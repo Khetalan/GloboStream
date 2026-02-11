@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-mo
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FiHeart, FiX, FiMail, FiMapPin, FiSliders, FiArrowLeft, FiFilter } from 'react-icons/fi';
-import { useAuth } from '../contexts/AuthContext';
+// useAuth disponible pour fonctionnalités futures
 import Navigation from '../components/Navigation';
 import FiltersPanel from '../components/FiltersPanel';
 import MessageModal from '../components/MessageModal';
@@ -35,6 +35,7 @@ const Swipe = () => {
 
   useEffect(() => {
     loadProfiles();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
   loadSentRequests();

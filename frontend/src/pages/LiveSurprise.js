@@ -7,17 +7,16 @@ import toast from 'react-hot-toast';
 import { 
   FiArrowLeft, FiHeart, FiX, FiSkipForward, FiClock, 
   FiSettings, FiVideo, FiVideoOff, FiMic, FiMicOff,
-  FiRefreshCw, FiMessageCircle
+  FiRefreshCw
 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import './LiveSurprise.css';
-import Navigation from '../components/Navigation';
 
 const LiveSurprise = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [socket, setSocket] = useState(null);
-  const [peer, setPeer] = useState(null);
+  const [, setSocket] = useState(null);
+  const [, setPeer] = useState(null);
   
   // États de connexion
   const [isSearching, setIsSearching] = useState(false);
@@ -66,6 +65,7 @@ const LiveSurprise = () => {
       cleanup();
       newSocket.disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

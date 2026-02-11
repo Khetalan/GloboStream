@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { 
   FiArrowLeft, FiSearch, FiTrendingUp, FiMapPin, FiClock, 
-  FiHeart, FiUsers, FiEye, FiPlay, FiX
+  FiHeart, FiEye, FiPlay, FiX
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../contexts/AuthContext';
@@ -30,10 +30,12 @@ const LivePublic = () => {
 
   useEffect(() => {
     loadLiveStreams();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
     filterStreams();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, liveStreams]);
 
   const loadLiveStreams = async () => {

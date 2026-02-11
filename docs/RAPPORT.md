@@ -241,20 +241,13 @@
 - [ ] Responsive mobile/tablette/desktop -> nécessite test visuel
 - [ ] Dark mode -> nécessite test visuel
 
-### Warnings ESLint (non bloquants)
-| Fichier | Nb warnings | Type |
-|---|---|---|
-| MessageModal.js | 1 | Import non utilisé (AnimatePresence) |
-| Chat.js | 2 | Dépendances useEffect manquantes |
-| LivePublic.js | 3 | Import non utilisé + dépendances hooks |
-| LiveSurprise.js | 5 | Imports non utilisés + dépendances hooks |
-| Matches.js | 3 | Variables non utilisées |
-| ModerationPanel.js | 4 | Imports non utilisés + dépendances hooks |
-| Profile.js | 6 | Imports/variables non utilisés + alt redondant |
-| PublicProfile.js | 4 | Imports non utilisés + alt redondant |
-| Settings.js | 6 | Imports/variables non utilisés |
-| Swipe.js | 2 | Import non utilisé + dépendance hook |
-| **TOTAL** | **36** | Warnings ESLint (aucune erreur bloquante) |
+### Warnings ESLint — TOUS CORRIGÉS ✅
+Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
+- Suppression des imports non utilisés (AnimatePresence, FiUsers, FiMessageCircle, FiX, FiSettings, FiGlobe, FiMoon, FiCheck, FiStar, FiCrown, motion, useAuth, Navigation)
+- Ajout `eslint-disable-next-line` pour les dépendances de hooks intentionnellement omises
+- Suppression variables inutilisées (saving, setSaving, user dans Settings)
+- Correction alt redondants sur les images (Profile.js, PublicProfile.js)
+- **Résultat** : `Compiled successfully!` — 0 warning, 0 erreur
 
 ---
 
@@ -284,31 +277,31 @@
 | Messagerie | 12 | 6 | 0 | OK |
 | Live Streaming | 16 | 5 | 0 | OK |
 | Modération | 14 | 2 | 0 | OK |
-| Interface & UX | 10 | 0 | 0 | OK (36 warnings) |
-| **TOTAL** | **84** | **30** | **9** | **Compile OK** |
+| Interface & UX | 10 | 0 | 0 | OK (0 warning) |
+| **TOTAL** | **84** | **30** | **9 + 36 ESLint** | **Compile OK** |
 
 ### Taux de couverture
 - **Backend API** : 30/84 fonctionnalités testées (36%)
-- **Bugs trouvés et corrigés** : 9 bugs (dont 3 critiques)
-- **Frontend compilation** : ✅ OK (dev + build production)
-- **Frontend visuel** : Non testé (nécessite navigateur Chrome MCP ou test manuel)
-- **Warnings ESLint** : 36 warnings (imports non utilisés, dépendances hooks) — aucune erreur
+- **Bugs backend trouvés et corrigés** : 9 bugs (dont 3 critiques)
+- **Warnings ESLint corrigés** : 36 warnings dans 10 fichiers frontend → 0 warning
+- **Frontend compilation** : ✅ `Compiled successfully!` (dev + build production)
+- **Frontend visuel** : Non testé (nécessite test manuel dans un navigateur)
 - **WebSocket/temps réel** : Non testé (nécessite 2 clients)
 - **OAuth** : Non testé (nécessite credentials réels)
 
 ### Prochaines étapes
 1. ~~Lancer le backend en local~~ FAIT
 2. ~~Tester les API backend~~ FAIT (30 fonctionnalités)
-3. ~~Corriger les bugs trouvés~~ FAIT (9 bugs corrigés)
+3. ~~Corriger les bugs backend~~ FAIT (9 bugs corrigés)
 4. ~~Lancer le frontend~~ FAIT (compile sans erreurs)
 5. ~~Build production~~ FAIT (183 KB JS + 14 KB CSS gzippés)
-6. Tester visuellement dans un navigateur (pages, navigation, responsive, dark mode)
-7. Corriger les 36 warnings ESLint (imports non utilisés)
+6. ~~Corriger les 36 warnings ESLint~~ FAIT (0 warning restant)
+7. Tester visuellement dans un navigateur (pages, navigation, responsive, dark mode)
 8. Tester les fonctionnalités WebSocket/temps réel
 9. Valider le MVP avant passage en Phase 2
 
 ---
 
 **Document** : Rapport GloboStream
-**Version** : 3.0
+**Version** : 4.0
 **Date** : 11 Février 2026

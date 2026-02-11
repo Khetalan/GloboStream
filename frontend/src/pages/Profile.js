@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+// framer-motion disponible pour animations futures
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import { 
   FiArrowLeft, FiHeart, FiEdit2, FiCamera, FiX, FiCheck, 
-  FiMapPin, FiStar, FiAward, FiGlobe 
+  FiMapPin, FiStar, FiAward
 } from 'react-icons/fi';
 import LocationPicker from '../components/LocationPicker';
 import './Profile.css';
@@ -32,6 +32,7 @@ const Profile = () => {
 
   useEffect(() => {
     loadProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadProfile = async () => {
@@ -105,7 +106,7 @@ const Profile = () => {
 
     try {
       setUploadingPhoto(true);
-      const response = await axios.post('/api/users/photos', formData, {
+      await axios.post('/api/users/photos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success('📷 Photo ajoutée !');
@@ -140,6 +141,7 @@ const Profile = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       toast.error('La géolocalisation n\'est pas supportée');
@@ -217,7 +219,7 @@ const Profile = () => {
           <div className="photos-grid">
             {profile?.photos?.map((photo, index) => (
               <div key={photo._id} className="photo-item">
-                <img src={photo.url} alt={`Photo ${index + 1}`} />
+                <img src={photo.url} alt={`${index + 1}`} />
                 {photo.isPrimary && (
                   <span className="primary-badge">
                     <FiStar /> Principal

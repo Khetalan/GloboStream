@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { 
   FiArrowLeft, FiBell, FiLock, FiEye, FiEyeOff, FiShield,
-  FiGlobe, FiMoon, FiTrash2, FiAlertCircle, FiCheck
+  FiTrash2, FiAlertCircle
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,7 +12,7 @@ import './Settings.css';
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   
   // États Notifications
   const [notifications, setNotifications] = useState({
@@ -46,7 +46,6 @@ const Settings = () => {
 
   // États généraux
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadSettings();

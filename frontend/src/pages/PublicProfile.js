@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { 
   FiArrowLeft, FiHeart, FiMail, FiMapPin, FiUser, 
-  FiCheck, FiStar, FiCrown, 
+  FiCheck,
   FiHexagon
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
@@ -19,6 +19,7 @@ const PublicProfile = () => {
 
   useEffect(() => {
     loadProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadProfile = async () => {
@@ -146,7 +147,7 @@ const PublicProfile = () => {
                   className={`thumbnail ${index === currentPhotoIndex ? 'active' : ''}`}
                   onClick={() => setCurrentPhotoIndex(index)}
                 >
-                  <img src={photo.url} alt={`Photo ${index + 1}`} />
+                  <img src={photo.url} alt={`${index + 1}`} />
                 </div>
               ))}
             </div>

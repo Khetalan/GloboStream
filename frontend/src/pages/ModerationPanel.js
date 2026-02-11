@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import { 
   FiArrowLeft, FiShield, FiUsers, FiAlertTriangle, FiCheck,
-  FiX, FiEye, FiSettings, FiBarChart2, FiUserX, FiVideo
+  FiEye, FiBarChart2, FiUserX, FiVideo
 } from 'react-icons/fi';
 import './ModerationPanel.css';
 
@@ -16,7 +16,7 @@ const ModerationPanel = () => {
   const [moderators, setModerators] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [, setSelectedUser] = useState(null);
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
 
@@ -29,6 +29,7 @@ const ModerationPanel = () => {
     }
 
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const loadData = async () => {

@@ -58,6 +58,7 @@ const Chat = () => {
     return () => {
       socket.disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser.id]);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ const Chat = () => {
         handleSelectConversation(conversation);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatUserId, conversations]);
 
   useEffect(() => {

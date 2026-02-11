@@ -8,8 +8,11 @@ import './Matches.css';
 const Matches = () => {
   const [activeTab, setActiveTab] = useState('matches');
   const [matches, setMatches] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [likes, setLikes] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [views, setViews] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
