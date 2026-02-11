@@ -38,3 +38,9 @@ yarn-error.log*
 
 # Misc
 .eslintcache
+
+# Claude Code
+.claude/
+
+# Windows artifacts
+nul
