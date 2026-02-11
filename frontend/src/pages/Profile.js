@@ -293,7 +293,7 @@ const Profile = () => {
               </div>
             ) : (
               <h1>
-                {profile?.firstName} {profile?.lastName}, {profile?.age}
+                {profile?.firstName} {profile?.lastName}{profile?.age ? `, ${profile.age}` : ''}
                 {profile?.isVerified && (
                   <span className="verified-badge" title="Profil vérifié">
                     <FiCheck />
