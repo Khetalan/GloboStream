@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { FiHeart, FiX, FiMail, FiMapPin, FiSliders, FiArrowLeft, FiFilter } from 'react-icons/fi';
 // useAuth disponible pour fonctionnalités futures
 import Navigation from '../components/Navigation';
@@ -11,6 +12,7 @@ import MessageModal from '../components/MessageModal';
 import './Swipe.css';
 
 const Swipe = () => {
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -71,11 +73,11 @@ const Swipe = () => {
       setCurrentIndex(0);
       
       if (!response.data.profiles || response.data.profiles.length === 0) {
-        toast.error('Aucun profil trouvé. Essayez d\'élargir vos filtres.');
+        toast.error(t('swipe.noProfiles'));
       }
     } catch (error) {
       console.error('Erreur chargement profils:', error);
-      toast.error('Erreur lors du chargement des profils');
+      toast.error(t('swipe.loadError'));
     } finally {
       setLoading(false);
     }
@@ -86,7 +88,7 @@ const Swipe = () => {
       if (direction === 'right') {
         const response = await axios.post(`/api/swipe/like/${userId}`);
         if (response.data.match) {
-          toast.success(`🎉 C'est un match !`, { duration: 5000 });
+          toast.success(t('swipe.itsAMatch'), { duration: 5000 });
         }
       } else if (direction === 'left') {
         await axios.post(`/api/swipe/dislike/${userId}`);
@@ -99,7 +101,7 @@ const Swipe = () => {
       }
     } catch (error) {
       console.error('Erreur swipe:', error);
-      toast.error('Erreur lors du swipe');
+      toast.error(t('swipe.swipeError'));
     }
   };
 
@@ -118,14 +120,14 @@ const Swipe = () => {
     setSentRequests(prev => new Set([...prev, userId]));
     setShowMessageModal(null);
     
-    toast.success('Message envoyé ! En attente de réponse...', {
+    toast.success(t('swipe.messageSent'), {
       icon: '📬',
       duration: 4000
     });
     
     } catch (error) {
     console.error('Erreur envoi message:', error);
-    toast.error(error.response?.data?.error || 'Erreur lors de l\'envoi');
+    toast.error(error.response?.data?.error || t('swipe.sendError'));
     throw error;
     }
     };
@@ -135,7 +137,7 @@ const Swipe = () => {
     setFilters(newFilters);
     setShowFilters(false);
     loadProfiles(newFilters);
-    toast.success('Filtres appliqués !');
+    toast.success(t('swipe.filtersApplied'));
   };
 
   const currentProfile = profiles[currentIndex];
@@ -155,7 +157,7 @@ const Swipe = () => {
         </div>
         <div className="loading-state">
           <div className="loading" style={{ width: 60, height: 60 }}></div>
-          <p>Chargement des profils...</p>
+          <p>{t('swipe.loadingProfiles')}</p>
         </div>
       </div>
     );
@@ -178,20 +180,20 @@ const Swipe = () => {
               onClick={() => setShowFilters(true)}
             >
               <FiSliders />
-              <span className="desktop-only">Filtres</span>
+              <span className="desktop-only">{t('swipe.filters')}</span>
             </button>
             <Navigation />
           </div>
         </div>
         <div className="empty-state">
           <FiHeart size={80} />
-          <h2>Plus de profils disponibles</h2>
-          <p>Essayez d'ajuster vos filtres pour voir plus de profils</p>
+          <h2>{t('swipe.noMoreProfiles')}</h2>
+          <p>{t('swipe.noMoreProfilesDesc')}</p>
           <button 
             className="btn btn-primary" 
             onClick={() => setShowFilters(true)}
           >
-            <FiFilter /> Modifier les filtres
+            <FiFilter /> {t('swipe.editFilters')}
           </button>
         </div>
         
@@ -222,7 +224,7 @@ const Swipe = () => {
             onClick={() => setShowFilters(true)}
           >
             <FiSliders />
-            <span className="desktop-only">Filtres</span>
+            <span className="desktop-only">{t('swipe.filters')}</span>
           </button>
           <Navigation />
         </div>
@@ -248,7 +250,7 @@ const Swipe = () => {
           <button
             className="action-btn dislike"
             onClick={() => handleSwipe('left', currentProfile._id || currentProfile.id)}
-            title="Passer"
+            title={t('swipe.pass')}
           >
             <FiX />
           </button>
@@ -256,7 +258,7 @@ const Swipe = () => {
           <button
             className="action-btn message"
             onClick={() => handleMessage(currentProfile._id || currentProfile.id)}
-            title="Envoyer un message"
+            title={t('swipe.sendMessage')}
           >
             <FiMail />
           </button>
@@ -264,14 +266,14 @@ const Swipe = () => {
           <button
             className="action-btn like"
             onClick={() => handleSwipe('right', currentProfile._id || currentProfile.id)}
-            title="J'aime"
+            title={t('swipe.like')}
           >
             <FiHeart />
           </button>
         </div>
 
         <div className="profiles-counter">
-          {profiles.length - currentIndex} profil{profiles.length - currentIndex > 1 ? 's' : ''} restant{profiles.length - currentIndex > 1 ? 's' : ''}
+          {t('swipe.profileRemaining', { count: profiles.length - currentIndex })}
         </div>
       </div>
 
@@ -319,6 +321,7 @@ const Swipe = () => {
 };
 
 const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests }) => {
+  const { t } = useTranslation();
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 300], [-30, 30]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
@@ -360,7 +363,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
         {profile.isLive && (
           <div className="live-badge">
             <span className="live-dot"></span>
-            EN DIRECT
+            {t('swipe.live')}
           </div>
         )}
 
@@ -369,7 +372,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
           <FiHeart size={48} />
-          <span>LIKE</span>
+          <span>{t('swipe.likeLabel')}</span>
         </motion.div>
         
         <motion.div
@@ -377,7 +380,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
           style={{ opacity: useTransform(x, [-100, 0], [1, 0]) }}
         >
           <FiX size={48} />
-          <span>NOPE</span>
+          <span>{t('swipe.nopeLabel')}</span>
         </motion.div>
       </div>
 
@@ -409,7 +412,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
           transition={{ type: 'spring', stiffness: 200 }}
         >
           <FiMail />
-          <span>Message envoyé</span>
+          <span>{t('swipe.messageSentLabel')}</span>
         </motion.div>
       )}
     </motion.div>
@@ -417,6 +420,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
 };
 
 const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
+  const { t } = useTranslation();
   const age = profile.age || Math.floor((Date.now() - new Date(profile.birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
   const primaryPhoto = profile.photos?.find(p => p.isPrimary) || profile.photos?.[0];
 
@@ -456,21 +460,21 @@ const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
               <FiMapPin /> 
               {profile.location?.city && profile.location?.country
                 ? `${profile.location.city}, ${profile.location.country}`
-                : profile.location?.city || 'Ville non renseignée'}
+                : profile.location?.city || t('swipe.unknownCity')}
               {profile.distance && ` • ${profile.distance}km`}
             </p>
           </div>
 
           {profile.bio && (
             <div className="modal-section">
-              <h3>À propos</h3>
+              <h3>{t('swipe.about')}</h3>
               <p>{profile.bio}</p>
             </div>
           )}
 
           {profile.interests && profile.interests.length > 0 && (
             <div className="modal-section">
-              <h3>Centres d'intérêt</h3>
+              <h3>{t('swipe.interests')}</h3>
               <div className="interests-tags">
                 {profile.interests.map((interest, i) => (
                   <span key={i} className="interest-tag">{interest}</span>
@@ -480,23 +484,23 @@ const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
           )}
 
           <div className="modal-section">
-            <h3>Informations</h3>
+            <h3>{t('swipe.info')}</h3>
             <div className="info-list">
               {profile.occupation && (
                 <div className="info-item">
-                  <span className="info-label">Profession</span>
+                  <span className="info-label">{t('swipe.profession')}</span>
                   <span className="info-value">{profile.occupation}</span>
                 </div>
               )}
               {profile.height && (
                 <div className="info-item">
-                  <span className="info-label">Taille</span>
+                  <span className="info-label">{t('swipe.height')}</span>
                   <span className="info-value">{profile.height} cm</span>
                 </div>
               )}
               {profile.languages && profile.languages.length > 0 && (
                 <div className="info-item">
-                  <span className="info-label">Langues</span>
+                  <span className="info-label">{t('swipe.languages')}</span>
                   <span className="info-value">{profile.languages.join(', ')}</span>
                 </div>
               )}
@@ -505,13 +509,13 @@ const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
 
           <div className="modal-actions">
             <button className="btn btn-outline-danger" onClick={onPass}>
-              <FiX /> Passer
+              <FiX /> {t('swipe.pass')}
             </button>
             <button className="btn btn-secondary" onClick={onMessage}>
-              <FiMail /> Message
+              <FiMail /> {t('swipe.sendMessage')}
             </button>
             <button className="btn btn-primary" onClick={onLike}>
-              <FiHeart /> J'aime
+              <FiHeart /> {t('swipe.like')}
             </button>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { 
   FiArrowLeft, FiSearch, FiTrendingUp, FiMapPin, FiClock, 
   FiHeart, FiEye, FiPlay, FiX
@@ -13,7 +14,8 @@ import './LivePublic.css';
 const LivePublic = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+  const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState('trending');
   const [liveStreams, setLiveStreams] = useState([]);
   const [filteredStreams, setFilteredStreams] = useState([]);
@@ -22,10 +24,10 @@ const LivePublic = () => {
   const [showSearch, setShowSearch] = useState(false);
 
   const tabs = [
-    { id: 'trending', label: 'Tendance', icon: FiTrendingUp },
-    { id: 'nearby', label: 'Alentours', icon: FiMapPin },
-    { id: 'new', label: 'Nouveau', icon: FiClock },
-    { id: 'favorites', label: 'Favoris', icon: FiHeart }
+    { id: 'trending', label: t('livePublic.tabTrending'), icon: FiTrendingUp },
+    { id: 'nearby', label: t('livePublic.tabNearby'), icon: FiMapPin },
+    { id: 'new', label: t('livePublic.tabNew'), icon: FiClock },
+    { id: 'favorites', label: t('livePublic.tabFavorites'), icon: FiHeart }
   ];
 
   useEffect(() => {
@@ -54,7 +56,7 @@ const LivePublic = () => {
       
     } catch (error) {
       console.error('Error loading live streams:', error);
-      toast.error('Erreur lors du chargement des lives');
+      toast.error(t('livePublic.loadError'));
     } finally {
       setLoading(false);
     }
@@ -92,14 +94,14 @@ const LivePublic = () => {
       ));
       
       toast.success(
-        liveStreams.find(s => s._id === streamId)?.isFavorite 
-          ? 'Retiré des favoris' 
-          : 'Ajouté aux favoris'
+        liveStreams.find(s => s._id === streamId)?.isFavorite
+          ? t('livePublic.removedFavorite')
+          : t('livePublic.addedFavorite')
       );
       
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      toast.error('Erreur');
+      toast.error(t('livePublic.favoriteError'));
     }
   };
 
@@ -110,7 +112,7 @@ const LivePublic = () => {
           <FiArrowLeft />
         </button>
         
-        <h1>Live Publique</h1>
+        <h1>{t('livePublic.title')}</h1>
         
         <div className="header-actions">
           <button 
@@ -128,7 +130,7 @@ const LivePublic = () => {
           <FiSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Rechercher un streamer ou un titre..."
+            placeholder={t('livePublic.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus
@@ -161,39 +163,39 @@ const LivePublic = () => {
         {loading ? (
           <div className="loading-state">
             <div className="loading"></div>
-            <p>Chargement des lives...</p>
+            <p>{t('livePublic.loadingLives')}</p>
           </div>
         ) : filteredStreams.length === 0 ? (
           <div className="empty-state">
             {searchQuery ? (
               <>
                 <FiSearch size={60} />
-                <h2>Aucun résultat</h2>
-                <p>Aucun live ne correspond à "{searchQuery}"</p>
-                <button 
+                <h2>{t('livePublic.noResults')}</h2>
+                <p>{t('livePublic.noResultsFor', { query: searchQuery })}</p>
+                <button
                   className="btn btn-primary"
                   onClick={() => setSearchQuery('')}
                 >
-                  Effacer la recherche
+                  {t('livePublic.clearSearch')}
                 </button>
               </>
             ) : activeTab === 'nearby' ? (
               <>
                 <FiMapPin size={60} />
-                <h2>Aucun live à proximité</h2>
-                <p>Personne n'est en live près de vous pour le moment</p>
+                <h2>{t('livePublic.noNearby')}</h2>
+                <p>{t('livePublic.noNearbyDesc')}</p>
               </>
             ) : activeTab === 'favorites' ? (
               <>
                 <FiHeart size={60} />
-                <h2>Aucun favori</h2>
-                <p>Ajoutez des streamers à vos favoris</p>
+                <h2>{t('livePublic.noFavorites')}</h2>
+                <p>{t('livePublic.noFavoritesDesc')}</p>
               </>
             ) : (
               <>
                 <FiPlay size={60} />
-                <h2>Aucun live actuellement</h2>
-                <p>Revenez plus tard ou lancez votre propre live !</p>
+                <h2>{t('livePublic.noLives')}</h2>
+                <p>{t('livePublic.noLivesDesc')}</p>
               </>
             )}
           </div>
@@ -215,6 +217,7 @@ const LivePublic = () => {
 };
 
 const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
+  const { t } = useTranslation();
   const primaryPhoto = stream.streamer.photos?.find(p => p.isPrimary) || stream.streamer.photos?.[0];
 
   return (
@@ -234,7 +237,7 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
         {/* Badge LIVE */}
         <div className="live-badge">
           <span className="live-dot"></span>
-          LIVE
+          {t('livePublic.live')}
         </div>
 
         {/* Nombre de spectateurs */}
@@ -265,7 +268,7 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
           </div>
 
           <div className="streamer-details">
-            <h3 className="stream-title">{stream.title || 'Live sans titre'}</h3>
+            <h3 className="stream-title">{stream.title || t('livePublic.untitled')}</h3>
             <p className="streamer-name">
               {stream.streamer.displayName || stream.streamer.firstName}
               {stream.streamer.isVerified && (
@@ -298,7 +301,7 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
         {stream.distance && (
           <div className="stream-distance">
             <FiMapPin />
-            <span>{stream.distance < 1 ? '< 1 km' : `${Math.round(stream.distance)} km`}</span>
+            <span>{stream.distance < 1 ? t('livePublic.lessThan1km') : `${Math.round(stream.distance)} ${t('common.km')}`}</span>
           </div>
         )}
       </div>

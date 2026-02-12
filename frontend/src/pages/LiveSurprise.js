@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { 
   FiArrowLeft, FiHeart, FiX, FiSkipForward, FiClock, 
   FiSettings, FiVideo, FiVideoOff, FiMic, FiMicOff,
@@ -15,6 +16,7 @@ import './LiveSurprise.css';
 const LiveSurprise = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [, setSocket] = useState(null);
   const [, setPeer] = useState(null);
   
@@ -90,7 +92,7 @@ const LiveSurprise = () => {
       return stream;
     } catch (error) {
       console.error('Error accessing media devices:', error);
-      toast.error('Impossible d\'accéder à la caméra/micro');
+      toast.error(t('liveSurprise.cameraError'));
       return null;
     }
   };
@@ -131,7 +133,7 @@ const LiveSurprise = () => {
 
     newPeer.on('error', (err) => {
       console.error('Peer error:', err);
-      toast.error('Erreur de connexion');
+      toast.error(t('liveSurprise.connectionError'));
     });
 
     setPeer(newPeer);
@@ -187,7 +189,7 @@ const LiveSurprise = () => {
 
       if (decision === 'like') {
         await axios.post(`/api/swipe/like/${partner.userId}`);
-        toast.success('Like envoyé ! 💕');
+        toast.success(t('liveSurprise.likeSent'));
       }
 
       setShowDecision(false);
@@ -201,7 +203,7 @@ const LiveSurprise = () => {
       
     } catch (error) {
       console.error('Error sending decision:', error);
-      toast.error('Erreur lors de l\'envoi');
+      toast.error(t('liveSurprise.likeError'));
     }
   };
 
@@ -211,7 +213,7 @@ const LiveSurprise = () => {
       try {
         const response = await axios.get(`/api/surprise/check-mutual/${partner.userId}`);
         if (response.data.mutual) {
-          toast.success('🎉 C\'est un match ! Vous pouvez continuer en privé');
+          toast.success(t('liveSurprise.itsAMatch'));
           navigate(`/chat/${partner.userId}`);
         }
       } catch (error) {
@@ -222,7 +224,7 @@ const LiveSurprise = () => {
 
   const handleSkip = () => {
     if (!canSkip) {
-      toast.error('Attendez au moins 30 secondes avant de skip');
+      toast.error(t('liveSurprise.waitBeforeSkip'));
       return;
     }
     
@@ -230,7 +232,7 @@ const LiveSurprise = () => {
   };
 
   const handlePartnerDisconnect = () => {
-    toast('Votre partenaire s\'est déconnecté', { icon: '👋' });
+    toast(t('liveSurprise.partnerDisconnected'), { icon: '👋' });
     cleanup();
     setIsConnected(false);
   };
@@ -288,12 +290,12 @@ const LiveSurprise = () => {
       <div className="live-surprise-header">
         <button className="btn btn-ghost" onClick={stopAndExit}>
           <FiArrowLeft />
-          Quitter
+          {t('liveSurprise.quit')}
         </button>
         
         <div className="header-center">
           <FiVideo className="header-icon" />
-          <span>Live Surprise</span>
+          <span>{t('liveSurprise.title')}</span>
         </div>
         
         <button 
@@ -335,20 +337,20 @@ const LiveSurprise = () => {
               <div className="searching-animation">
                 <FiRefreshCw className="spinning" size={60} />
               </div>
-              <h2>Recherche en cours...</h2>
-              <p>Nous cherchons quelqu'un pour vous</p>
+              <h2>{t('liveSurprise.searching')}</h2>
+              <p>{t('liveSurprise.searchingDesc')}</p>
             </div>
           ) : (
             <div className="waiting-state">
               <FiVideo size={80} />
-              <h2>Live Surprise</h2>
-              <p>Rencontrez des personnes aléatoirement en vidéo</p>
+              <h2>{t('liveSurprise.introTitle')}</h2>
+              <p>{t('liveSurprise.introDesc')}</p>
               <button 
                 className="btn btn-primary btn-large"
                 onClick={startSearch}
               >
                 <FiVideo />
-                Commencer
+                {t('liveSurprise.start')}
               </button>
             </div>
           )}
@@ -401,7 +403,7 @@ const LiveSurprise = () => {
                 onClick={handleSkip}
               >
                 <FiSkipForward />
-                Skip
+                {t('liveSurprise.skip')}
               </button>
             )}
           </div>
@@ -410,8 +412,8 @@ const LiveSurprise = () => {
         {/* Panel de décision */}
         {showDecision && (
           <div className="decision-panel">
-            <h3>Temps écoulé !</h3>
-            <p>Que souhaitez-vous faire ?</p>
+            <h3>{t('liveSurprise.timeUp')}</h3>
+            <p>{t('liveSurprise.whatToDo')}</p>
             
             <div className="decision-buttons">
               <button 
@@ -419,7 +421,7 @@ const LiveSurprise = () => {
                 onClick={() => handleDecision('dislike')}
               >
                 <FiX />
-                <span>Passer</span>
+                <span>{t('liveSurprise.pass')}</span>
               </button>
               
               <button 
@@ -427,7 +429,7 @@ const LiveSurprise = () => {
                 onClick={() => handleDecision('like')}
               >
                 <FiHeart />
-                <span>J'aime</span>
+                <span>{t('liveSurprise.iLike')}</span>
               </button>
               
               <button 
@@ -435,7 +437,7 @@ const LiveSurprise = () => {
                 onClick={() => handleDecision('skip')}
               >
                 <FiSkipForward />
-                <span>Suivant</span>
+                <span>{t('common.next')}</span>
               </button>
             </div>
           </div>
@@ -445,10 +447,10 @@ const LiveSurprise = () => {
         {showSettings && (
           <div className="settings-modal-overlay" onClick={() => setShowSettings(false)}>
             <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
-              <h3>Paramètres</h3>
+              <h3>{t('liveSurprise.settingsTitle')}</h3>
               
               <div className="setting-group">
-                <label>Durée du timer</label>
+                <label>{t('liveSurprise.timerDuration')}</label>
                 <div className="timer-options">
                   {[3, 5, 8, 10].map((minutes) => (
                     <button
@@ -457,12 +459,12 @@ const LiveSurprise = () => {
                       onClick={() => setTimerDuration(minutes)}
                       disabled={isConnected}
                     >
-                      {minutes} min
+                      {minutes} {t('common.min')}
                     </button>
                   ))}
                 </div>
                 <p className="setting-hint">
-                  {isConnected ? 'Vous ne pouvez pas changer pendant une session' : 'Temps minimum avant décision'}
+                  {isConnected ? t('liveSurprise.cannotChangeDuring') : t('liveSurprise.minTimeBeforeDecision')}
                 </p>
               </div>
               
@@ -470,7 +472,7 @@ const LiveSurprise = () => {
                 className="btn btn-primary"
                 onClick={() => setShowSettings(false)}
               >
-                Fermer
+                {t('common.close')}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import { useTranslation } from 'react-i18next';
+import {
   FiHeart, FiMessageSquare, FiUsers, FiVideo, FiSettings, FiLifeBuoy
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
@@ -9,49 +10,50 @@ import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const actions = [
     {
       icon: FiHeart,
-      title: 'Swipe',
-      description: 'Découvrez de nouveaux profils',
+      title: t('home.swipe'),
+      description: t('home.swipeDesc'),
       color: 'var(--primary)',
       path: '/swipe'
     },
     {
       icon: FiMessageSquare,
-      title: 'Messages',
-      description: 'Discutez avec vos matchs',
+      title: t('home.messages'),
+      description: t('home.messagesDesc'),
       color: 'var(--secondary)',
       path: '/chat'
     },
     {
       icon: FiUsers,
-      title: 'Matchs',
-      description: 'Voir tous vos matchs',
+      title: t('home.matches'),
+      description: t('home.matchesDesc'),
       color: 'var(--success)',
       path: '/matches'
     },
     {
       icon: FiVideo,
-      title: 'Stream',
-      description: 'Rencontres en live vidéo',
+      title: t('home.stream'),
+      description: t('home.streamDesc'),
       color: 'var(--error)',
       path: '/stream',
-      badge: 'NEW'
+      badge: t('home.new')
     },
     {
       icon: FiSettings,
-      title: 'Profil',
-      description: 'Gérer votre profil',
+      title: t('home.profile'),
+      description: t('home.profileDesc'),
       color: 'var(--warning)',
       path: '/profile'
     },
     {
       icon: FiLifeBuoy,
-      title: 'Support',
-      description: 'Besoin d\'aide ?',
+      title: t('home.support'),
+      description: t('home.supportDesc'),
       color: '#6366F1',
       path: '/support'
     }
@@ -70,8 +72,8 @@ const Home = () => {
 
       <div className="home-content">
         <div className="home-header">
-          <h1>Bienvenue, {user?.displayName || user?.firstName} ✌️</h1>
-          <p className="home-subtitle">Que souhaitez-vous faire aujourd'hui ?</p>
+          <h1>{t('home.welcome', { name: user?.displayName || user?.firstName })}</h1>
+          <p className="home-subtitle">{t('home.subtitle')}</p>
         </div>
 
         <div className="actions-grid">

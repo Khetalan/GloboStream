@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
-import { 
+import {
   FiArrowLeft, FiHeart, FiSend, FiImage, FiMoreVertical,
   FiPhone, FiVideo, FiSearch
 } from 'react-icons/fi';
@@ -17,6 +18,7 @@ import MessageRequestsPanel from '../components/MessageRequestsPanel';
 let socket;
 
 const Chat = () => {
+  const { t } = useTranslation();
   const { userId: chatUserId } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
@@ -81,7 +83,7 @@ const Chat = () => {
       const response = await axios.get('/api/chat/conversations');
       setConversations(response.data.conversations || []);
     } catch (error) {
-      toast.error('Erreur lors du chargement des conversations');
+      toast.error(t('chat.loadConversationsError'));
     } finally {
       setLoading(false);
     }
@@ -98,7 +100,7 @@ const Chat = () => {
       // Marquer comme lu
       await axios.patch(`/api/chat/${conversation.user.id}/read`);
     } catch (error) {
-      toast.error('Erreur lors du chargement des messages');
+      toast.error(t('chat.loadMessagesError'));
     }
   };
 
@@ -120,7 +122,7 @@ const Chat = () => {
       loadConversations();
       scrollToBottom();
     } catch (error) {
-      toast.error('Erreur lors de l\'envoi');
+      toast.error(t('chat.sendError'));
     } finally {
       setSending(false);
     }
@@ -165,7 +167,7 @@ const Chat = () => {
         </button>
         <div className="logo">
           <FiHeart className="logo-icon" />
-          <span>Messages</span>
+          <span>{t('chat.title')}</span>
         </div>
         <Navigation />
       </div>
@@ -174,7 +176,7 @@ const Chat = () => {
         {/* Sidebar - Liste des conversations */}
         <div className={`chat-sidebar ${selectedConversation ? 'hidden-mobile' : ''}`}>
           <div className="sidebar-header">
-            <h2>Conversations</h2>
+            <h2>{t('chat.conversations')}</h2>
             <button className="btn btn-ghost">
               <FiSearch />
             </button>
@@ -185,9 +187,9 @@ const Chat = () => {
             {conversations.length === 0 ? (
               <div className="empty-conversations">
                 <FiHeart size={48} />
-                <p>Aucune conversation</p>
+                <p>{t('chat.noConversations')}</p>
                 <button className="btn btn-primary" onClick={() => navigate('/matches')}>
-                  Voir mes matchs
+                  {t('chat.viewMatches')}
                 </button>
               </div>
             ) : (
@@ -220,7 +222,7 @@ const Chat = () => {
                       )}
                     </div>
                     <div className="conv-last-message">
-                      <p>{conv.lastMessage?.content || 'Nouveau match !'}</p>
+                      <p>{conv.lastMessage?.content || t('chat.newMatch')}</p>
                       {conv.unreadCount > 0 && (
                         <span className="unread-badge">{conv.unreadCount}</span>
                       )}
@@ -259,17 +261,17 @@ const Chat = () => {
                   </div>
                   <div>
                     <h3>{selectedConversation.user.displayName}</h3>
-                    {isTyping && <span className="typing-indicator">En train d'écrire...</span>}
+                    {isTyping && <span className="typing-indicator">{t('chat.typing')}</span>}
                   </div>
                 </div>
                 <div className="header-actions">
-                  <button className="btn btn-ghost" title="Appel audio">
+                  <button className="btn btn-ghost" title={t('chat.audioCall')}>
                     <FiPhone />
                   </button>
-                  <button className="btn btn-ghost" title="Appel vidéo">
+                  <button className="btn btn-ghost" title={t('chat.videoCall')}>
                     <FiVideo />
                   </button>
-                  <button className="btn btn-ghost" title="Plus d'options">
+                  <button className="btn btn-ghost" title={t('chat.moreOptions')}>
                     <FiMoreVertical />
                   </button>
                 </div>
@@ -324,7 +326,7 @@ const Chat = () => {
                     setNewMessage(e.target.value);
                     handleTyping();
                   }}
-                  placeholder="Écrivez votre message..."
+                  placeholder={t('chat.messagePlaceholder')}
                   disabled={sending}
                 />
                 <button 
@@ -339,8 +341,8 @@ const Chat = () => {
           ) : (
             <div className="no-conversation-selected">
               <FiHeart size={80} />
-              <h2>Sélectionnez une conversation</h2>
-              <p>Choisissez un match pour commencer à discuter</p>
+              <h2>{t('chat.selectConversation')}</h2>
+              <p>{t('chat.selectConversationDesc')}</p>
             </div>
           )}
         </div>

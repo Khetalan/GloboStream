@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiX, FiSend, FiMail } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './MessageModal.css';
-
-const MESSAGE_TEMPLATES = [
-  "Salut ! Ton profil m'a vraiment plu 😊",
-  "Hey ! J'aimerais bien discuter avec toi",
-  "Coucou ! Tu as l'air super intéressant(e)",
-  "Salut ! On a l'air d'avoir des points communs",
-  "Hey ! J'adore ton profil, on se parle ?",
-];
 
 const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
   const [message, setMessage] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [sending, setSending] = useState(false);
+  const { t } = useTranslation();
+
+  const MESSAGE_TEMPLATES = [
+    t('messageModal.template1'),
+    t('messageModal.template2'),
+    t('messageModal.template3'),
+    t('messageModal.template4'),
+    t('messageModal.template5'),
+  ];
 
   const handleSend = async () => {
     const messageToSend = message.trim() || selectedTemplate;
@@ -73,7 +75,7 @@ const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
           </div>
           <div className="profile-info">
             <h3>{profile.displayName || profile.firstName}, {age}</h3>
-            <p>Envoyer un message</p>
+            <p>{t('messageModal.title')}</p>
           </div>
         </div>
 
@@ -81,18 +83,18 @@ const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
           <div className="already-sent-notice">
             <FiMail />
             <div>
-              <h4>Message déjà envoyé</h4>
-              <p>Vous avez déjà envoyé un message à ce profil. Attendez sa réponse !</p>
+              <h4>{t('messageModal.alreadySent')}</h4>
+              <p>{t('messageModal.alreadySentDesc')}</p>
             </div>
           </div>
         ) : (
           <>
             <div className="message-modal-body">
-              <label>Votre message</label>
+              <label>{t('messageModal.yourMessage')}</label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Écrivez un message sympa..."
+                placeholder={t('messageModal.placeholder')}
                 maxLength={500}
                 rows={4}
                 autoFocus
@@ -102,7 +104,7 @@ const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
               </div>
 
               <div className="templates-section">
-                <label>Ou utilisez un message rapide</label>
+                <label>{t('messageModal.quickMessages')}</label>
                 <div className="templates-grid">
                   {MESSAGE_TEMPLATES.map((template, index) => (
                     <button
@@ -122,7 +124,7 @@ const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
                 className="btn btn-secondary" 
                 onClick={onClose}
               >
-                Annuler
+                {t('common.cancel')}
               </button>
               <button 
                 className="btn btn-primary send-btn" 
@@ -132,12 +134,12 @@ const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
                 {sending ? (
                   <>
                     <div className="loading-spinner"></div>
-                    Envoi...
+                    {t('common.sending')}
                   </>
                 ) : (
                   <>
                     <FiSend />
-                    Envoyer
+                    {t('common.send')}
                   </>
                 )}
               </button>

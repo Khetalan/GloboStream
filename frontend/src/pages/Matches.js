@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { FiArrowLeft, FiHeart, FiEye, FiMessageCircle } from 'react-icons/fi';
 import './Matches.css';
 
 const Matches = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('matches');
   const [matches, setMatches] = useState([]);
   // eslint-disable-next-line no-unused-vars
@@ -36,7 +38,7 @@ const Matches = () => {
         //{ id: 3, name: 'Julie', age: 28, photo: null, isBlurred: true },
       //]);
     } catch (error) {
-      toast.error('Erreur lors du chargement');
+      toast.error(t('matches.loadError'));
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,7 @@ const Matches = () => {
         </button>
         <div className="logo">
           <FiHeart className="logo-icon" />
-          <span>Mes Matchs</span>
+          <span>{t('matches.title')}</span>
         </div>
         <div style={{ width: 40 }}></div>
       </div>
@@ -61,21 +63,21 @@ const Matches = () => {
           onClick={() => setActiveTab('matches')}
         >
           <FiHeart />
-          Matchs ({matches.length})
+          {t('matches.tabMatches')} ({matches.length})
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'likes' ? 'active' : ''}`}
           onClick={() => setActiveTab('likes')}
         >
           <FiHeart />
-          Likes ({likes.length})
+          {t('matches.tabLikes')} ({likes.length})
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'views' ? 'active' : ''}`}
           onClick={() => setActiveTab('views')}
         >
           <FiEye />
-          Vues ({views.length})
+          {t('matches.tabViews')} ({views.length})
         </button>
       </div>
 
@@ -85,17 +87,18 @@ const Matches = () => {
             {matches.length === 0 ? (
               <div className="empty-message">
                 <FiHeart size={60} />
-                <p>Aucun match pour le moment</p>
+                <p>{t('matches.noMatches')}</p>
                 <button className="btn btn-primary" onClick={() => navigate('/swipe')}>
-                  Commencer à swiper
+                  {t('matches.startSwiping')}
                 </button>
               </div>
             ) : (
               matches.map((match) => (
-                <MatchCard 
-                  key={match.id} 
-                  match={match} 
+                <MatchCard
+                  key={match.id}
+                  match={match}
                   onClick={() => navigate(`/chat/${match.user.id}`)}
+                  t={t}
                 />
               ))
             )}
@@ -107,14 +110,15 @@ const Matches = () => {
             {likes.length === 0 ? (
               <div className="empty-message">
                 <FiHeart size={60} />
-                <p>Personne ne vous a encore liké</p>
+                <p>{t('matches.noLikes')}</p>
               </div>
             ) : (
               likes.map((like) => (
-                <LikeCard 
-                  key={like.id} 
+                <LikeCard
+                  key={like.id}
                   like={like}
-                  onClick={() => toast('Version premium requise 💎')}
+                  onClick={() => toast(t('matches.premiumRequired'))}
+                  t={t}
                 />
               ))
             )}
@@ -126,14 +130,15 @@ const Matches = () => {
             {views.length === 0 ? (
               <div className="empty-message">
                 <FiEye size={60} />
-                <p>Personne n'a vu votre profil récemment</p>
+                <p>{t('matches.noViews')}</p>
               </div>
             ) : (
               views.map((view) => (
-                <ViewCard 
-                  key={view.id} 
+                <ViewCard
+                  key={view.id}
                   view={view}
-                  onClick={() => toast('Version premium requise 💎')}
+                  onClick={() => toast(t('matches.premiumRequired'))}
+                  t={t}
                 />
               ))
             )}
@@ -144,9 +149,9 @@ const Matches = () => {
   );
 };
 
-const MatchCard = ({ match, onClick }) => {
+const MatchCard = ({ match, onClick, t }) => {
   const primaryPhoto = match.user.photos?.find(p => p.isPrimary) || match.user.photos?.[0];
-  
+
   return (
     <div className="match-card" onClick={onClick}>
       <div className="match-photo">
@@ -160,7 +165,7 @@ const MatchCard = ({ match, onClick }) => {
       </div>
       <div className="match-info">
         <h3>{match.user.displayName}, {match.user.age}</h3>
-        <p>{match.user.location?.city || 'Ville inconnue'}</p>
+        <p>{match.user.location?.city || t('matches.unknownCity')}</p>
       </div>
       <button className="chat-btn">
         <FiMessageCircle />
@@ -169,7 +174,7 @@ const MatchCard = ({ match, onClick }) => {
   );
 };
 
-const LikeCard = ({ like, onClick }) => {
+const LikeCard = ({ like, onClick, t }) => {
   return (
     <div className="match-card blurred" onClick={onClick}>
       <div className="match-photo">
@@ -180,14 +185,14 @@ const LikeCard = ({ like, onClick }) => {
       <div className="match-info">
         <h3>{like.name}, {like.age}</h3>
         <div className="premium-badge">
-          💎 Premium
+          {t('matches.premium')}
         </div>
       </div>
     </div>
   );
 };
 
-const ViewCard = ({ view, onClick }) => {
+const ViewCard = ({ view, onClick, t }) => {
   return (
     <div className="match-card blurred" onClick={onClick}>
       <div className="match-photo">
@@ -198,7 +203,7 @@ const ViewCard = ({ view, onClick }) => {
       <div className="match-info">
         <h3>{view.name}, {view.age}</h3>
         <div className="premium-badge">
-          💎 Premium
+          {t('matches.premium')}
         </div>
       </div>
     </div>

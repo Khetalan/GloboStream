@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiHeart } from 'react-icons/fi';
@@ -12,6 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ const Login = () => {
     const result = await login(email, password);
     
     if (result.success) {
-      toast.success('Connexion réussie !');
+      toast.success(t('login.success'));
       navigate('/home');
     } else {
       toast.error(result.error);
@@ -48,21 +50,21 @@ const Login = () => {
               <FiHeart className="logo-icon" />
               <span>Globostream</span>
             </div>
-            <h1>Bon retour !</h1>
-            <p>Connectez-vous pour continuer</p>
+            <h1>{t('login.title')}</h1>
+            <p>{t('login.subtitle')}</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label>
                 <FiMail />
-                Email
+                {t('login.email')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre@email.com"
+                placeholder={t('login.emailPlaceholder')}
                 required
               />
             </div>
@@ -70,13 +72,13 @@ const Login = () => {
             <div className="form-group">
               <label>
                 <FiLock />
-                Mot de passe
+                {t('login.password')}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t('login.passwordPlaceholder')}
                 required
               />
             </div>
@@ -86,12 +88,12 @@ const Login = () => {
               className="btn btn-primary btn-block"
               disabled={loading}
             >
-              {loading ? <div className="loading"></div> : 'Se connecter'}
+              {loading ? <div className="loading"></div> : t('login.submit')}
             </button>
           </form>
 
           <div className="auth-divider">
-            <span>Ou continuer avec</span>
+            <span>{t('login.orContinueWith')}</span>
           </div>
 
           <div className="social-buttons">
@@ -122,8 +124,8 @@ const Login = () => {
 
           <div className="auth-footer">
             <p>
-              Pas encore de compte ?{' '}
-              <Link to="/register">S'inscrire</Link>
+              {t('login.noAccount')}{' '}
+              <Link to="/register">{t('login.signupLink')}</Link>
             </p>
           </div>
         </motion.div>

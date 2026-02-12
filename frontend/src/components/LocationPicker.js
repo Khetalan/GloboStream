@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiMapPin, FiLoader } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './LocationPicker.css';
 
 const COUNTRIES = [
@@ -60,6 +61,7 @@ const LocationPicker = ({ city, country, coordinates, onChange }) => {
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const debounceTimer = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setCityInput(city || '');
@@ -143,7 +145,7 @@ const LocationPicker = ({ city, country, coordinates, onChange }) => {
   // Géolocalisation automatique
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      alert('La géolocalisation n\'est pas supportée par votre navigateur');
+      alert(t('location.geoNotSupported'));
       return;
     }
 
@@ -182,14 +184,14 @@ const LocationPicker = ({ city, country, coordinates, onChange }) => {
           
         } catch (error) {
           console.error('Erreur géocodage:', error);
-          alert('Impossible de récupérer votre ville');
+          alert(t('location.cannotGetCity'));
         } finally {
           setGettingLocation(false);
         }
       },
       (error) => {
         console.error('Erreur géolocalisation:', error);
-        alert('Veuillez autoriser l\'accès à votre position');
+        alert(t('location.allowAccess'));
         setGettingLocation(false);
       },
       {
@@ -221,13 +223,13 @@ const LocationPicker = ({ city, country, coordinates, onChange }) => {
     <div className="location-picker">
       <div className="location-row">
         <div className="location-input-wrapper">
-          <label>Ville</label>
+          <label>{t('location.city')}</label>
           <div className="city-input-container">
             <input
               type="text"
               value={cityInput}
               onChange={(e) => handleCityChange(e.target.value)}
-              placeholder="Entrez votre ville..."
+              placeholder={t('location.cityPlaceholder')}
               className="city-input"
             />
             {loading && (
@@ -254,7 +256,7 @@ const LocationPicker = ({ city, country, coordinates, onChange }) => {
         </div>
 
         <div className="location-input-wrapper">
-          <label>Pays</label>
+          <label>{t('location.country')}</label>
           <select
             value={selectedCountry}
             onChange={(e) => handleCountryChange(e.target.value)}
@@ -278,12 +280,12 @@ const LocationPicker = ({ city, country, coordinates, onChange }) => {
         {gettingLocation ? (
           <>
             <FiLoader className="spinning" />
-            Localisation en cours...
+            {t('location.locating')}
           </>
         ) : (
           <>
             <FiMapPin />
-            Utiliser ma position actuelle
+            {t('location.useMyPosition')}
           </>
         )}
       </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -31,6 +32,7 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
+  const { t } = useTranslation();
   return (
     <AuthProvider>
       <Router>
@@ -155,8 +157,8 @@ function App() {
                 flexDirection: 'column',
                 gap: '20px'
               }}>
-                <h1>Live de Compétition</h1>
-                <p>Bientôt disponible</p>
+                <h1>{t('app.competition')}</h1>
+                <p>{t('app.comingSoon')}</p>
               </div>
             </PrivateRoute>
           } />
@@ -171,8 +173,8 @@ function App() {
                 flexDirection: 'column',
                 gap: '20px'
               }}>
-                <h1>Live Événementiel</h1>
-                <p>Bientôt disponible</p>
+                <h1>{t('app.event')}</h1>
+                <p>{t('app.comingSoon')}</p>
               </div>
             </PrivateRoute>
           } />

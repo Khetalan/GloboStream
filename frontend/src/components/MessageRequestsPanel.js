@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FiMail, FiCheck, FiX, FiUser } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './MessageRequestsPanel.css';
 
 const MessageRequestsPanel = () => {
@@ -11,6 +12,7 @@ const MessageRequestsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadRequests();
@@ -34,7 +36,7 @@ const MessageRequestsPanel = () => {
     try {
       await axios.post(`/api/message-requests/accept/${requestId}`);
       
-      toast.success('Demande acceptée ! Vous êtes maintenant matchés 🎉', {
+      toast.success(t('messageRequests.acceptSuccess'), {
         duration: 4000
       });
       
@@ -43,7 +45,7 @@ const MessageRequestsPanel = () => {
       
     } catch (error) {
       console.error('Erreur acceptation:', error);
-      toast.error('Erreur lors de l\'acceptation');
+      toast.error(t('messageRequests.acceptError'));
     } finally {
       setProcessing(null);
     }
@@ -55,14 +57,14 @@ const MessageRequestsPanel = () => {
     try {
       await axios.post(`/api/message-requests/reject/${requestId}`);
       
-      toast.success('Demande refusée');
+      toast.success(t('messageRequests.declineSuccess'));
       
       // Retirer la demande de la liste
       setRequests(prev => prev.filter(r => r._id !== requestId));
       
     } catch (error) {
       console.error('Erreur rejet:', error);
-      toast.error('Erreur lors du rejet');
+      toast.error(t('messageRequests.declineError'));
     } finally {
       setProcessing(null);
     }
@@ -75,11 +77,11 @@ const MessageRequestsPanel = () => {
   const getTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     
-    if (seconds < 60) return 'À l\'instant';
-    if (seconds < 3600) return `Il y a ${Math.floor(seconds / 60)} min`;
-    if (seconds < 86400) return `Il y a ${Math.floor(seconds / 3600)}h`;
-    if (seconds < 604800) return `Il y a ${Math.floor(seconds / 86400)}j`;
-    return `Il y a ${Math.floor(seconds / 604800)} sem`;
+    if (seconds < 60) return t('messageRequests.justNow');
+    if (seconds < 3600) return t('messageRequests.minutesAgo', { count: Math.floor(seconds / 60) });
+    if (seconds < 86400) return t('messageRequests.hoursAgo', { count: Math.floor(seconds / 3600) });
+    if (seconds < 604800) return t('messageRequests.daysAgo', { count: Math.floor(seconds / 86400) });
+    return t('messageRequests.weeksAgo', { count: Math.floor(seconds / 604800) });
   };
 
   if (loading) {
@@ -99,8 +101,8 @@ const MessageRequestsPanel = () => {
       <div className="requests-header">
         <FiMail className="header-icon" />
         <div className="header-text">
-          <h3>Demandes de messages</h3>
-          <p>{requests.length} nouvelle{requests.length > 1 ? 's' : ''} demande{requests.length > 1 ? 's' : ''}</p>
+          <h3>{t('messageRequests.title')}</h3>
+          <p>{t('messageRequests.newRequests', { count: requests.length })}</p>
         </div>
       </div>
 
@@ -131,6 +133,7 @@ const MessageRequestCard = ({
   processing,
   getTimeAgo 
 }) => {
+  const { t } = useTranslation();
   const sender = request.sender;
   const primaryPhoto = sender.photos?.find(p => p.isPrimary) || sender.photos?.[0];
 
@@ -181,7 +184,7 @@ const MessageRequestCard = ({
             disabled={processing}
           >
             <FiX />
-            <span>Refuser</span>
+            <span>{t('messageRequests.decline')}</span>
           </button>
           
           <button
@@ -192,12 +195,12 @@ const MessageRequestCard = ({
             {processing ? (
               <>
                 <div className="loading-spinner-small"></div>
-                <span>Traitement...</span>
+                <span>{t('messageRequests.processing')}</span>
               </>
             ) : (
               <>
                 <FiCheck />
-                <span>Accepter</span>
+                <span>{t('messageRequests.accept')}</span>
               </>
             )}
           </button>

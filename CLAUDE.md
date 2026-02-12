@@ -6,11 +6,15 @@
 - Consulter `docs/RAPPORT.md` pour connaître l'état des fonctionnalités et des tests avant de travailler sur une feature.
 - Mettre à jour `docs/RAPPORT.md` après chaque fonctionnalité testée ou corrigée.
 - Aucune fonctionnalité n'est considérée comme terminée tant qu'elle n'a pas été testée.
+- **OBLIGATOIRE** : Mettre à jour `claude_session.md` à la fin de chaque session et/ou étape. Ce fichier sert de mémoire persistante entre les sessions Claude Code. Y noter : ce qui a été fait, les bugs trouvés/corrigés, l'état actuel, et les prochaines étapes.
 
 ## Statut du projet
 
-- **Phase** : MVP en cours - code écrit, aucune fonctionnalité testée
-- **84 fonctionnalités codées, 0 testées** (voir `docs/RAPPORT.md`)
+- **Phase** : MVP en cours — tests en progression
+- **84 fonctionnalités codées, 48 testées** (30 API + 18 modération) — voir `docs/RAPPORT.md`
+- **15/15 pages frontend testées visuellement** + responsive 3 tailles
+- **i18n en cours** : 5 langues (FR, EN, IT, DE, ES) — intégration dans les composants en cours
+- **10 bugs corrigés** + 36 warnings ESLint éliminés
 - Pas de tests automatisés, pas de CI/CD
 
 ## Stack Technique
@@ -86,6 +90,7 @@ npm run build        # build production
 | `docs/MVP.md` | Checklist fonctionnalités MVP |
 | `docs/POST_MVP.md` | Fonctionnalités post-MVP |
 | `docs/RAPPORT.md` | **Rapport de suivi** — à mettre à jour après chaque test |
+| `claude_session.md` | **Journal de session** — mémoire persistante entre sessions Claude Code (obligatoire) |
 
 ## Environnement
 
