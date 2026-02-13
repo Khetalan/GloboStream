@@ -170,6 +170,40 @@
 
 ---
 
+## Session 5 — 13 Février 2026
+
+### Ce qui a été fait
+- **Déploiement GitHub Pages** avec mode démo complet :
+  - `HashRouter` remplace `BrowserRouter` dans App.js (compatibilité GH Pages)
+  - `homepage` + scripts `predeploy`/`deploy` ajoutés dans package.json
+  - Package `gh-pages` installé en devDependency
+  - `.env.production` créé avec `REACT_APP_DEMO_MODE=true`
+- **Système de données démo** créé :
+  - `frontend/src/demo/demoData.js` — utilisateur démo, 5 profils fictifs, 3 matches, 2 conversations avec messages, 2 streams, 1 demande de message, stats modération
+  - `frontend/src/demo/demoApi.js` — intercepteur axios complet :
+    - 20+ routes statiques mockées (auth, user, swipe, matches, chat, streams, settings, support, modération)
+    - 15+ routes dynamiques (like/dislike, chat par userId, profil public, demandes de message, photos, favoris)
+    - Simule délai réseau (200-500ms)
+    - Auto-détection via `REACT_APP_DEMO_MODE`
+  - `AuthContext.js` modifié — auto-login démo en production
+- **Build** réussi : 235 KB JS + 14 KB CSS gzippés
+- **Déploiement** : `npm run deploy` → branche `gh-pages` publiée sur GitHub
+- **URL** : `https://Khetalan.github.io/GloboStream`
+
+### Fichiers modifiés/créés (Session 5)
+- `frontend/package.json` — homepage, scripts deploy, gh-pages devDep
+- `frontend/src/App.js` — HashRouter
+- `frontend/src/demo/demoData.js` — **nouveau** (données fictives)
+- `frontend/src/demo/demoApi.js` — **nouveau** (intercepteur API)
+- `frontend/src/contexts/AuthContext.js` — import démo + auto-login
+- `frontend/.env.production` — **nouveau** (REACT_APP_DEMO_MODE=true)
+
+### Note importante
+- GitHub Pages doit être activé dans les Settings du repo → Source: branche `gh-pages`
+- Le mode démo n'affecte PAS le développement local (`.env.production` ignoré en dev)
+
+---
+
 ## État Actuel du Projet
 
 ### Compteurs
@@ -183,7 +217,8 @@
 | i18n intégré | 22/22 fichiers ✅ (5 langues) |
 | Bugs corrigés | 10 (9 backend + 1 visuel) |
 | ESLint warnings corrigés | 36 → 0 |
-| Commits poussés | 3 (sur `claude/friendly-turing`) |
+| GitHub Pages | ✅ déployé sur `gh-pages` |
+| Commits poussés | 4 (sur `claude/friendly-turing`) |
 | PR GitHub | #1 ouverte |
 
 ### Fichiers de documentation à maintenir
@@ -197,12 +232,13 @@
 
 1. ✅ ~~Terminer l'i18n~~ FAIT (22/22 fichiers, 5 langues, sélecteur langue)
 2. ✅ ~~Mettre à jour RAPPORT.md v6.0~~ FAIT
-3. ⏳ **Commit + push** tous les fichiers i18n
-4. 📋 **Tester visuellement l'i18n** (changer de langue dans Settings, vérifier affichage)
-5. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
-6. 📋 **Tester uploads photos** (multipart/form-data)
-7. 📋 **Configurer tests automatisés** (Jest ou similaire)
-8. 📋 **Déploiement staging**
+3. ✅ ~~Commit + push~~ FAIT
+4. ✅ ~~Déploiement GitHub Pages~~ FAIT (mode démo + HashRouter + données fictives)
+5. 📋 **Activer GitHub Pages** dans Settings repo (branche `gh-pages`)
+6. 📋 **Tester visuellement l'i18n** (changer de langue dans Settings, vérifier affichage)
+7. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
+8. 📋 **Tester uploads photos** (multipart/form-data)
+9. 📋 **Configurer tests automatisés** (Jest ou similaire)
 
 ---
 
