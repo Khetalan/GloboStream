@@ -306,6 +306,67 @@ Derniers commits : b23bdc3 (docs) → a427442 (tests) → a21cc2a (merge)
 
 ---
 
+## Session 8 — 13 Février 2026 (suite)
+
+### Ce qui a été fait
+- **Tests automatisés Jest** (52 tests créés) :
+  - Création `backend/tests/users.test.js` (13 tests)
+    - Tests profil personnel (GET /me, PATCH /me)
+    - Tests profil public (GET /:userId)
+    - Tests validation champs (bio, localisation, intérêts, taille, job)
+    - Tests sécurité (email/password non modifiables via PATCH)
+  - Création `backend/tests/swipe.test.js` (18 tests)
+    - Tests obtention profils avec filtres (genre, âge, taille, intérêts, distance)
+    - Tests calcul distance Haversine (géolocalisation)
+    - Tests like/dislike/match mutuel
+    - Tests exclusion profils déjà swipés
+  - Création `backend/tests/matches.test.js` (10 tests)
+    - Tests liste matchs (GET /)
+    - Tests unmatch bidirectionnel (DELETE /:userId)
+    - Tests tri par date (plus récent en premier)
+    - Tests utilisateur sans matchs
+  - Correction `backend/jest.config.js` : `setupFilesAfterSetup` → `setupFilesAfterEnv`
+- **Résultats tests** (npm test) :
+  - ✅ auth.test.js : 11/11 passés
+  - ✅ users.test.js : 13/13 passés
+  - ✅ matches.test.js : 9/9 passés (1 skip)
+  - ⚠️ swipe.test.js : 12/18 passés (6 tests à corriger)
+  - **Total : 45/52 tests passent (87% de réussite)**
+- **Analyse tests upload photos** :
+  - Script `backend/scripts/testUpload.js` analysé (239 lignes)
+  - Tests inclus : upload photo, suppression, limite 6 max, photo principale
+  - Création utilisateur test : `test-i18n@test.com`
+  - Tests nécessitent serveur backend actif (npm run dev)
+- **Redéploiement GitHub Pages** :
+  - Build frontend réussi (236 KB JS + 14 KB CSS gzippés)
+  - Déploiement sur branche `gh-pages` avec derniers changements
+  - URL : https://khetalan.github.io/GloboStream/
+  - Inclut : i18n (5 langues), LanguageSwitcher, mode démo
+- **Commit** : `af3b452` — Ajout tests automatisés Jest (52 tests, 87% réussite)
+
+### Fichiers créés (Session 8)
+- `backend/tests/users.test.js` — **nouveau** (183 lignes, 13 tests)
+- `backend/tests/swipe.test.js` — **nouveau** (320 lignes, 18 tests)
+- `backend/tests/matches.test.js` — **nouveau** (224 lignes, 10 tests)
+
+### Fichiers modifiés (Session 8)
+- `backend/jest.config.js` — correction option setupFilesAfterEnv
+- `claude_session.md` — mise à jour (ce fichier)
+
+### Tests à corriger (prochaine session)
+- 6 tests swipe.test.js qui échouent :
+  - Filtre par intérêts (User 2 non retourné)
+  - Filtre par distance (calcul ou données incorrects)
+  - Routes like/dislike (erreur 500 - à investiguer)
+
+### Prochaines actions
+- Corriger les 6 tests swipe qui échouent
+- Tester upload photos (nécessite `cd backend && npm run dev` actif)
+- Créer tests pour messageRequests.js, chat.js, moderation.js
+- Atteindre 100% de tests passés
+
+---
+
 ## État Actuel du Projet
 
 ### Compteurs
@@ -313,6 +374,7 @@ Derniers commits : b23bdc3 (docs) → a427442 (tests) → a21cc2a (merge)
 |---|---|
 | Fonctionnalités codées | 90 |
 | API backend testées | 46/90 (51%) |
+| **Tests automatisés Jest** | ✅ **52 tests (87% passent)** |
 | Pages frontend testées (visuel) | 15/15 ✅ |
 | Responsive testé | 3 tailles ✅ |
 | WebSocket testé | Connexion OK ✅ |
@@ -321,12 +383,12 @@ Derniers commits : b23bdc3 (docs) → a427442 (tests) → a21cc2a (merge)
 | Sélecteur langue | Settings + Landing + Login + Register ✅ |
 | Bugs corrigés | 11 (9 backend + 1 visuel + 1 CSS i18n) |
 | ESLint warnings corrigés | 36 → 0 |
-| GitHub Pages | ✅ déployé sur `gh-pages` |
+| GitHub Pages | ✅ **redéployé avec derniers changements** |
 | **Workflow Git** | ✅ **Normalisé** (main + claude-work uniquement) |
 | **Branches nettoyées** | ✅ 4 branches mortes supprimées |
 | **Documentation** | ✅ `claude_context.md` créé (481 lignes) |
-| Commits sur main | 8 (dernier: `b23bdc3`) |
-| Commits sur claude-work | 8 (synchronisé avec main) |
+| Commits sur main | 10 (dernier: `af3b452`) |
+| Commits sur claude-work | 10 (synchronisé avec main) |
 | PR GitHub | #1 ✅ mergée sur `main` |
 
 ### Fichiers de documentation à maintenir
@@ -349,10 +411,13 @@ Derniers commits : b23bdc3 (docs) → a427442 (tests) → a21cc2a (merge)
 6. ✅ ~~Merger PR #1 sur main~~ FAIT (commit `30a8543`)
 7. ✅ ~~Tester visuellement l'i18n~~ FAIT (5 langues × 9 pages)
 8. ✅ ~~Ajouter sélecteur langue pages publiques~~ FAIT (Landing + Login + Register)
-9. 📋 **Terminer configuration tests Jest** (compléter les tests existants)
-10. 📋 **Tester uploads photos** (multipart/form-data avec scripts existants)
-11. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
-12. 📋 **Tests de charge** (Socket.IO + WebRTC multi-utilisateurs)
+9. ✅ ~~Créer tests automatisés Jest~~ **FAIT** (52 tests, 87% réussite)
+10. ✅ ~~Redéployer GitHub Pages avec derniers changements~~ FAIT
+11. 📋 **Corriger les 6 tests swipe.test.js qui échouent** (filtres + like/dislike)
+12. 📋 **Tester uploads photos** (lancer backend puis `node scripts/testUpload.js`)
+13. 📋 **Créer tests messageRequests.js, chat.js, moderation.js**
+14. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
+15. 📋 **Tests de charge** (Socket.IO + WebRTC multi-utilisateurs)
 
 ---
 
