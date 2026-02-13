@@ -27,27 +27,27 @@ beforeAll(async () => {
       firstName: 'Marc',
       lastName: 'Test',
       birthDate: '1990-05-15',
-      gender: 'homme',
-      lookingFor: ['femme'],
-      bio: 'User 1',
-      interests: ['cinéma', 'sport'],
-      languages: ['français', 'anglais'],
-      height: 180
+      gender: 'homme'
     });
 
   user1Token = res1.body.token;
-  user1Id = res1.body.user._id;
+  user1Id = res1.body.user.id;
 
-  // Mettre à jour la localisation de User 1 (Paris)
+  // Compléter le profil et mettre à jour la localisation de User 1
   await request(app)
     .patch('/api/users/me')
     .set('Authorization', `Bearer ${user1Token}`)
     .send({
+      interestedIn: 'femme',
+      bio: 'User 1',
+      interests: ['cinéma', 'sport'],
+      languages: ['français', 'anglais'],
+      height: 180,
       location: {
         type: 'Point',
-        coordinates: [2.3522, 48.8566] // Paris
-      },
-      city: 'Paris'
+        coordinates: [2.3522, 48.8566], // Paris
+        city: 'Paris'
+      }
     });
 
   // Créer User 2 (femme, Paris)
@@ -59,27 +59,27 @@ beforeAll(async () => {
       firstName: 'Sophie',
       lastName: 'Test',
       birthDate: '1992-08-20',
-      gender: 'femme',
-      lookingFor: ['homme'],
-      bio: 'User 2',
-      interests: ['cinéma', 'lecture'],
-      languages: ['français'],
-      height: 165
+      gender: 'femme'
     });
 
   user2Token = res2.body.token;
-  user2Id = res2.body.user._id;
+  user2Id = res2.body.user.id;
 
-  // Mettre à jour la localisation de User 2 (Paris)
+  // Compléter le profil et mettre à jour la localisation de User 2
   await request(app)
     .patch('/api/users/me')
     .set('Authorization', `Bearer ${user2Token}`)
     .send({
+      interestedIn: 'homme',
+      bio: 'User 2',
+      interests: ['cinéma', 'lecture'],
+      languages: ['français'],
+      height: 165,
       location: {
         type: 'Point',
-        coordinates: [2.3500, 48.8500] // Paris (proche)
-      },
-      city: 'Paris'
+        coordinates: [2.3500, 48.8500], // Paris (proche)
+        city: 'Paris'
+      }
     });
 
   // Créer User 3 (femme, loin)
@@ -91,17 +91,23 @@ beforeAll(async () => {
       firstName: 'Marie',
       lastName: 'Test',
       birthDate: '1988-12-10',
-      gender: 'femme',
-      lookingFor: ['homme'],
+      gender: 'femme'
+    });
+
+  const user3Token = res3.body.token;
+  user3Id = res3.body.user.id;
+
+  // Compléter le profil de User 3 (sans localisation - très loin)
+  await request(app)
+    .patch('/api/users/me')
+    .set('Authorization', `Bearer ${user3Token}`)
+    .send({
+      interestedIn: 'homme',
       bio: 'User 3',
       interests: ['voyage'],
       languages: ['anglais'],
       height: 170
     });
-
-  user3Id = res3.body.user._id;
-
-  // User 3 sans localisation (ou très loin)
 });
 
 afterAll(async () => {

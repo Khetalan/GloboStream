@@ -27,12 +27,11 @@ beforeAll(async () => {
       firstName: 'Match1',
       lastName: 'Test',
       birthDate: '1990-05-15',
-      gender: 'homme',
-      lookingFor: ['femme']
+      gender: 'homme'
     });
 
   user1Token = res1.body.token;
-  user1Id = res1.body.user._id;
+  user1Id = res1.body.user.id;
 
   // Créer User 2
   const res2 = await request(app)
@@ -43,12 +42,11 @@ beforeAll(async () => {
       firstName: 'Match2',
       lastName: 'Test',
       birthDate: '1992-08-20',
-      gender: 'femme',
-      lookingFor: ['homme']
+      gender: 'femme'
     });
 
   user2Token = res2.body.token;
-  user2Id = res2.body.user._id;
+  user2Id = res2.body.user.id;
 
   // Créer User 3
   const res3 = await request(app)
@@ -59,12 +57,11 @@ beforeAll(async () => {
       firstName: 'Match3',
       lastName: 'Test',
       birthDate: '1988-12-10',
-      gender: 'femme',
-      lookingFor: ['homme']
+      gender: 'femme'
     });
 
   user3Token = res3.body.token;
-  user3Id = res3.body.user._id;
+  user3Id = res3.body.user.id;
 
   // Créer un match entre User 1 et User 2
   await request(app)

@@ -27,9 +27,7 @@ beforeAll(async () => {
       firstName: 'User',
       lastName: 'Test',
       birthDate: '1995-06-15',
-      gender: 'homme',
-      lookingFor: ['femme'],
-      bio: 'Test bio'
+      gender: 'homme'
     });
 
   testUser = res.body.user;
@@ -44,9 +42,7 @@ beforeAll(async () => {
       firstName: 'Other',
       lastName: 'User',
       birthDate: '1992-03-10',
-      gender: 'femme',
-      lookingFor: ['homme'],
-      bio: 'Other user bio'
+      gender: 'femme'
     });
 
   otherUser = res2.body.user;
@@ -86,7 +82,7 @@ describe('API Users - Profil Personnel', () => {
         bio: 'Bio mise à jour par Jest',
         interests: ['cinéma', 'sport'],
         height: 180,
-        job: 'Développeur'
+        occupation: 'Développeur'
       });
 
     expect(res.statusCode).toBe(200);
@@ -95,7 +91,7 @@ describe('API Users - Profil Personnel', () => {
     expect(res.body.user.interests).toContain('cinéma');
     expect(res.body.user.interests).toContain('sport');
     expect(res.body.user.height).toBe(180);
-    expect(res.body.user.job).toBe('Développeur');
+    expect(res.body.user.occupation).toBe('Développeur');
   });
 
   test('PATCH /api/users/me - mettre à jour localisation', async () => {
@@ -105,15 +101,15 @@ describe('API Users - Profil Personnel', () => {
       .send({
         location: {
           type: 'Point',
-          coordinates: [2.3522, 48.8566] // Paris
-        },
-        city: 'Paris',
-        country: 'France'
+          coordinates: [2.3522, 48.8566], // Paris
+          city: 'Paris',
+          country: 'France'
+        }
       });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.user.city).toBe('Paris');
-    expect(res.body.user.country).toBe('France');
+    expect(res.body.user.location.city).toBe('Paris');
+    expect(res.body.user.location.country).toBe('France');
     expect(res.body.user.location).toBeDefined();
     expect(res.body.user.location.coordinates).toEqual([2.3522, 48.8566]);
   });
@@ -145,14 +141,13 @@ describe('API Users - Profil Personnel', () => {
 describe('API Users - Profil Public', () => {
   test('GET /api/users/:userId - obtenir profil public d\'un autre utilisateur', async () => {
     const res = await request(app)
-      .get(`/api/users/${otherUser._id}`)
+      .get(`/api/users/${otherUser.id}`)
       .set('Authorization', `Bearer ${testToken}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.user).toBeDefined();
     expect(res.body.user.displayName).toBe('Other User');
-    expect(res.body.user.bio).toBe('Other user bio');
     expect(res.body.user.email).toBeUndefined(); // Email non exposé dans profil public
     expect(res.body.user.password).toBeUndefined();
   });
@@ -176,7 +171,7 @@ describe('API Users - Profil Public', () => {
 
   test('GET /api/users/:userId - sans token (401)', async () => {
     const res = await request(app)
-      .get(`/api/users/${otherUser._id}`);
+      .get(`/api/users/${otherUser.id}`);
 
     expect(res.statusCode).toBe(401);
   });

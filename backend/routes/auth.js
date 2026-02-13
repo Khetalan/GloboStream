@@ -323,6 +323,7 @@ router.get('/verify', async (req, res) => {
 
     res.json({
       success: true,
+      valid: true,
       user: user.getPublicProfile()
     });
   } catch (error) {
