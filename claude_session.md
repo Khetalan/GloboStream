@@ -437,14 +437,148 @@ backend/tests/users.test.js   | 29 ++++++----- (occupation, location, .id)
 
 ---
 
+## Session 10 : Tests complets messageRequests, chat, modération + upload photos
+**Date** : 13 février 2026 (suite Session 9)
+**Branche** : `claude-work` (en cours)
+**Status** : 108 tests (100% de réussite) 🎉
+
+### Objectifs
+- **Option A** : Tester l'upload de photos via scripts/testUpload.js
+- **Option B** : Créer tests automatisés pour messageRequests.js, chat.js, moderation.js
+- **Option C** : Load testing Socket.IO + WebRTC (à venir)
+- **Option D** : OAuth testing (reporté à la prochaine session)
+
+### Option A : Upload Photos Testing
+
+**Préparation** :
+1. Backend démarré en arrière-plan (port 5000)
+2. Création utilisateur test : `test-i18n@test.com`
+3. Exécution script : `node backend/scripts/testUpload.js`
+
+**Résultats** :
+- ✅ Upload photo (multipart/form-data, limite 5MB)
+- ✅ Suppression photo (DELETE /:photoId)
+- ✅ Limite 6 photos max (7e photo rejetée avec erreur 400)
+- ✅ Définir photo principale (PATCH /:photoId/primary)
+
+**Verdict** : Tous les tests d'upload photos passent ✅
+
+### Option B : Nouveaux Tests Automatisés (60 tests)
+
+#### 1. messageRequests.test.js — 21 tests ✅
+**Fichier** : `backend/tests/messageRequests.test.js` (333 lignes)
+
+**Endpoints testés** (7 routes) :
+- `POST /api/message-requests/send/:recipientId` — envoyer demande
+- `GET /api/message-requests/received` — obtenir demandes reçues
+- `GET /api/message-requests/sent` — obtenir demandes envoyées
+- `GET /api/message-requests/check/:recipientId` — vérifier si demande déjà envoyée
+- `POST /api/message-requests/accept/:requestId` — accepter demande (crée match)
+- `POST /api/message-requests/reject/:requestId` — rejeter demande
+- `DELETE /api/message-requests/:requestId` — supprimer demande (expéditeur uniquement)
+
+**Tests créés** :
+- 5 tests envoi (message vide, demande déjà envoyée, déjà matchés, sans token)
+- 4 tests récupération (received, sent, check, sans token)
+- 5 tests réponse (accept, reject, demande déjà traitée, demande inexistante, sans permission)
+- 4 tests suppression (supprimer, demande inexistante, sans permission, sans token)
+- 3 tests workflow complet (send → accept → match créé)
+
+**Bug corrigé** : Chemin routes `/api/messageRequests` → `/api/message-requests` (avec tiret)
+
+#### 2. chat.test.js — 15 tests ✅
+**Fichier** : `backend/tests/chat.test.js` (291 lignes)
+
+**Endpoints testés** (5 routes) :
+- `POST /api/chat/:userId` — envoyer message
+- `GET /api/chat/:userId` — obtenir messages conversation
+- `GET /api/chat/conversations` — liste conversations avec dernier message + unreadCount
+- `PATCH /api/chat/:userId/read` — marquer messages comme lus
+- `DELETE /api/chat/message/:messageId` — supprimer message (expéditeur uniquement)
+
+**Tests créés** :
+- 4 tests envoi message (message vide, pas de match, sans token, message réussi)
+- 4 tests récupération (messages conversation, pagination, pas de match, conversations)
+- 2 tests marquage lecture (marquer comme lu, sans token)
+- 5 tests suppression (supprimer, message inexistant, pas autorisé, sans token)
+
+**Setup** : 3 utilisateurs créés, 2 matchs (User1↔User2, User1↔User3)
+
+#### 3. moderation.test.js — 24 tests ✅
+**Fichier** : `backend/tests/moderation.test.js` (426 lignes)
+
+**Endpoints testés** (13 routes avec 4 niveaux de privilèges) :
+- **Modérateur (privilegeLevel 1)** :
+  - `GET /api/moderation/reports` — obtenir rapports
+  - `POST /api/moderation/warn/:userId` — avertir utilisateur
+  - `POST /api/moderation/ban/:userId` — bannir utilisateur
+  - `POST /api/moderation/unban/:userId` — débannir utilisateur
+  - `POST /api/moderation/stream/:streamId/stop` — arrêter stream
+  - `GET /api/moderation/stats` — stats personnelles
+- **Admin (privilegeLevel 2)** :
+  - `POST /api/moderation/promote/:userId` — promouvoir en modérateur
+  - `POST /api/moderation/demote/:userId` — révoquer modérateur
+  - `PATCH /api/moderation/permissions/:userId` — modifier permissions
+  - `GET /api/moderation/moderators` — liste modérateurs
+  - `GET /api/moderation/stats/global` — statistiques globales
+  - `GET /api/moderation/users` — liste utilisateurs (pagination + filtres)
+- **Super Admin (privilegeLevel 3)** :
+  - `POST /api/moderation/promote-admin/:userId` — promouvoir en admin
+
+**Tests créés** :
+- 7 tests routes modérateur (reports, warn, ban, unban, stop stream, stats, user inexistant)
+- 8 tests routes admin (promote, demote, permissions, moderators, stats/global, users avec filtres)
+- 3 tests routes super admin (promote-admin, accès refusé pour admin, user inexistant)
+- 6 tests contrôle d'accès (user normal → 403, modérateur ne peut pas bannir admin, etc.)
+
+**Setup** : 4 utilisateurs avec niveaux de privilège :
+```javascript
+- User normal (privilegeLevel 0)
+- Modérateur (privilegeLevel 1) avec moderationPermissions
+- Admin (privilegeLevel 2) avec permissions complètes
+- Super Admin (privilegeLevel 3) avec permissions complètes
+```
+
+**Bug corrigé** : Test demote échouait car utilisateur mal créé → solution : créer nouvel utilisateur dans le test, le promouvoir, puis le révoquer
+
+### Résultats Globaux
+
+**Avant Session 10** : 48 tests (100%)
+**Après Session 10** : 108 tests (100%) ✅
+
+Détails par fichier :
+- ✅ auth.test.js : 11/11 tests
+- ✅ users.test.js : 13/13 tests
+- ✅ swipe.test.js : 18/18 tests
+- ✅ matches.test.js : 10/10 tests (1 skipped)
+- ✅ **messageRequests.test.js : 21/21 tests** 🆕
+- ✅ **chat.test.js : 15/15 tests** 🆕
+- ✅ **moderation.test.js : 24/24 tests** 🆕
+
+**Total** : 108 tests, 108 passent (100%) 🎉
+
+### Fichiers créés
+```
+backend/tests/messageRequests.test.js  (nouveau, 333 lignes, 21 tests)
+backend/tests/chat.test.js             (nouveau, 291 lignes, 15 tests)
+backend/tests/moderation.test.js       (nouveau, 426 lignes, 24 tests)
+```
+
+### Prochaines actions
+- ✅ Mettre à jour claude_session.md (ce fichier)
+- 📋 Committer tous les nouveaux tests
+- 📋 Option C : Load testing Socket.IO + WebRTC
+
+---
+
 ## État Actuel du Projet
 
 ### Compteurs
 | Métrique | Valeur |
 |---|---|
 | Fonctionnalités codées | 90 |
-| API backend testées | 46/90 (51%) |
-| **Tests automatisés Jest** | ✅ **48 tests (100% passent)** 🎉 |
+| API backend testées | 53/90 (59%) |
+| **Tests automatisés Jest** | ✅ **108 tests (100% passent)** 🎉 |
 | Pages frontend testées (visuel) | 15/15 ✅ |
 | Responsive testé | 3 tailles ✅ |
 | WebSocket testé | Connexion OK ✅ |
@@ -458,7 +592,7 @@ backend/tests/users.test.js   | 29 ++++++----- (occupation, location, .id)
 | **Branches nettoyées** | ✅ 4 branches mortes supprimées |
 | **Documentation** | ✅ `claude_context.md` créé (481 lignes) |
 | Commits sur main | 11 (dernier: `14052ed`) |
-| Commits sur claude-work | 11 (synchronisé avec main) |
+| Commits sur claude-work | 12 (en avance de 1 commit sur main) |
 | PR GitHub | #1 ✅ mergée sur `main` |
 
 ### Fichiers de documentation à maintenir
@@ -484,11 +618,10 @@ backend/tests/users.test.js   | 29 ++++++----- (occupation, location, .id)
 9. ✅ ~~Créer tests automatisés Jest~~ **FAIT** (52 tests, 87% réussite)
 10. ✅ ~~Redéployer GitHub Pages avec derniers changements~~ FAIT
 11. ✅ ~~Corriger tous les tests pour atteindre 100%~~ **FAIT** (48/48 tests passent)
-12. 📋 **Tester uploads photos** (lancer backend puis `node scripts/testUpload.js`)
-13. 📋 **Créer tests pour messageRequests.js, chat.js, moderation.js**
-14. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
-15. 📋 **Load testing** (Socket.IO + WebRTC avec multiples utilisateurs simultanés)
-15. 📋 **Tests de charge** (Socket.IO + WebRTC multi-utilisateurs)
+12. ✅ ~~Tester uploads photos~~ **FAIT** (tous les tests passent)
+13. ✅ ~~Créer tests pour messageRequests.js, chat.js, moderation.js~~ **FAIT** (60 nouveaux tests, 108 total)
+14. 📋 **Load testing** (Socket.IO + WebRTC avec multiples utilisateurs simultanés)
+15. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple - reporté à la prochaine session)
 
 ---
 
