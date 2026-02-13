@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/GloboStream/static/css/main.bfec6586.css",
-    "main.js": "/GloboStream/static/js/main.97cefb62.js",
+    "main.css": "/GloboStream/static/css/main.76192047.css",
+    "main.js": "/GloboStream/static/js/main.5495876e.js",
     "index.html": "/GloboStream/index.html",
-    "main.bfec6586.css.map": "/GloboStream/static/css/main.bfec6586.css.map",
-    "main.97cefb62.js.map": "/GloboStream/static/js/main.97cefb62.js.map"
+    "main.76192047.css.map": "/GloboStream/static/css/main.76192047.css.map",
+    "main.5495876e.js.map": "/GloboStream/static/js/main.5495876e.js.map"
   },
   "entrypoints": [
-    "static/css/main.bfec6586.css",
-    "static/js/main.97cefb62.js"
+    "static/css/main.76192047.css",
+    "static/js/main.5495876e.js"
   ]
 }
