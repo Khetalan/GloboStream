@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiUser, FiCalendar, FiHeart } from 'react-icons/fi';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import './Auth.css';
 
 const Register = () => {
@@ -47,7 +48,10 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-content">
-        <motion.div 
+        <div className="auth-lang-bar">
+          <LanguageSwitcher />
+        </div>
+        <motion.div
           className="auth-card register-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

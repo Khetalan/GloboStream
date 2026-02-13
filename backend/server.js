@@ -201,12 +201,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Démarrage du serveur
+// Démarrage du serveur (sauf en mode test)
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
-  console.log(`📡 WebSocket activé`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+    console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+    console.log(`📡 WebSocket activé`);
+  });
+}
 
 module.exports = { app, io };

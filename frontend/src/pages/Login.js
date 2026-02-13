@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiHeart } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaApple } from 'react-icons/fa';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import './Auth.css';
 
 const Login = () => {
@@ -40,7 +41,10 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-content">
-        <motion.div 
+        <div className="auth-lang-bar">
+          <LanguageSwitcher />
+        </div>
+        <motion.div
           className="auth-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

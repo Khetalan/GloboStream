@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { FiHeart, FiVideo, FiMessageCircle, FiUsers } from 'react-icons/fi';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import './Landing.css';
 
 const Landing = () => {
@@ -51,6 +52,7 @@ const Landing = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
+            <LanguageSwitcher />
             <Link to="/login" className="nav-link">{t('landing.login')}</Link>
             <Link to="/register" className="btn btn-primary">{t('landing.signup')}</Link>
           </motion.nav>

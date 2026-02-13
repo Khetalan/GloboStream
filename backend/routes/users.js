@@ -181,9 +181,12 @@ router.post('/photos', upload.single('photo'), async (req, res) => {
     user.photos.push(photo);
     await user.save();
 
+    // Récupérer la photo sauvegardée avec son _id MongoDB
+    const savedPhoto = user.photos[user.photos.length - 1];
+
     res.json({
       success: true,
-      photo: photo,
+      photo: savedPhoto,
       message: 'Photo ajoutée avec succès'
     });
   } catch (error) {
@@ -250,6 +253,7 @@ router.patch('/photos/:photoId/primary', async (req, res) => {
 
     res.json({
       success: true,
+      photos: user.photos,
       message: 'Photo principale mise à jour'
     });
   } catch (error) {

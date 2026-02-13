@@ -29,6 +29,13 @@
   max-width: 480px;
 }
 
+/* Barre de langue au-dessus de la carte */
+.auth-lang-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
 .auth-card {
   background: var(--bg-card);
   border: 1px solid var(--border);

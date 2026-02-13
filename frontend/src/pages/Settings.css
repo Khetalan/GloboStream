@@ -55,6 +55,57 @@
   color: var(--text-primary);
 }
 
+/* Section Description */
+.section-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+/* Language Selector */
+.language-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.language-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.language-btn:hover {
+  border-color: var(--primary);
+  background: var(--bg-tertiary);
+  transform: translateY(-2px);
+}
+
+.language-btn.active {
+  border-color: var(--primary);
+  background: rgba(239, 68, 108, 0.15);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.language-flag {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.language-label {
+  font-size: 0.9rem;
+}
+
 /* Settings List */
 .settings-list {
   display: flex;
