@@ -11,8 +11,9 @@
 |-----|--------|
 | **Projet** | GloboStream — App de rencontres avec streaming live |
 | **Repo** | `https://github.com/Khetalan/GloboStream.git` |
-| **Branche** | `claude/friendly-turing` |
-| **PR** | #1 — [Tests MVP complets](https://github.com/Khetalan/GloboStream/pull/1) |
+| **Branche principale** | `main` (stable, toujours propre) |
+| **Branche développement** | `claude-work` (UNIQUE branche de dev autorisée) |
+| **PR** | #1 — [Tests MVP complets](https://github.com/Khetalan/GloboStream/pull/1) ✅ Mergée |
 | **Backend** | Node.js 18+, Express 4, MongoDB Atlas, Socket.IO, JWT + Passport.js |
 | **Frontend** | React 18, React Router v6, Socket.IO Client, Simple-Peer, Framer Motion |
 | **Langue code** | JavaScript pur (pas TypeScript) — CommonJS backend, ES modules frontend |
@@ -239,6 +240,72 @@
 
 ---
 
+## Session 7 — 13 Février 2026
+
+### Ce qui a été fait
+- **Normalisation complète de Git** avec workflow strict imposé :
+  - Analyse de l'état Git : 4 branches Claude temporaires détectées + travail en cours non committé
+  - Synchronisation `main` avec `origin/claude/friendly-turing` (merge commit `a21cc2a`)
+  - Création branche `claude-work` à partir de `main` synchronisé
+  - Résolution conflit `claude_session.md` (fusion des deux versions)
+  - Commit du travail en cours sur `claude-work` (commit `a427442`)
+    - Ajout configuration Jest + tests unitaires backend
+    - Ajout scripts de test (testSetPrimary.js, testUpload.js)
+    - Création composant LanguageSwitcher
+    - 16 fichiers modifiés (775 insertions, 31 suppressions)
+  - Synchronisation `main` avec `claude-work` (fast-forward merge)
+  - Suppression 4 branches mortes : `claude/friendly-hertz`, `claude/friendly-turing`, `claude/sad-nash`, `claude/silly-fermi`
+  - Nettoyage 4 worktrees obsolètes
+  - Renommage branche distante : `origin/claude/friendly-turing` → supprimée, `origin/claude-work` → créée
+  - Push synchronisé de `main` et `claude-work` sur origin
+- **Création `claude_context.md`** (481 lignes) — fichier de contexte complet :
+  - Présentation projet (GloboStream, app de rencontres + streaming)
+  - Stack technique détaillée (MERN + Socket.IO + WebRTC + i18n)
+  - Structure complète du projet (backend/frontend, dossiers, responsabilités)
+  - **Workflow Git strict** : `main` (stable) + `claude-work` (développement) UNIQUEMENT
+  - Règles strictes pour Claude (sécurité, conventions, interdictions)
+  - Bonnes pratiques spécifiques (patterns, erreurs à éviter, structure commits)
+  - État actuel et commandes essentielles
+- **Ajout références dans documentation** :
+  - `README.md` : section "Pour Claude Code" avec référence obligatoire vers `claude_context.md`
+  - `CLAUDE.md` : section "⚠️ LECTURE OBLIGATOIRE" avec ordre de lecture recommandé
+- **Commit final** : `b23bdc3` — Ajout claude_context.md + références documentation
+
+### Fichiers créés (Session 7)
+- `claude_context.md` — **nouveau** (481 lignes, contexte complet projet)
+- `backend/jest.config.js` — **nouveau** (configuration Jest)
+- `backend/tests/setup.js` — **nouveau** (setup tests Jest)
+- `backend/tests/auth.test.js` — **nouveau** (tests authentification)
+- `backend/scripts/testSetPrimary.js` — **nouveau** (script test photo principale)
+- `backend/scripts/testUpload.js` — **nouveau** (script test upload photos)
+
+### Fichiers modifiés (Session 7)
+- `backend/package.json` — ajout script `test` (Jest)
+- `backend/routes/users.js` — corrections mineures
+- `backend/server.js` — corrections mineures
+- `README.md` — ajout section "Pour Claude Code"
+- `CLAUDE.md` — ajout section "⚠️ LECTURE OBLIGATOIRE"
+- `claude_session.md` — mise à jour (ce fichier)
+
+### Résultat final
+- ✅ **Workflow Git normalisé** : UNIQUEMENT 2 branches (`main` + `claude-work`)
+- ✅ **Branches synchronisées** : `main` et `claude-work` identiques (commit `b23bdc3`)
+- ✅ **Branches mortes supprimées** : 4 branches Claude temporaires nettoyées
+- ✅ **Worktrees nettoyés** : 4 worktrees obsolètes supprimés
+- ✅ **Documentation complète** : `claude_context.md` créé avec toutes les règles
+- ✅ **Références ajoutées** : README.md et CLAUDE.md pointent vers `claude_context.md`
+- ✅ **Working tree propre** : aucun changement non committé
+
+### État Git final
+```
+Branches locales : main, claude-work (identiques)
+Branches distantes : origin/main, origin/claude-work, origin/gh-pages
+Working tree : clean ✅
+Derniers commits : b23bdc3 (docs) → a427442 (tests) → a21cc2a (merge)
+```
+
+---
+
 ## État Actuel du Projet
 
 ### Compteurs
@@ -255,18 +322,25 @@
 | Bugs corrigés | 11 (9 backend + 1 visuel + 1 CSS i18n) |
 | ESLint warnings corrigés | 36 → 0 |
 | GitHub Pages | ✅ déployé sur `gh-pages` |
-| Commits poussés | 5 (sur `claude/friendly-turing`, mergé dans main) |
+| **Workflow Git** | ✅ **Normalisé** (main + claude-work uniquement) |
+| **Branches nettoyées** | ✅ 4 branches mortes supprimées |
+| **Documentation** | ✅ `claude_context.md` créé (481 lignes) |
+| Commits sur main | 8 (dernier: `b23bdc3`) |
+| Commits sur claude-work | 8 (synchronisé avec main) |
 | PR GitHub | #1 ✅ mergée sur `main` |
 
 ### Fichiers de documentation à maintenir
-- `docs/RAPPORT.md` — rapport détaillé de chaque fonctionnalité
-- `claude_session.md` — **CE FICHIER** (journal de session, obligatoire)
-- `CLAUDE.md` — instructions projet
+- **`claude_context.md`** — **SOURCE DE VÉRITÉ** (contexte projet, workflow Git, règles strictes)
+- `claude_session.md` — **CE FICHIER** (journal de session, mémoire persistante)
+- `docs/RAPPORT.md` — rapport détaillé de chaque fonctionnalité (à mettre à jour après tests)
+- `CLAUDE.md` — instructions générales
+- `README.md` — vue d'ensemble publique
 
 ---
 
 ## Prochaines Étapes
 
+0. ✅ ~~Normaliser workflow Git~~ **FAIT** (main + claude-work uniquement, `claude_context.md` créé)
 1. ✅ ~~Terminer l'i18n~~ FAIT
 2. ✅ ~~Mettre à jour RAPPORT.md v6.0~~ FAIT
 3. ✅ ~~Commit + push~~ FAIT
@@ -275,9 +349,10 @@
 6. ✅ ~~Merger PR #1 sur main~~ FAIT (commit `30a8543`)
 7. ✅ ~~Tester visuellement l'i18n~~ FAIT (5 langues × 9 pages)
 8. ✅ ~~Ajouter sélecteur langue pages publiques~~ FAIT (Landing + Login + Register)
-9. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
-10. 📋 **Tester uploads photos** (multipart/form-data)
-11. 📋 **Configurer tests automatisés** (Jest ou similaire)
+9. 📋 **Terminer configuration tests Jest** (compléter les tests existants)
+10. 📋 **Tester uploads photos** (multipart/form-data avec scripts existants)
+11. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
+12. 📋 **Tests de charge** (Socket.IO + WebRTC multi-utilisateurs)
 
 ---
 
