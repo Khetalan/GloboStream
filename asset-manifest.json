@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/GloboStream/static/css/main.bfec6586.css",
+    "main.js": "/GloboStream/static/js/main.97cefb62.js",
+    "index.html": "/GloboStream/index.html",
+    "main.bfec6586.css.map": "/GloboStream/static/css/main.bfec6586.css.map",
+    "main.97cefb62.js.map": "/GloboStream/static/js/main.97cefb62.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bfec6586.css",
+    "static/js/main.97cefb62.js"
+  ]
+}
