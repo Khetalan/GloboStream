@@ -1,5 +1,24 @@
 # CLAUDE.md
 
+## ⚠️ LECTURE OBLIGATOIRE AVANT TOUTE ACTION
+
+**Avant de commencer à travailler sur ce projet, vous DEVEZ lire [`claude_context.md`](claude_context.md).**
+
+Ce fichier contient :
+- **Le workflow Git strict** : `main` (stable) + `claude-work` (développement) uniquement
+- **L'architecture complète** du projet (backend + frontend)
+- **Les règles de sécurité** et zones sensibles à ne pas casser
+- **Les conventions de code** et bonnes pratiques spécifiques
+- **L'état actuel du projet** et prochaines étapes
+
+📖 **Ordre de lecture recommandé** :
+1. [`claude_context.md`](claude_context.md) ← **LIRE EN PREMIER** (source de vérité)
+2. [`claude_session.md`](claude_session.md) ← Historique récent des sessions
+3. [`docs/RAPPORT.md`](docs/RAPPORT.md) ← État détaillé des fonctionnalités
+4. Ce fichier (CLAUDE.md) ← Instructions générales
+
+---
+
 ## Instructions
 
 - **Toujours répondre en français.** L'utilisateur est francophone.

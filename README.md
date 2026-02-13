@@ -258,6 +258,30 @@ Le code des fonctionnalités de base existe mais **aucune fonctionnalité n'a é
 
 ---
 
+## Pour Claude Code
+
+⚠️ **IMPORTANT** : Si vous êtes Claude Code (ou un autre assistant IA), vous **DEVEZ** lire [`claude_context.md`](claude_context.md) avant toute action sur ce projet.
+
+Ce fichier contient :
+- Les règles strictes du workflow Git (branches `main` + `claude-work` uniquement)
+- L'architecture complète du projet
+- Les zones sensibles à ne pas casser
+- Les conventions de code et bonnes pratiques
+- L'état actuel du projet
+
+**Workflow Git imposé** :
+- `main` : branche stable, ne jamais travailler directement dessus
+- `claude-work` : UNIQUE branche de développement autorisée
+- Interdiction de créer d'autres branches sans autorisation
+
+📖 **Fichiers à lire en priorité** :
+1. [`claude_context.md`](claude_context.md) — Contexte projet (ce fichier est LA référence)
+2. [`claude_session.md`](claude_session.md) — Journal de session (mémoire persistante)
+3. [`CLAUDE.md`](CLAUDE.md) — Instructions générales
+4. [`docs/RAPPORT.md`](docs/RAPPORT.md) — État des fonctionnalités
+
+---
+
 ## Contribution
 
 ### Standards Code
