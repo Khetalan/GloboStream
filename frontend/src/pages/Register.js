@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiUser, FiCalendar, FiHeart } from 'react-icons/fi';
@@ -16,6 +17,7 @@ const Register = () => {
     gender: 'homme'
   });
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -33,7 +35,7 @@ const Register = () => {
     const result = await register(formData);
     
     if (result.success) {
-      toast.success('Compte créé avec succès !');
+      toast.success(t('register.success'));
       navigate('/home');
     } else {
       toast.error(result.error);
@@ -55,8 +57,8 @@ const Register = () => {
               <FiHeart className="logo-icon" />
               <span>Globostream</span>
             </div>
-            <h1>Créer un compte</h1>
-            <p>Commencez votre aventure</p>
+            <h1>{t('register.title')}</h1>
+            <p>{t('register.subtitle')}</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit}>
@@ -64,26 +66,26 @@ const Register = () => {
               <div className="form-group">
                 <label>
                   <FiUser />
-                  Prénom
+                  {t('register.firstName')}
                 </label>
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="Prénom"
+                  placeholder={t('register.firstNamePlaceholder')}
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>Nom</label>
+                <label>{t('register.lastName')}</label>
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  placeholder="Nom (optionnel)"
+                  placeholder={t('register.lastNamePlaceholder')}
                 />
               </div>
             </div>
@@ -91,14 +93,14 @@ const Register = () => {
             <div className="form-group">
               <label>
                 <FiMail />
-                Email
+                {t('register.email')}
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="votre@email.com"
+                placeholder={t('register.emailPlaceholder')}
                 required
               />
             </div>
@@ -106,14 +108,14 @@ const Register = () => {
             <div className="form-group">
               <label>
                 <FiLock />
-                Mot de passe
+                {t('register.password')}
               </label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="••••••••"
+                placeholder={t('register.passwordPlaceholder')}
                 required
                 minLength={6}
               />
@@ -122,7 +124,7 @@ const Register = () => {
             <div className="form-group">
               <label>
                 <FiCalendar />
-                Date de naissance
+                {t('register.birthDate')}
               </label>
               <input
                 type="date"
@@ -135,7 +137,7 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label>Genre</label>
+              <label>{t('register.gender')}</label>
               <div className="radio-group">
                 <label className="radio-label">
                   <input
@@ -145,7 +147,7 @@ const Register = () => {
                     checked={formData.gender === 'homme'}
                     onChange={handleChange}
                   />
-                  <span>Homme</span>
+                  <span>{t('register.male')}</span>
                 </label>
                 
                 <label className="radio-label">
@@ -156,7 +158,7 @@ const Register = () => {
                     checked={formData.gender === 'femme'}
                     onChange={handleChange}
                   />
-                  <span>Femme</span>
+                  <span>{t('register.female')}</span>
                 </label>
                 
                 <label className="radio-label">
@@ -167,7 +169,7 @@ const Register = () => {
                     checked={formData.gender === 'autre'}
                     onChange={handleChange}
                   />
-                  <span>Autre</span>
+                  <span>{t('register.other')}</span>
                 </label>
               </div>
             </div>
@@ -177,14 +179,14 @@ const Register = () => {
               className="btn btn-primary btn-block"
               disabled={loading}
             >
-              {loading ? <div className="loading"></div> : 'Créer mon compte'}
+              {loading ? <div className="loading"></div> : t('register.submit')}
             </button>
           </form>
 
           <div className="auth-footer">
             <p>
-              Déjà un compte ?{' '}
-              <Link to="/login">Se connecter</Link>
+              {t('register.hasAccount')}{' '}
+              <Link to="/login">{t('register.loginLink')}</Link>
             </p>
           </div>
         </motion.div>

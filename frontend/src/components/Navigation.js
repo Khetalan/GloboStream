@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FiHome, FiHeart, FiMessageSquare, FiUsers, FiVideo, 
+import { useTranslation } from 'react-i18next';
+import {
+  FiHome, FiHeart, FiMessageSquare, FiUsers, FiVideo,
   FiUser, FiSettings, FiLogOut, FiLifeBuoy, FiChevronDown,
   FiShield
 } from 'react-icons/fi';
@@ -9,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './Navigation.css';
 
 const Navigation = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { user, logout } = useAuth();
@@ -34,21 +36,21 @@ const Navigation = () => {
   const isModerator = user?.privilegeLevel >= 1;
 
   const menuItems = [
-    { icon: FiHome, label: 'Accueil', path: '/home' },
-    { icon: FiHeart, label: 'Swipe', path: '/swipe' },
-    { icon: FiMessageSquare, label: 'Messages', path: '/chat' },
-    { icon: FiUsers, label: 'Matchs', path: '/matches' },
-    { icon: FiVideo, label: 'Stream', path: '/stream' },
-    { icon: FiUser, label: 'Profil', path: '/profile' },
-    { icon: FiSettings, label: 'Paramètres', path: '/settings' },
-    { icon: FiLifeBuoy, label: 'Support', path: '/support' }
+    { icon: FiHome, label: t('nav.home'), path: '/home' },
+    { icon: FiHeart, label: t('nav.swipe'), path: '/swipe' },
+    { icon: FiMessageSquare, label: t('nav.messages'), path: '/chat' },
+    { icon: FiUsers, label: t('nav.matches'), path: '/matches' },
+    { icon: FiVideo, label: t('nav.stream'), path: '/stream' },
+    { icon: FiUser, label: t('nav.profile'), path: '/profile' },
+    { icon: FiSettings, label: t('nav.settings'), path: '/settings' },
+    { icon: FiLifeBuoy, label: t('nav.support'), path: '/support' }
   ];
 
   // Ajouter Modération si l'utilisateur est modérateur
   if (isModerator) {
     menuItems.splice(7, 0, { 
-      icon: FiShield, 
-      label: 'Modération', 
+      icon: FiShield,
+      label: t('nav.moderation'),
       path: '/moderation',
       isModeration: true
     });
@@ -92,9 +94,9 @@ const Navigation = () => {
               {user?.email && <p>{user.email}</p>}
               {isModerator && (
                 <span className="moderator-badge">
-                  {user.privilegeLevel === 3 ? 'Super Admin' :
-                   user.privilegeLevel === 2 ? 'Admin' :
-                   'Modérateur'}
+                  {user.privilegeLevel === 3 ? t('nav.superAdmin') :
+                   user.privilegeLevel === 2 ? t('nav.admin') :
+                   t('nav.moderator')}
                 </span>
               )}
             </div>
@@ -120,7 +122,7 @@ const Navigation = () => {
 
           <button className="nav-dropdown-item logout-item" onClick={handleLogout}>
             <FiLogOut className="nav-item-icon" />
-            <span>Déconnexion</span>
+            <span>{t('nav.logout')}</span>
           </button>
         </div>
       )}

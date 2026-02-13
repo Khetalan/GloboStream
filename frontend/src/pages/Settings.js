@@ -2,18 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { 
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
+import {
   FiArrowLeft, FiBell, FiLock, FiEye, FiEyeOff, FiShield,
-  FiGlobe, FiMoon, FiTrash2, FiAlertCircle, FiCheck
+  FiTrash2, FiAlertCircle, FiGlobe
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import './Settings.css';
 
+const LANGUAGES = [
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' }
+];
+
 const Settings = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  
+  const { logout } = useAuth();
+  const { t } = useTranslation();
+
   // États Notifications
   const [notifications, setNotifications] = useState({
     newMatches: true,
@@ -46,7 +57,6 @@ const Settings = () => {
 
   // États généraux
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -69,15 +79,15 @@ const Settings = () => {
   const handleNotificationChange = async (key) => {
     const newValue = !notifications[key];
     setNotifications(prev => ({ ...prev, [key]: newValue }));
-    
+
     try {
       await axios.patch('/api/users/settings/notifications', {
         [key]: newValue
       });
-      toast.success('Paramètres mis à jour');
+      toast.success(t('settings.settingsUpdated'));
     } catch (error) {
       console.error('Error updating notifications:', error);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t('settings.settingsUpdateError'));
       // Rollback
       setNotifications(prev => ({ ...prev, [key]: !newValue }));
     }
@@ -86,29 +96,29 @@ const Settings = () => {
   const handlePrivacyChange = async (key) => {
     const newValue = !privacy[key];
     setPrivacy(prev => ({ ...prev, [key]: newValue }));
-    
+
     try {
       await axios.patch('/api/users/settings/privacy', {
         [key]: newValue
       });
-      toast.success('Paramètres mis à jour');
+      toast.success(t('settings.settingsUpdated'));
     } catch (error) {
       console.error('Error updating privacy:', error);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t('settings.settingsUpdateError'));
       setPrivacy(prev => ({ ...prev, [key]: !newValue }));
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
+      toast.error(t('settings.passwordMismatch'));
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères');
+      toast.error(t('settings.passwordTooShort'));
       return;
     }
 
@@ -120,7 +130,7 @@ const Settings = () => {
         newPassword: passwordData.newPassword
       });
 
-      toast.success('Mot de passe modifié avec succès');
+      toast.success(t('settings.passwordChanged'));
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -128,36 +138,34 @@ const Settings = () => {
       });
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error(error.response?.data?.error || 'Erreur lors du changement');
+      toast.error(error.response?.data?.error || t('settings.passwordChangeError'));
     } finally {
       setChangingPassword(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      '⚠️ Êtes-vous sûr de vouloir supprimer votre compte ?\n\n' +
-      'Cette action est IRRÉVERSIBLE.\n' +
-      'Toutes vos données seront définitivement supprimées.'
-    );
+    const confirmed = window.confirm(t('settings.deleteConfirm'));
 
     if (!confirmed) return;
 
-    const doubleConfirm = window.confirm(
-      'Dernière confirmation : Voulez-vous vraiment supprimer votre compte ?'
-    );
+    const doubleConfirm = window.confirm(t('settings.deleteLastConfirm'));
 
     if (!doubleConfirm) return;
 
     try {
       await axios.delete('/api/users/me');
-      toast.success('Compte supprimé');
+      toast.success(t('settings.accountDeleted'));
       logout();
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('settings.deleteError'));
     }
+  };
+
+  const handleLanguageChange = (langCode) => {
+    i18n.changeLanguage(langCode);
   };
 
   if (loading) {
@@ -165,7 +173,7 @@ const Settings = () => {
       <div className="settings-container">
         <div className="loading-state">
           <div className="loading"></div>
-          <p>Chargement...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -177,50 +185,73 @@ const Settings = () => {
         <button className="btn btn-ghost" onClick={() => navigate(-1)}>
           <FiArrowLeft />
         </button>
-        <h1>Paramètres</h1>
+        <h1>{t('settings.title')}</h1>
         <Navigation />
       </div>
 
       <div className="settings-content">
+        {/* Section Langue */}
+        <div className="settings-section">
+          <div className="section-header">
+            <FiGlobe className="section-icon" />
+            <h2>{t('settings.language')}</h2>
+          </div>
+
+          <p className="section-description">{t('settings.languageDesc')}</p>
+
+          <div className="language-selector">
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                className={`language-btn ${i18n.language === lang.code ? 'active' : ''}`}
+                onClick={() => handleLanguageChange(lang.code)}
+              >
+                <span className="language-flag">{lang.flag}</span>
+                <span className="language-label">{lang.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Section Notifications */}
         <div className="settings-section">
           <div className="section-header">
             <FiBell className="section-icon" />
-            <h2>Notifications</h2>
+            <h2>{t('settings.notifications')}</h2>
           </div>
 
           <div className="settings-list">
             <SettingToggle
-              label="Nouveaux matchs"
-              description="Recevoir une notification lors d'un nouveau match"
+              label={t('settings.newMatches')}
+              description={t('settings.newMatchesDesc')}
               checked={notifications.newMatches}
               onChange={() => handleNotificationChange('newMatches')}
             />
 
             <SettingToggle
-              label="Messages"
-              description="Recevoir une notification pour les nouveaux messages"
+              label={t('settings.messagesNotif')}
+              description={t('settings.messagesNotifDesc')}
               checked={notifications.messages}
               onChange={() => handleNotificationChange('messages')}
             />
 
             <SettingToggle
-              label="Likes reçus"
-              description="Être notifié quand quelqu'un vous like"
+              label={t('settings.likesReceived')}
+              description={t('settings.likesReceivedDesc')}
               checked={notifications.likes}
               onChange={() => handleNotificationChange('likes')}
             />
 
             <SettingToggle
-              label="Demandes de messages"
-              description="Notifications pour les demandes de messages"
+              label={t('settings.messageRequests')}
+              description={t('settings.messageRequestsDesc')}
               checked={notifications.messageRequests}
               onChange={() => handleNotificationChange('messageRequests')}
             />
 
             <SettingToggle
-              label="Notifications par email"
-              description="Recevoir des notifications sur votre email"
+              label={t('settings.emailNotif')}
+              description={t('settings.emailNotifDesc')}
               checked={notifications.emailNotifications}
               onChange={() => handleNotificationChange('emailNotifications')}
             />
@@ -231,12 +262,12 @@ const Settings = () => {
         <div className="settings-section">
           <div className="section-header">
             <FiLock className="section-icon" />
-            <h2>Sécurité</h2>
+            <h2>{t('settings.security')}</h2>
           </div>
 
           <form onSubmit={handlePasswordChange} className="password-form">
             <div className="form-group">
-              <label>Mot de passe actuel</label>
+              <label>{t('settings.currentPassword')}</label>
               <div className="password-input">
                 <input
                   type={showPasswords.current ? 'text' : 'password'}
@@ -261,7 +292,7 @@ const Settings = () => {
             </div>
 
             <div className="form-group">
-              <label>Nouveau mot de passe</label>
+              <label>{t('settings.newPassword')}</label>
               <div className="password-input">
                 <input
                   type={showPasswords.new ? 'text' : 'password'}
@@ -287,7 +318,7 @@ const Settings = () => {
             </div>
 
             <div className="form-group">
-              <label>Confirmer le nouveau mot de passe</label>
+              <label>{t('settings.confirmPassword')}</label>
               <div className="password-input">
                 <input
                   type={showPasswords.confirm ? 'text' : 'password'}
@@ -317,7 +348,7 @@ const Settings = () => {
               className="btn btn-primary"
               disabled={changingPassword}
             >
-              {changingPassword ? 'Modification...' : 'Changer le mot de passe'}
+              {changingPassword ? t('settings.changingPassword') : t('settings.changePassword')}
             </button>
           </form>
         </div>
@@ -326,34 +357,34 @@ const Settings = () => {
         <div className="settings-section">
           <div className="section-header">
             <FiShield className="section-icon" />
-            <h2>Confidentialité</h2>
+            <h2>{t('settings.privacy')}</h2>
           </div>
 
           <div className="settings-list">
             <SettingToggle
-              label="Afficher ma distance"
-              description="Les autres peuvent voir ma distance approximative"
+              label={t('settings.showDistance')}
+              description={t('settings.showDistanceDesc')}
               checked={privacy.showDistance}
               onChange={() => handlePrivacyChange('showDistance')}
             />
 
             <SettingToggle
-              label="Afficher mon âge"
-              description="Mon âge est visible sur mon profil"
+              label={t('settings.showAge')}
+              description={t('settings.showAgeDesc')}
               checked={privacy.showAge}
               onChange={() => handlePrivacyChange('showAge')}
             />
 
             <SettingToggle
-              label="Afficher mon statut en ligne"
-              description="Les matchs peuvent voir si je suis en ligne"
+              label={t('settings.showOnline')}
+              description={t('settings.showOnlineDesc')}
               checked={privacy.showOnline}
               onChange={() => handlePrivacyChange('showOnline')}
             />
 
             <SettingToggle
-              label="Autoriser les demandes de messages"
-              description="Les non-matchs peuvent m'envoyer des demandes"
+              label={t('settings.allowRequests')}
+              description={t('settings.allowRequestsDesc')}
               checked={privacy.allowMessageRequests}
               onChange={() => handlePrivacyChange('allowMessageRequests')}
             />
@@ -364,21 +395,21 @@ const Settings = () => {
         <div className="settings-section danger-section">
           <div className="section-header">
             <FiAlertCircle className="section-icon" />
-            <h2>Zone de danger</h2>
+            <h2>{t('settings.dangerZone')}</h2>
           </div>
 
           <div className="danger-actions">
             <div className="danger-item">
               <div>
-                <h3>Supprimer mon compte</h3>
-                <p>Action irréversible. Toutes vos données seront supprimées.</p>
+                <h3>{t('settings.deleteAccount')}</h3>
+                <p>{t('settings.deleteAccountDesc')}</p>
               </div>
               <button
                 className="btn btn-danger"
                 onClick={handleDeleteAccount}
               >
                 <FiTrash2 />
-                Supprimer
+                {t('settings.deleteButton')}
               </button>
             </div>
           </div>

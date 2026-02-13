@@ -11,7 +11,7 @@ require('../config/passport')(passport);
 
 // Génération du token JWT
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+  return jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
     expiresIn: '7d'
   });
 };
@@ -21,25 +21,41 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password, firstName, lastName, birthDate, gender } = req.body;
 
+    // Validations
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email et mot de passe requis' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
+    }
+
     // Vérifier si l'email existe déjà
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
     }
 
-    // Calculer l'âge
-    const age = Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
-    if (age < 18) {
-      return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans' });
+    // Calculer l'âge si birthDate fourni
+    if (birthDate) {
+      const age = Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
+      if (age < 18) {
+        return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans' });
+      }
     }
+
+    // Construire le displayName
+    const displayName = firstName
+      ? `${firstName} ${lastName || ''}`.trim()
+      : email.split('@')[0];
 
     // Créer l'utilisateur
     const user = new User({
-      email,
+      email: email.toLowerCase(),
       password,
-      firstName,
-      lastName,
-      displayName: `${firstName} ${lastName || ''}`.trim(),
+      firstName: firstName || '',
+      lastName: lastName || '',
+      displayName,
       birthDate,
       gender
     });
@@ -73,14 +89,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Vérifier le mot de passe
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-    }
-
-    // Vérifier le mot de passe
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
@@ -99,11 +108,7 @@ router.post('/login', async (req, res) => {
     await user.save();
 
     // Générer le token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = generateToken(user._id);
 
     // Retourner les données utilisateur COMPLÈTES
     const userData = {
@@ -310,7 +315,7 @@ router.get('/verify', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.userId);
 
     if (!user) {
       return res.status(401).json({ error: 'Utilisateur non trouvé' });

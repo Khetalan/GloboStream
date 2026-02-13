@@ -1,30 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { FiHeart, FiVideo, FiMessageCircle, FiUsers } from 'react-icons/fi';
 import './Landing.css';
 
 const Landing = () => {
+  const { t } = useTranslation();
+
   const features = [
     {
       icon: <FiHeart />,
       title: 'Swipe & Match',
-      description: 'Faites glisser pour découvrir des profils qui vous correspondent'
+      description: t('landing.feature1')
     },
     {
       icon: <FiVideo />,
       title: 'Live Streaming',
-      description: 'Lancez des streams en direct et connectez-vous en temps réel'
+      description: t('landing.feature2')
     },
     {
       icon: <FiMessageCircle />,
       title: 'Chat Instantané',
-      description: 'Discutez avec vos matchs en temps réel'
+      description: t('landing.feature3')
     },
     {
       icon: <FiUsers />,
       title: 'Communauté Active',
-      description: 'Rejoignez une communauté de personnes qui cherchent l\'amour'
+      description: t('landing.feature4')
     }
   ];
 
@@ -48,8 +51,8 @@ const Landing = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Link to="/login" className="nav-link">Connexion</Link>
-            <Link to="/register" className="btn btn-primary">S'inscrire</Link>
+            <Link to="/login" className="nav-link">{t('landing.login')}</Link>
+            <Link to="/register" className="btn btn-primary">{t('landing.signup')}</Link>
           </motion.nav>
         </div>
       </header>
@@ -64,20 +67,19 @@ const Landing = () => {
             transition={{ delay: 0.2 }}
           >
             <h1 className="hero-title">
-              Rencontrez l'amour
+              {t('landing.heroTitle1')}
               <br />
-              <span className="gradient-text">En direct</span>
+              <span className="gradient-text">{t('landing.heroTitle2')}</span>
             </h1>
             <p className="hero-subtitle">
-              La première plateforme de rencontres avec streaming en direct.
-              Connectez-vous authentiquement, matchez intelligemment.
+              {t('landing.heroDescription')}
             </p>
             <div className="hero-buttons">
               <Link to="/register" className="btn btn-primary btn-large">
-                Commencer gratuitement
+                {t('landing.ctaStart')}
               </Link>
               <button className="btn btn-outline btn-large">
-                En savoir plus
+                {t('landing.ctaLearnMore')}
               </button>
             </div>
           </motion.div>
@@ -94,8 +96,8 @@ const Landing = () => {
                   <div className="profile-card-demo">
                     <div className="profile-image-demo"></div>
                     <div className="profile-info-demo">
-                      <h3>Sophie, 26</h3>
-                      <p>Paris, France</p>
+                      <h3>{t('landing.mockupName')}</h3>
+                      <p>{t('landing.mockupCity')}</p>
                     </div>
                   </div>
                 </div>
@@ -114,8 +116,8 @@ const Landing = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2>Fonctionnalités uniques</h2>
-            <p>Tout ce dont vous avez besoin pour trouver l'amour</p>
+            <h2>{t('landing.featuresTitle')}</h2>
+            <p>{t('landing.featuresSubtitle')}</p>
           </motion.div>
 
           <div className="features-grid">
@@ -147,10 +149,10 @@ const Landing = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <h2>Prêt à trouver l'amour ?</h2>
-            <p>Rejoignez des milliers de célibataires dès aujourd'hui</p>
+            <h2>{t('landing.ctaTitle')}</h2>
+            <p>{t('landing.ctaSubtitle')}</p>
             <Link to="/register" className="btn btn-primary btn-large">
-              Créer mon compte gratuitement
+              {t('landing.ctaButton')}
             </Link>
           </motion.div>
         </div>
@@ -165,7 +167,7 @@ const Landing = () => {
               <span>Globostream</span>
             </div>
             <p className="footer-text">
-              © 2026 Globostream. Trouvez l'amour en direct.
+              {t('landing.footer')}
             </p>
           </div>
         </div>

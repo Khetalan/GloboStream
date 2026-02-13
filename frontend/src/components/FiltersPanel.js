@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiX, FiCheck } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './FiltersPanel.css';
 
 const COMMON_LANGUAGES = [
@@ -16,6 +17,7 @@ const COMMON_INTERESTS = [
 
 const FiltersPanel = ({ filters, onClose, onApply }) => {
   const [localFilters, setLocalFilters] = useState(filters);
+  const { t } = useTranslation();
 
   const handleChange = (field, value) => {
     setLocalFilters(prev => ({ ...prev, [field]: value }));
@@ -64,7 +66,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="filters-header">
-          <h2>Filtres de recherche</h2>
+          <h2>{t('filters.title')}</h2>
           <button className="btn-close" onClick={onClose}>
             <FiX />
           </button>
@@ -73,10 +75,10 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
         <div className="filters-content">
           {/* Âge */}
           <div className="filter-section">
-            <h3>Tranche d'âge</h3>
+            <h3>{t('filters.ageRange')}</h3>
             <div className="range-inputs">
               <div className="range-input-group">
-                <label>Min</label>
+                <label>{t('filters.min')}</label>
                 <input
                   type="number"
                   value={localFilters.ageMin}
@@ -87,7 +89,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
               </div>
               <span className="range-separator">-</span>
               <div className="range-input-group">
-                <label>Max</label>
+                <label>{t('filters.max')}</label>
                 <input
                   type="number"
                   value={localFilters.ageMax}
@@ -97,12 +99,12 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                 />
               </div>
             </div>
-            <p className="filter-hint">Entre {localFilters.ageMin} et {localFilters.ageMax} ans</p>
+            <p className="filter-hint">{t('filters.ageBetween', { min: localFilters.ageMin, max: localFilters.ageMax })}</p>
           </div>
 
           {/* Distance */}
           <div className="filter-section">
-            <h3>Distance maximale</h3>
+            <h3>{t('filters.maxDistance')}</h3>
             <input
               type="range"
               value={localFilters.distance}
@@ -111,12 +113,12 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
               max="500"
               className="distance-slider"
             />
-            <p className="filter-hint">{localFilters.distance} km autour de vous</p>
+            <p className="filter-hint">{t('filters.distanceAround', { distance: localFilters.distance })}</p>
           </div>
 
           {/* Genre */}
           <div className="filter-section">
-            <h3>Genre</h3>
+            <h3>{t('filters.gender')}</h3>
             <div className="filter-checkboxes">
               <label className="filter-checkbox">
                 <input
@@ -124,7 +126,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.gender.includes('homme')}
                   onChange={() => handleArrayToggle('gender', 'homme')}
                 />
-                <span>Hommes</span>
+                <span>{t('filters.men')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -132,7 +134,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.gender.includes('femme')}
                   onChange={() => handleArrayToggle('gender', 'femme')}
                 />
-                <span>Femmes</span>
+                <span>{t('filters.women')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -140,17 +142,17 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.gender.includes('autre')}
                   onChange={() => handleArrayToggle('gender', 'autre')}
                 />
-                <span>Autres</span>
+                <span>{t('filters.others')}</span>
               </label>
             </div>
           </div>
 
           {/* Taille */}
           <div className="filter-section">
-            <h3>Taille (cm)</h3>
+            <h3>{t('filters.height')}</h3>
             <div className="range-inputs">
               <div className="range-input-group">
-                <label>Min</label>
+                <label>{t('filters.min')}</label>
                 <input
                   type="number"
                   value={localFilters.heightMin || ''}
@@ -162,7 +164,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
               </div>
               <span className="range-separator">-</span>
               <div className="range-input-group">
-                <label>Max</label>
+                <label>{t('filters.max')}</label>
                 <input
                   type="number"
                   value={localFilters.heightMax || ''}
@@ -177,7 +179,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
 
           {/* Langues */}
           <div className="filter-section">
-            <h3>Langues parlées</h3>
+            <h3>{t('filters.languages')}</h3>
             <div className="filter-tags">
               {COMMON_LANGUAGES.map(lang => (
                 <button
@@ -194,7 +196,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
 
           {/* Centres d'intérêt */}
           <div className="filter-section">
-            <h3>Centres d'intérêt</h3>
+            <h3>{t('filters.interests')}</h3>
             <div className="filter-tags">
               {COMMON_INTERESTS.map(interest => (
                 <button
@@ -211,7 +213,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
 
           {/* Enfants */}
           <div className="filter-section">
-            <h3>Enfants</h3>
+            <h3>{t('filters.children')}</h3>
             <div className="filter-checkboxes">
               <label className="filter-checkbox">
                 <input
@@ -220,7 +222,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.hasChildren === null}
                   onChange={() => handleChange('hasChildren', null)}
                 />
-                <span>Peu importe</span>
+                <span>{t('filters.anyChildren')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -229,7 +231,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.hasChildren === 'non'}
                   onChange={() => handleChange('hasChildren', 'non')}
                 />
-                <span>Sans enfants</span>
+                <span>{t('filters.noChildren')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -238,14 +240,14 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.hasChildren === 'oui'}
                   onChange={() => handleChange('hasChildren', 'oui')}
                 />
-                <span>Avec enfants</span>
+                <span>{t('filters.withChildren')}</span>
               </label>
             </div>
           </div>
 
           {/* Fumeur */}
           <div className="filter-section">
-            <h3>Fumeur</h3>
+            <h3>{t('filters.smoker')}</h3>
             <div className="filter-checkboxes">
               <label className="filter-checkbox">
                 <input
@@ -254,7 +256,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.smoker === null}
                   onChange={() => handleChange('smoker', null)}
                 />
-                <span>Peu importe</span>
+                <span>{t('filters.anySmoker')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -263,7 +265,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.smoker === 'non'}
                   onChange={() => handleChange('smoker', 'non')}
                 />
-                <span>Non-fumeur</span>
+                <span>{t('filters.nonSmoker')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -272,14 +274,14 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.smoker === 'rarement'}
                   onChange={() => handleChange('smoker', 'rarement')}
                 />
-                <span>Occasionnel</span>
+                <span>{t('filters.occasional')}</span>
               </label>
             </div>
           </div>
 
           {/* Type de relation */}
           <div className="filter-section">
-            <h3>Recherche</h3>
+            <h3>{t('filters.lookingFor')}</h3>
             <div className="filter-checkboxes">
               <label className="filter-checkbox">
                 <input
@@ -288,7 +290,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.lookingFor === null}
                   onChange={() => handleChange('lookingFor', null)}
                 />
-                <span>Peu importe</span>
+                <span>{t('filters.anyRelation')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -297,7 +299,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.lookingFor === 'relation-serieuse'}
                   onChange={() => handleChange('lookingFor', 'relation-serieuse')}
                 />
-                <span>Relation sérieuse</span>
+                <span>{t('filters.serious')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -306,7 +308,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.lookingFor === 'rencontre-casual'}
                   onChange={() => handleChange('lookingFor', 'rencontre-casual')}
                 />
-                <span>Rencontre décontractée</span>
+                <span>{t('filters.casual')}</span>
               </label>
               <label className="filter-checkbox">
                 <input
@@ -315,7 +317,7 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
                   checked={localFilters.lookingFor === 'amitie'}
                   onChange={() => handleChange('lookingFor', 'amitie')}
                 />
-                <span>Amitié</span>
+                <span>{t('filters.friendship')}</span>
               </label>
             </div>
           </div>
@@ -323,14 +325,14 @@ const FiltersPanel = ({ filters, onClose, onApply }) => {
 
         <div className="filters-footer">
           <button className="btn btn-secondary" onClick={handleReset}>
-            Réinitialiser
+            {t('filters.resetFilters')}
           </button>
           <button 
             className="btn btn-primary" 
             onClick={() => onApply(localFilters)}
             disabled={localFilters.gender.length === 0}
           >
-            Appliquer les filtres
+            {t('filters.applyFilters')}
           </button>
         </div>
       </motion.div>

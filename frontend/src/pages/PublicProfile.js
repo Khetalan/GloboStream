@@ -4,9 +4,10 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { 
   FiArrowLeft, FiHeart, FiMail, FiMapPin, FiUser, 
-  FiCheck, FiStar, FiCrown, 
+  FiCheck,
   FiHexagon
 } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import Navigation from '../components/Navigation';
 import './PublicProfile.css';
 
@@ -16,9 +17,11 @@ const PublicProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadProfile = async () => {
@@ -28,7 +31,7 @@ const PublicProfile = () => {
       setProfile(response.data.profile);
     } catch (error) {
       console.error('Erreur chargement profil:', error);
-      toast.error('Impossible de charger ce profil');
+      toast.error(t('publicProfile.loadError'));
       navigate(-1);
     } finally {
       setLoading(false);
@@ -39,13 +42,13 @@ const PublicProfile = () => {
     try {
       const response = await axios.post(`/api/swipe/like/${userId}`);
       if (response.data.match) {
-        toast.success('🎉 C\'est un match !', { duration: 5000 });
+        toast.success(t('publicProfile.itsAMatch'), { duration: 5000 });
       } else {
-        toast.success('Like envoyé !');
+        toast.success(t('publicProfile.likeSent'));
       }
       setProfile(prev => ({ ...prev, hasLiked: true }));
     } catch (error) {
-      toast.error('Erreur lors du like');
+      toast.error(t('publicProfile.likeError'));
     }
   };
 
@@ -54,7 +57,7 @@ const PublicProfile = () => {
       navigate(`/chat/${userId}`);
     } else {
       navigate('/swipe'); // Retour au swipe pour envoyer une demande
-      toast('Retournez sur le swipe pour envoyer un message', {
+      toast(t('publicProfile.goToSwipe'), {
         icon: '💬'
       });
     }
@@ -65,7 +68,7 @@ const PublicProfile = () => {
       <div className="public-profile-container">
         <div className="loading-state">
           <div className="loading" style={{ width: 60, height: 60 }}></div>
-          <p>Chargement du profil...</p>
+          <p>{t('publicProfile.loadingProfile')}</p>
         </div>
       </div>
     );
@@ -84,7 +87,7 @@ const PublicProfile = () => {
         <button className="btn btn-ghost" onClick={() => navigate(-1)}>
           <FiArrowLeft />
         </button>
-        <h2>Profil</h2>
+        <h2>{t('publicProfile.title')}</h2>
         <Navigation />
       </div>
 
@@ -103,7 +106,7 @@ const PublicProfile = () => {
             {profile.isLive && (
               <div className="live-badge">
                 <span className="live-dot"></span>
-                EN DIRECT
+                {t('publicProfile.live')}
               </div>
             )}
 
@@ -146,7 +149,7 @@ const PublicProfile = () => {
                   className={`thumbnail ${index === currentPhotoIndex ? 'active' : ''}`}
                   onClick={() => setCurrentPhotoIndex(index)}
                 >
-                  <img src={photo.url} alt={`Photo ${index + 1}`} />
+                  <img src={photo.url} alt={`${index + 1}`} />
                 </div>
               ))}
             </div>
@@ -160,10 +163,10 @@ const PublicProfile = () => {
               <h1>
                 {profile.displayName || profile.firstName}, {profile.age}
                 {profile.isVerified && (
-                  <FiCheck className="verified-badge" title="Profil vérifié" />
+                  <FiCheck className="verified-badge" title={t('publicProfile.verified')} />
                 )}
                 {profile.isPremium && (
-                  <FiHexagon className="premium-badge" title="Membre Premium" />
+                  <FiHexagon className="premium-badge" title={t('publicProfile.premium')} />
                 )}
               </h1>
             </div>
@@ -180,14 +183,14 @@ const PublicProfile = () => {
 
           {profile.bio && (
             <div className="info-card">
-              <h3>À propos</h3>
+              <h3>{t('publicProfile.about')}</h3>
               <p>{profile.bio}</p>
             </div>
           )}
 
           {profile.interests && profile.interests.length > 0 && (
             <div className="info-card">
-              <h3>Centres d'intérêt</h3>
+              <h3>{t('publicProfile.interests')}</h3>
               <div className="interests-grid">
                 {profile.interests.map((interest, i) => (
                   <span key={i} className="interest-tag">
@@ -199,36 +202,36 @@ const PublicProfile = () => {
           )}
 
           <div className="info-card">
-            <h3>Informations</h3>
+            <h3>{t('publicProfile.info')}</h3>
             <div className="info-grid">
               {profile.occupation && (
                 <div className="info-item">
-                  <span className="info-label">Profession</span>
+                  <span className="info-label">{t('publicProfile.profession')}</span>
                   <span className="info-value">{profile.occupation}</span>
                 </div>
               )}
               {profile.height && (
                 <div className="info-item">
-                  <span className="info-label">Taille</span>
+                  <span className="info-label">{t('publicProfile.height')}</span>
                   <span className="info-value">{profile.height} cm</span>
                 </div>
               )}
               {profile.hasChildren && (
                 <div className="info-item">
-                  <span className="info-label">Enfants</span>
+                  <span className="info-label">{t('publicProfile.children')}</span>
                   <span className="info-value">
-                    {profile.hasChildren === 'oui' ? 'Oui' : 
-                     profile.hasChildren === 'non' ? 'Non' : 'Non précisé'}
+                    {profile.hasChildren === 'oui' ? t('common.yes') :
+                     profile.hasChildren === 'non' ? t('common.no') : t('common.notSpecified')}
                   </span>
                 </div>
               )}
               {profile.smoker && (
                 <div className="info-item">
-                  <span className="info-label">Fumeur</span>
+                  <span className="info-label">{t('publicProfile.smoker')}</span>
                   <span className="info-value">
-                    {profile.smoker === 'oui' ? 'Oui' : 
-                     profile.smoker === 'non' ? 'Non' : 
-                     profile.smoker === 'rarement' ? 'Occasionnel' : 'Souvent'}
+                    {profile.smoker === 'oui' ? t('common.yes') :
+                     profile.smoker === 'non' ? t('common.no') :
+                     profile.smoker === 'rarement' ? t('publicProfile.smokerOccasional') : t('publicProfile.smokerOften')}
                   </span>
                 </div>
               )}
@@ -237,7 +240,7 @@ const PublicProfile = () => {
 
           {profile.languages && profile.languages.length > 0 && (
             <div className="info-card">
-              <h3>Langues parlées</h3>
+              <h3>{t('publicProfile.languages')}</h3>
               <div className="languages-list">
                 {profile.languages.map((lang, i) => (
                   <span key={i} className="language-tag">{lang}</span>
@@ -252,19 +255,19 @@ const PublicProfile = () => {
           {!profile.hasLiked && !profile.isMatch && (
             <button className="btn btn-primary action-btn" onClick={handleLike}>
               <FiHeart />
-              J'aime
+              {t('publicProfile.like')}
             </button>
           )}
           
           {profile.isMatch ? (
             <button className="btn btn-secondary action-btn" onClick={handleMessage}>
               <FiMail />
-              Envoyer un message
+              {t('publicProfile.sendMessage')}
             </button>
           ) : profile.hasLiked ? (
             <div className="liked-notice">
               <FiCheck />
-              <span>Vous avez liké ce profil</span>
+              <span>{t('publicProfile.alreadyLiked')}</span>
             </div>
           ) : null}
         </div>

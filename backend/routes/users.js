@@ -43,7 +43,7 @@ const upload = multer({
 router.use(authMiddleware);
 
 // Obtenir son propre profil complet
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me', async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
       .select('-password -linkedAccounts'); // Exclure uniquement password et linkedAccounts
@@ -72,7 +72,7 @@ router.get('/me', authMiddleware, async (req, res) => {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération du profil' });
   }
-});;
+});
 
 // Obtenir un profil public par ID
 router.get('/:userId', async (req, res) => {
@@ -94,7 +94,7 @@ router.get('/:userId', async (req, res) => {
 });
 
 // Mettre à jour son profil - TOUS LES CHAMPS
-router.patch('/me', authMiddleware, async (req, res) => {
+router.patch('/me', async (req, res) => {
   try {
     const updates = req.body;
 

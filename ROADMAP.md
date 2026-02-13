@@ -1,12 +1,12 @@
-# 🗺️ ROADMAP - Globostream
+# ROADMAP - GloboStream
 
 > **Vision et évolution du projet sur 12 mois**
 
 ---
 
-## 🎯 Vision du Projet
+## Vision du Projet
 
-**Globostream** vise à révolutionner les rencontres en ligne en combinant :
+**GloboStream** vise à révolutionner les rencontres en ligne en combinant :
 - L'authenticité du face-à-face vidéo
 - L'efficacité du matching intelligent
 - La sécurité d'une modération active
@@ -14,72 +14,72 @@
 
 ---
 
-## 📅 Timeline Globale
+## Timeline Globale
 
 ```
-Q1 2026 (Jan-Mar)  │ ✅ MVP Complet
-Q2 2026 (Avr-Juin) │ 🚧 Amélioration & Croissance
-Q3 2026 (Juil-Sep) │ 📋 Fonctionnalités Premium
-Q4 2026 (Oct-Déc)  │ 🚀 Expansion & Scale
+Q1 2026 (Jan-Mar)  │ En cours - MVP (code écrit, à tester)
+Q2 2026 (Avr-Juin) │ Amélioration & Croissance
+Q3 2026 (Juil-Sep) │ Fonctionnalités Premium
+Q4 2026 (Oct-Déc)  │ Expansion & Scale
 ```
 
 ---
 
-## ✅ PHASE 1 : MVP (TERMINÉE)
+## PHASE 1 : MVP (EN COURS)
 **Janvier - Mars 2026**
 
 ### Objectif
 Créer une application fonctionnelle avec les fonctionnalités essentielles pour valider le concept.
 
-### Fonctionnalités Livrées
+### Fonctionnalités (code écrit, à tester)
 
-**Authentification ✅**
-- Inscription/Connexion email
-- OAuth Google (structure)
-- JWT sécurisé
+**Authentification**
+- [ ] Inscription/Connexion email
+- [ ] OAuth Google (structure)
+- [ ] JWT sécurisé
 
-**Profil Utilisateur ✅**
-- Upload 6 photos
-- 20+ champs de profil
-- Géolocalisation GPS
-- Autocomplétion ville
+**Profil Utilisateur**
+- [ ] Upload 6 photos
+- [ ] 20+ champs de profil
+- [ ] Géolocalisation GPS
+- [ ] Autocomplétion ville
 
-**Swipe & Matching ✅**
-- Système de swipe fluide
-- 10 filtres avancés
-- Calcul distance GPS
-- Détection matchs auto
+**Swipe & Matching**
+- [ ] Système de swipe fluide
+- [ ] 10 filtres avancés
+- [ ] Calcul distance GPS
+- [ ] Détection matchs auto
 
-**Messagerie ✅**
-- Chat temps réel
-- Demandes de messages
-- Notifications
+**Messagerie**
+- [ ] Chat temps réel
+- [ ] Demandes de messages
+- [ ] Notifications
 
-**Live Streaming ✅**
-- Live Surprise (Speed Dating)
-- Live Publique (Multi-participants)
-- Chat en direct
+**Live Streaming**
+- [ ] Live Surprise (Speed Dating)
+- [ ] Live Publique
+- [ ] Chat en direct
 
-**Modération ✅**
-- 4 niveaux privilèges
-- Panel complet
-- Actions modération
+**Modération**
+- [ ] 4 niveaux privilèges
+- [ ] Panel complet
+- [ ] Actions modération
 
-**Infrastructure ✅**
-- Architecture scalable
-- MongoDB Atlas
-- Socket.IO temps réel
-- Design responsive
+**Infrastructure**
+- [ ] Architecture scalable
+- [ ] MongoDB Atlas
+- [ ] Socket.IO temps réel
+- [ ] Design responsive
 
 ### Métriques de Succès
-- ✅ Application fonctionnelle
-- ✅ 0 bug critique
-- ✅ Performance correcte
-- ✅ Code maintenable
+- [ ] Application fonctionnelle
+- [ ] 0 bug critique
+- [ ] Performance correcte
+- [ ] Code maintenable
 
 ---
 
-## 🚧 PHASE 2 : AMÉLIORATION & CROISSANCE
+## PHASE 2 : AMÉLIORATION & CROISSANCE
 **Avril - Juin 2026**
 
 ### Objectif
@@ -145,7 +145,7 @@ Améliorer l'expérience utilisateur, corriger les bugs, et préparer le lanceme
 
 ---
 
-## 📋 PHASE 3 : FONCTIONNALITÉS PREMIUM
+## PHASE 3 : FONCTIONNALITÉS PREMIUM
 **Juillet - Septembre 2026**
 
 ### Objectif
@@ -206,11 +206,11 @@ Monétisation et fonctionnalités premium pour générer des revenus.
 ### Objectifs Revenus
 - 100 abonnés premium
 - 1,000€ MRR (Monthly Recurring Revenue)
-- Conversion 10% gratuit → premium
+- Conversion 10% gratuit -> premium
 
 ---
 
-## 🚀 PHASE 4 : EXPANSION & SCALE
+## PHASE 4 : EXPANSION & SCALE
 **Octobre - Décembre 2026**
 
 ### Objectif
@@ -268,7 +268,7 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 
 ---
 
-## 🔮 PHASE 5 : VISION LONG TERME
+## PHASE 5 : VISION LONG TERME
 **2027 et au-delà**
 
 ### Innovations Futures
@@ -295,7 +295,7 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 
 ---
 
-## 📊 Métriques Clés par Phase
+## Métriques Clés par Phase
 
 | Phase | Utilisateurs | MRR | Taux Rétention |
 |-------|-------------|-----|----------------|
@@ -307,31 +307,7 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 
 ---
 
-## 🎯 Indicateurs de Succès
-
-### Utilisateurs
-- ✅ Croissance mensuelle +20%
-- ✅ Taux activation 50%+
-- ✅ Taux rétention J30 > 30%
-
-### Engagement
-- ✅ 10+ swipes/jour/utilisateur
-- ✅ Taux match 10%+
-- ✅ 5+ messages/match
-
-### Revenus (Post-MVP)
-- ✅ Conversion premium 10%+
-- ✅ LTV > 50€
-- ✅ Croissance MRR +15%/mois
-
-### Qualité
-- ✅ Bugs critiques < 1%
-- ✅ Temps réponse < 2s
-- ✅ Uptime > 99.5%
-
----
-
-## 🔄 Processus de Développement
+## Processus de Développement
 
 ### Méthodologie
 - **Agile/Scrum** : Sprints de 2 semaines
@@ -347,28 +323,6 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 
 ---
 
-## 📝 Notes Importantes
-
-### Flexibilité
-Cette roadmap est **vivante** et peut évoluer selon :
-- Feedback utilisateurs
-- Données analytics
-- Opportunités marché
-- Contraintes techniques
-
-### Priorisation
-Les fonctionnalités seront priorisées selon :
-- **Impact utilisateur** (élevé > faible)
-- **Effort développement** (faible > élevé)
-- **Valeur business** (élevée > faible)
-
-### Communication
-- Mise à jour roadmap : Mensuelle
-- Changelog : Chaque release
-- Blog updates : Trimestriel
-
----
-
-**Roadmap maintenue par** : Équipe Globostream  
-**Dernière mise à jour** : Février 2026  
+**Roadmap maintenue par** : Équipe GloboStream
+**Dernière mise à jour** : Février 2026
 **Prochaine révision** : Mars 2026
