@@ -198,8 +198,10 @@
 - `frontend/src/contexts/AuthContext.js` — import démo + auto-login
 - `frontend/.env.production` — **nouveau** (REACT_APP_DEMO_MODE=true)
 
-### Note importante
-- GitHub Pages doit être activé dans les Settings du repo → Source: branche `gh-pages`
+### Suite Session 5 — Commit + merge + activation
+- **Commit** `10fb0ee` : GitHub Pages + mode démo poussé sur `claude/friendly-turing`
+- **GitHub Pages activé** via API GitHub — statut: `built`, URL: `https://khetalan.github.io/GloboStream/`
+- **PR #1 mergée** sur `main` (commit merge `30a8543`) — tout le travail sessions 1→5 est sur main
 - Le mode démo n'affecte PAS le développement local (`.env.production` ignoré en dev)
 
 ---
@@ -218,8 +220,8 @@
 | Bugs corrigés | 10 (9 backend + 1 visuel) |
 | ESLint warnings corrigés | 36 → 0 |
 | GitHub Pages | ✅ déployé sur `gh-pages` |
-| Commits poussés | 4 (sur `claude/friendly-turing`) |
-| PR GitHub | #1 ouverte |
+| Commits poussés | 5 (sur `claude/friendly-turing`) |
+| PR GitHub | #1 ✅ mergée sur `main` |
 
 ### Fichiers de documentation à maintenir
 - `docs/RAPPORT.md` — rapport détaillé de chaque fonctionnalité
@@ -234,11 +236,12 @@
 2. ✅ ~~Mettre à jour RAPPORT.md v6.0~~ FAIT
 3. ✅ ~~Commit + push~~ FAIT
 4. ✅ ~~Déploiement GitHub Pages~~ FAIT (mode démo + HashRouter + données fictives)
-5. 📋 **Activer GitHub Pages** dans Settings repo (branche `gh-pages`)
-6. 📋 **Tester visuellement l'i18n** (changer de langue dans Settings, vérifier affichage)
-7. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
-8. 📋 **Tester uploads photos** (multipart/form-data)
-9. 📋 **Configurer tests automatisés** (Jest ou similaire)
+5. ✅ ~~Activer GitHub Pages~~ FAIT (branche `gh-pages`, statut: built)
+6. ✅ ~~Merger PR #1 sur main~~ FAIT (commit `30a8543`)
+7. 📋 **Tester visuellement l'i18n** (changer de langue dans Settings, vérifier affichage)
+8. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
+9. 📋 **Tester uploads photos** (multipart/form-data)
+10. 📋 **Configurer tests automatisés** (Jest ou similaire)
 
 ---
 
