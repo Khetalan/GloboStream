@@ -137,9 +137,7 @@ const userSchema = new mongoose.Schema({
 // Index géospatial pour recherche par proximité
 userSchema.index({ 'location': '2dsphere' });
 
-// Index pour recherche rapide
-userSchema.index({ email: 1 });
-userSchema.index({ googleId: 1 });
+// Index pour recherche rapide (email et googleId déjà indexés via unique:true dans le schéma)
 userSchema.index({ privilegeLevel: 1 });
 userSchema.index({ isActive: 1, isBanned: 1 });
 

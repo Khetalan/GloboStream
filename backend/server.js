@@ -46,10 +46,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Connexion MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('✅ MongoDB connecté'))
 .catch(err => console.error('❌ Erreur MongoDB:', err));
 
@@ -202,12 +199,23 @@ app.use((err, req, res, next) => {
 });
 
 // Démarrage du serveur (sauf en mode test)
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
   server.listen(PORT, () => {
     console.log(`🚀 Serveur démarré sur le port ${PORT}`);
     console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
     console.log(`📡 WebSocket activé`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Le port ${PORT} est déjà utilisé.`);
+      console.error(`   Fermez l'autre instance du serveur et relancez 'npm run dev'.`);
+      console.error(`   Sur Windows : taskkill /F /IM node.exe`);
+      process.exit(1);
+    } else {
+      throw err;
+    }
   });
 }
 
