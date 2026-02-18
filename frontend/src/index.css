@@ -1,3 +1,13 @@
+/* ============================================================
+   GLOBOSTREAM — Mobile-First Design System
+   Breakpoints :
+     Base  : 0px+     (375px minimum ciblé — smartphones)
+     sm    : 480px+   (grand mobile)
+     md    : 768px+   (tablette)
+     lg    : 1024px+  (desktop)
+     xl    : 1280px+  (grand desktop)
+   ============================================================ */
+
 :root {
   --primary: #FF3366;
   --primary-dark: #E6003D;
@@ -5,33 +15,33 @@
   --secondary: #6366F1;
   --secondary-dark: #4F46E5;
   --accent: #F59E0B;
-  
+
   --bg-primary: #0A0A0A;
   --bg-secondary: #1A1A1A;
   --bg-tertiary: #2A2A2A;
   --bg-card: #1E1E1E;
-  
+
   --text-primary: #FFFFFF;
   --text-secondary: #A3A3A3;
   --text-tertiary: #6B6B6B;
-  
+
   --border: #2A2A2A;
   --border-light: #3A3A3A;
-  
+
   --success: #10B981;
   --error: #EF4444;
   --warning: #F59E0B;
-  
+
   --shadow: 0 10px 40px rgba(255, 51, 102, 0.1);
   --shadow-lg: 0 20px 60px rgba(255, 51, 102, 0.15);
-  
+
   --font-display: 'Playfair Display', serif;
   --font-body: 'DM Sans', sans-serif;
-  
+
   --radius: 20px;
   --radius-sm: 12px;
   --radius-lg: 30px;
-  
+
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -39,6 +49,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -46,9 +57,21 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  font-size: 0.9rem;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Safe area pour iOS (notch, home indicator) */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+@media (min-width: 768px) {
+  body { font-size: 0.95rem; }
+}
+
+@media (min-width: 1024px) {
+  body { font-size: 1rem; }
 }
 
 /* Background animé */
@@ -80,9 +103,22 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
 }
 
-h1 { font-size: 3.5rem; }
-h2 { font-size: 2.5rem; }
-h3 { font-size: 2rem; }
+/* Mobile-first : tailles de base pour smartphone */
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.2rem; }
+
+@media (min-width: 768px) {
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  h1 { font-size: 3.5rem; }
+  h2 { font-size: 2.5rem; }
+  h3 { font-size: 2rem; }
+}
 
 button {
   font-family: var(--font-body);
@@ -90,6 +126,8 @@ button {
   border: none;
   outline: none;
   transition: var(--transition);
+  /* Touch target minimum iOS/Android */
+  min-height: 44px;
 }
 
 input, textarea, select {
@@ -168,15 +206,27 @@ a {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px; /* Mobile : 16px */
+}
+
+@media (min-width: 768px) {
+  .container { padding: 0 24px; }
+}
+
+@media (min-width: 1024px) {
+  .container { padding: 0 40px; }
 }
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
+  border-radius: var(--radius-sm); /* Mobile : radius réduit */
+  padding: 16px;
   transition: var(--transition);
+}
+
+@media (min-width: 768px) {
+  .card { padding: 24px; border-radius: var(--radius); }
 }
 
 .card:hover {
@@ -185,10 +235,11 @@ a {
 }
 
 .btn {
-  padding: 14px 32px;
+  padding: 12px 20px; /* Mobile : plus compact */
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
+  min-height: 44px; /* Touch target */
   transition: var(--transition);
   position: relative;
   overflow: hidden;
@@ -196,6 +247,10 @@ a {
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .btn { padding: 14px 32px; font-size: 16px; }
 }
 
 .btn-primary {
@@ -257,20 +312,9 @@ a {
   background: rgba(26, 26, 26, 0.8);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  h1 { font-size: 2.5rem; }
-  h2 { font-size: 2rem; }
-  h3 { font-size: 1.5rem; }
-  
-  .container {
-    padding: 0 16px;
-  }
-  
-  .btn {
-    padding: 12px 24px;
-    font-size: 14px;
-  }
+/* Scrollbar masquée sur mobile */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar { width: 0; }
 }
 
 /* Loading */

@@ -1,5 +1,12 @@
+/* ============================================================
+   ModerationPanel — Mobile-First
+   Base : colonne unique, sidebar en accordéon horizontal
+   768px+ : grid sidebar 220px + content
+   1024px+ : sidebar 250px
+   ============================================================ */
+
 .moderation-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-primary);
   display: flex;
   flex-direction: column;
@@ -14,7 +21,7 @@
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,47 +30,59 @@
 .moderation-header .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 20px;
+  gap: 10px;
+  font-size: 18px;
   font-weight: 700;
   font-family: var(--font-display);
 }
 
 .moderation-header .logo-icon {
   color: var(--warning);
-  font-size: 24px;
+  font-size: 22px;
 }
 
+/* ── Layout principal ─────────────────────────────────────── */
 .moderation-main {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  min-height: calc(100vh - 70px);
-  margin-top: 70px;
-}
-
-/* Sidebar */
-.moderation-sidebar {
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
-  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  min-height: calc(100dvh - 60px);
+  margin-top: 60px;
+}
+
+/* ── Sidebar navigation (scroll horizontal sur mobile) ─────── */
+.moderation-sidebar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.moderation-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  padding: 14px 16px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-weight: 500;
+  white-space: nowrap;
+  min-height: 44px;
+  flex-shrink: 0;
 }
 
 .sidebar-btn:hover {
@@ -77,36 +96,37 @@
 }
 
 .sidebar-btn svg {
-  font-size: 20px;
+  font-size: 18px;
 }
 
-/* Content */
+/* ── Contenu ──────────────────────────────────────────────── */
 .moderation-content {
-  padding: 32px;
+  flex: 1;
+  padding: 20px 16px;
   overflow-y: auto;
 }
 
-/* Dashboard */
+/* ── Dashboard ─────────────────────────────────────────────── */
 .dashboard h2 {
-  font-size: 2rem;
-  margin-bottom: 32px;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
   color: var(--primary);
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
+  border-radius: var(--radius-sm);
+  padding: 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   transition: var(--transition);
 }
 
@@ -116,7 +136,7 @@
 }
 
 .stat-icon {
-  font-size: 48px;
+  font-size: 36px;
   color: var(--primary);
 }
 
@@ -133,36 +153,37 @@
 }
 
 .stat-info h3 {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   margin-bottom: 4px;
 }
 
 .stat-info p {
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
-/* Table */
+/* ── Table ─────────────────────────────────────────────────── */
 .table-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .table-header h2 {
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   color: var(--primary);
 }
 
 .search-input {
-  padding: 10px 16px;
+  padding: 10px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
-  width: 300px;
+  width: 100%;
   font-size: 1rem;
+  min-height: 44px;
 }
 
 .search-input:focus {
@@ -170,13 +191,21 @@
   outline: none;
 }
 
+/* Table scrollable horizontalement sur mobile */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   width: 100%;
+  min-width: 600px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   border-collapse: collapse;
   overflow: hidden;
+  font-size: 0.85rem;
 }
 
 thead {
@@ -184,7 +213,7 @@ thead {
 }
 
 th, td {
-  padding: 16px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
@@ -192,7 +221,7 @@ th, td {
 th {
   font-weight: 600;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -206,17 +235,17 @@ tbody tr:last-child td {
 }
 
 .privilege-badge {
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: white;
 }
 
 .status-badge {
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
@@ -237,13 +266,13 @@ tbody tr:last-child td {
 
 .actions-cell {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .btn-action {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
   background: var(--bg-tertiary);
@@ -253,7 +282,7 @@ tbody tr:last-child td {
   justify-content: center;
   cursor: pointer;
   transition: var(--transition);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .btn-action:hover {
@@ -285,18 +314,18 @@ tbody tr:last-child td {
   color: white;
 }
 
-/* Moderators Grid */
+/* ── Grille modérateurs ────────────────────────────────────── */
 .moderators-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 .moderator-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
+  border-radius: var(--radius-sm);
+  padding: 16px;
 }
 
 .moderator-header {
@@ -307,19 +336,19 @@ tbody tr:last-child td {
 }
 
 .moderator-header h3 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .moderator-email {
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-bottom: 20px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
 }
 
 .moderator-permissions h4 {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -328,15 +357,15 @@ tbody tr:last-child td {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .permission-badge {
   background: linear-gradient(135deg, rgba(255, 51, 102, 0.15), rgba(99, 102, 241, 0.15));
   border: 1px solid var(--primary);
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 16px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-primary);
   font-weight: 500;
 }
@@ -344,11 +373,11 @@ tbody tr:last-child td {
 .moderator-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .stat-item {
@@ -358,31 +387,32 @@ tbody tr:last-child td {
 }
 
 .stat-item span {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
 }
 
 .stat-item strong {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: var(--primary);
 }
 
 .moderator-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .btn-sm {
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  min-height: 36px;
 }
 
-/* Empty states */
+/* ── États vides ──────────────────────────────────────────── */
 .empty-message {
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 16px;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .loading-state {
@@ -392,33 +422,129 @@ tbody tr:last-child td {
   min-height: 60vh;
 }
 
-/* Responsive */
-@media (max-width: 968px) {
+/* ── 768px+ : layout grid avec sidebar verticale ──────────── */
+@media (min-width: 768px) {
+  .moderation-header {
+    padding: 16px 24px;
+  }
+
+  .moderation-header .logo {
+    font-size: 20px;
+    gap: 12px;
+  }
+
+  .moderation-header .logo-icon {
+    font-size: 24px;
+  }
+
   .moderation-main {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100dvh - 70px);
+    margin-top: 70px;
+    flex-direction: unset;
   }
 
   .moderation-sidebar {
-    display: none;
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    overflow-x: visible;
+    overflow-y: auto;
+    gap: 8px;
+    height: auto;
+  }
+
+  .sidebar-btn {
+    font-size: 1rem;
+    padding: 14px 16px;
+    white-space: normal;
+  }
+
+  .moderation-content {
+    padding: 32px 24px;
+  }
+
+  .dashboard h2 {
+    font-size: 2rem;
+    margin-bottom: 32px;
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
   }
 
-  .moderators-grid {
-    grid-template-columns: 1fr;
+  .stat-card {
+    padding: 24px;
+    border-radius: var(--radius);
+  }
+
+  .stat-icon {
+    font-size: 48px;
+  }
+
+  .stat-info h3 {
+    font-size: 2.5rem;
+  }
+
+  .stat-info p {
+    font-size: 0.95rem;
+  }
+
+  .table-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .table-header h2 {
+    font-size: 1.75rem;
   }
 
   .search-input {
-    width: 100%;
+    width: 300px;
   }
 
   table {
-    font-size: 0.9rem;
+    min-width: unset;
+    font-size: 1rem;
   }
 
   th, td {
-    padding: 12px 8px;
+    padding: 16px;
+  }
+
+  th {
+    font-size: 0.9rem;
+  }
+
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .moderators-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .moderator-card {
+    padding: 24px;
+    border-radius: var(--radius);
+  }
+}
+
+/* ── 1024px+ : sidebar 250px ──────────────────────────────── */
+@media (min-width: 1024px) {
+  .moderation-main {
+    grid-template-columns: 250px 1fr;
+  }
+
+  .moderation-content {
+    padding: 32px;
   }
 }

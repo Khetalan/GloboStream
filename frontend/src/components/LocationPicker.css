@@ -1,13 +1,20 @@
+/* ============================================================
+   LocationPicker — Mobile-First
+   Base : colonne unique, suggestions en bottom overlay
+   768px+ : grid 2fr 1fr, suggestions en dropdown absolu
+   ============================================================ */
+
 .location-picker {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
+/* ── Layout ligne ville + pays ────────────────────────────── */
 .location-row {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .location-input-wrapper {
@@ -22,13 +29,15 @@
   color: var(--text-secondary);
 }
 
+/* ── Input ville ──────────────────────────────────────────── */
 .city-input-container {
   position: relative;
 }
 
 .city-input {
   width: 100%;
-  padding: 12px 40px 12px 16px;
+  min-height: 44px;
+  padding: 10px 40px 10px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -58,27 +67,30 @@
 
 @keyframes spin {
   from { transform: translateY(-50%) rotate(0deg); }
-  to { transform: translateY(-50%) rotate(360deg); }
+  to   { transform: translateY(-50%) rotate(360deg); }
 }
 
+/* ── Suggestions ──────────────────────────────────────────── */
 .suggestions-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  top: auto;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  max-height: 300px;
+  max-height: 50dvh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
-  z-index: 100;
+  z-index: 1000;
 }
 
 .suggestion-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  min-height: 44px;
   padding: 12px 16px;
   cursor: pointer;
   transition: var(--transition);
@@ -112,9 +124,11 @@
   line-height: 1.4;
 }
 
+/* ── Select pays ──────────────────────────────────────────── */
 .country-select {
   width: 100%;
-  padding: 12px 16px;
+  min-height: 44px;
+  padding: 10px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -134,7 +148,10 @@
   border-color: var(--border-light);
 }
 
+/* ── Bouton géolocalisation ───────────────────────────────── */
 .geolocate-btn {
+  width: 100%;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,18 +169,32 @@
   cursor: not-allowed;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .location-row {
-    grid-template-columns: 1fr;
+/* ── 768px+ ───────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .location-picker {
+    gap: 16px;
   }
-  
+
+  .location-row {
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+
+  .city-input {
+    padding: 12px 40px 12px 16px;
+  }
+
   .suggestions-dropdown {
-    position: fixed;
-    left: 10px;
-    right: 10px;
-    top: auto;
-    bottom: 10px;
-    max-height: 50vh;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    top: calc(100% + 4px);
+    max-height: 300px;
+    z-index: 100;
+  }
+
+  .geolocate-btn {
+    width: auto;
   }
 }

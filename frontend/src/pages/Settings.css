@@ -1,8 +1,15 @@
+/* ============================================================
+   Settings — Mobile-First
+   Base : toggles empilés, danger items en colonne
+   768px+ : toggles en ligne, danger items en ligne
+   ============================================================ */
+
 .settings-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-primary);
 }
 
+/* ── Header ───────────────────────────────────────────────── */
 .settings-header {
   position: fixed;
   top: 0;
@@ -12,76 +19,77 @@
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .settings-header h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--text-primary);
 }
 
+/* ── Content ──────────────────────────────────────────────── */
 .settings-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 100px 20px 40px 20px;
+  padding: 80px 16px 32px;
 }
 
-/* Section */
+/* ── Section ──────────────────────────────────────────────── */
 .settings-section {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  margin-bottom: 24px;
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  margin-bottom: 16px;
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .section-icon {
-  font-size: 24px;
+  font-size: 22px;
   color: var(--primary);
 }
 
 .section-header h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--text-primary);
 }
 
-/* Section Description */
 .section-description {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
-/* Language Selector */
+/* ── Language Selector ────────────────────────────────────── */
 .language-selector {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .language-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   background: var(--bg-secondary);
   border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
+  min-height: 44px;
 }
 
 .language-btn:hover {
@@ -106,21 +114,21 @@
   font-size: 0.9rem;
 }
 
-/* Settings List */
+/* ── Settings List ────────────────────────────────────────── */
 .settings-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .setting-toggle {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px;
   background: var(--bg-secondary);
   border-radius: var(--radius);
-  gap: 20px;
+  gap: 12px;
 }
 
 .setting-info {
@@ -140,13 +148,14 @@
   line-height: 1.4;
 }
 
-/* Toggle Switch */
+/* ── Toggle Switch ────────────────────────────────────────── */
 .toggle-switch {
   position: relative;
   display: inline-block;
   width: 50px;
   height: 26px;
   flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .toggle-switch input {
@@ -186,11 +195,11 @@
   transform: translateX(24px);
 }
 
-/* Password Form */
+/* ── Password Form ────────────────────────────────────────── */
 .password-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .form-group {
@@ -218,6 +227,7 @@
   color: var(--text-primary);
   font-size: 1rem;
   transition: var(--transition);
+  min-height: 44px;
 }
 
 .password-input input:focus {
@@ -247,7 +257,7 @@
   color: var(--primary);
 }
 
-/* Danger Zone */
+/* ── Danger Zone ──────────────────────────────────────────── */
 .danger-section {
   border-color: var(--error);
 }
@@ -259,25 +269,25 @@
 .danger-actions {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .danger-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius);
-  gap: 20px;
+  gap: 12px;
 }
 
 .danger-item h3 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--error);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .danger-item p {
@@ -286,6 +296,8 @@
 }
 
 .btn-danger {
+  width: 100%;
+  min-height: 44px;
   padding: 10px 20px;
   background: var(--error);
   color: white;
@@ -296,6 +308,7 @@
   transition: var(--transition);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   white-space: nowrap;
 }
@@ -306,13 +319,13 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* Loading State */
+/* ── Loading State ────────────────────────────────────────── */
 .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 60dvh;
   gap: 16px;
 }
 
@@ -329,28 +342,73 @@
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ── 768px+ ───────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .settings-header {
+    padding: 16px 24px;
+  }
+
+  .settings-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .settings-content {
+    padding: 100px 20px 40px;
+  }
+
   .settings-section {
-    padding: 24px 16px;
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+  }
+
+  .section-header {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-icon {
+    font-size: 24px;
+  }
+
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .settings-list {
+    gap: 16px;
   }
 
   .setting-toggle {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 20px;
   }
 
   .toggle-switch {
-    align-self: flex-end;
+    align-self: auto;
+  }
+
+  .password-form {
+    gap: 20px;
+  }
+
+  .danger-actions {
+    gap: 16px;
   }
 
   .danger-item {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    gap: 20px;
   }
 
   .btn-danger {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    flex-shrink: 0;
   }
 }

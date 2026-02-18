@@ -1,5 +1,12 @@
+/* ============================================================
+   Chat — Mobile-First
+   Base : colonne unique (sidebar OU conversation)
+   768px+ : grid sidebar 280px + conversation
+   1024px+ : sidebar 380px
+   ============================================================ */
+
 .chat-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-primary);
   display: flex;
   flex-direction: column;
@@ -14,7 +21,7 @@
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,37 +30,51 @@
 .chat-header .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 20px;
+  gap: 10px;
+  font-size: 18px;
   font-weight: 700;
   font-family: var(--font-display);
 }
 
+/* ── Layout principal ─────────────────────────────────────── */
 .chat-main {
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  height: calc(100vh - 70px);
-  margin-top: 70px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 60px);
+  margin-top: 60px;
 }
 
-/* Sidebar */
+/* ── Sidebar ─────────────────────────────────────────────── */
 .chat-sidebar {
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Masquage mobile géré par le JS via hidden-mobile */
+.chat-sidebar.hidden-mobile {
+  display: none;
+}
+
+.chat-messages.hidden-mobile {
+  display: none;
 }
 
 .sidebar-header {
-  padding: 20px;
+  padding: 16px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .sidebar-header h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 .conversations-list {
@@ -67,7 +88,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 40px;
+  padding: 32px 20px;
   text-align: center;
   color: var(--text-secondary);
 }
@@ -75,16 +96,17 @@
 .empty-conversations svg {
   color: var(--text-tertiary);
   opacity: 0.3;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .conversation-item {
   display: flex;
   gap: 12px;
-  padding: 16px 20px;
+  padding: 14px 16px;
   cursor: pointer;
   border-bottom: 1px solid var(--border);
   transition: var(--transition);
+  min-height: 44px;
 }
 
 .conversation-item:hover {
@@ -98,8 +120,8 @@
 
 .conv-avatar {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -120,15 +142,15 @@
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
 }
 
 .online-indicator {
   position: absolute;
   bottom: 2px;
   right: 2px;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   background: var(--success);
   border: 2px solid var(--bg-secondary);
   border-radius: 50%;
@@ -147,7 +169,7 @@
 }
 
 .conv-header-row h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -155,7 +177,7 @@
 }
 
 .conv-time {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-tertiary);
   flex-shrink: 0;
 }
@@ -168,7 +190,7 @@
 
 .conv-last-message p {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -180,41 +202,46 @@
   color: white;
   padding: 2px 8px;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   flex-shrink: 0;
   margin-left: 8px;
 }
 
-/* Messages Area */
+/* ── Zone messages ─────────────────────────────────────────── */
 .chat-messages {
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
+  height: 100%;
+  overflow: hidden;
 }
 
 .messages-header {
-  padding: 16px 24px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .header-user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
+  min-width: 0;
 }
 
 .user-avatar-small {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .user-avatar-small img {
@@ -235,38 +262,55 @@
 }
 
 .header-user-info h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .typing-indicator {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--primary);
   font-style: italic;
 }
 
 .header-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-/* Messages */
+.header-actions .btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-actions .btn span {
+  display: none;
+}
+
+/* ── Messages ─────────────────────────────────────────────── */
 .messages-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px;
 }
 
 .messages-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .message {
   display: flex;
   gap: 8px;
-  max-width: 70%;
+  max-width: 85%;
 }
 
 .message.own {
@@ -279,8 +323,8 @@
 }
 
 .message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -301,12 +345,12 @@
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .message-bubble {
   background: var(--bg-card);
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 18px;
   border: 1px solid var(--border);
 }
@@ -321,6 +365,7 @@
   margin: 0;
   word-wrap: break-word;
   line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 .message-time {
@@ -334,25 +379,28 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* Input */
+/* ── Input ─────────────────────────────────────────────────── */
 .messages-input {
-  padding: 16px 24px;
+  padding: 12px 16px;
   border-top: 1px solid var(--border);
   background: var(--bg-card);
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
+  flex-shrink: 0;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
 
 .messages-input input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 24px;
   color: var(--text-primary);
   font-size: 1rem;
   transition: var(--transition);
+  min-height: 44px;
 }
 
 .messages-input input:focus {
@@ -368,6 +416,7 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .no-conversation-selected {
@@ -378,57 +427,23 @@
   height: 100%;
   color: var(--text-secondary);
   text-align: center;
-  padding: 40px;
+  padding: 32px 20px;
 }
 
 .no-conversation-selected svg {
   color: var(--text-tertiary);
   opacity: 0.3;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .no-conversation-selected h2 {
   margin-bottom: 8px;
+  font-size: 1.25rem;
 }
 
-/* Mobile */
+/* Bouton retour mobile (généré par le JS) */
 .mobile-only {
-  display: none;
-}
-
-@media (max-width: 968px) {
-  .chat-main {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-sidebar.hidden-mobile {
-    display: none;
-  }
-
-  .chat-messages.hidden-mobile {
-    display: none;
-  }
-
-  .mobile-only {
-    display: flex;
-  }
-
-  .message {
-    max-width: 85%;
-  }
-
-  .header-actions .btn {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .header-actions .btn span {
-    display: none;
-  }
+  display: flex;
 }
 
 .loading-state {
@@ -436,4 +451,105 @@
   justify-content: center;
   align-items: center;
   min-height: 60vh;
+}
+
+/* ── 768px+ : layout grid sidebar + conversation ──────────── */
+@media (min-width: 768px) {
+  .chat-header {
+    padding: 16px 24px;
+  }
+
+  .chat-header .logo {
+    font-size: 20px;
+    gap: 12px;
+  }
+
+  .chat-main {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: calc(100dvh - 70px);
+    margin-top: 70px;
+    flex-direction: unset;
+  }
+
+  .chat-sidebar {
+    height: auto;
+    overflow: hidden;
+  }
+
+  /* Sur desktop, toujours visibles (le JS n'applique pas hidden-mobile) */
+  .chat-sidebar.hidden-mobile {
+    display: flex;
+  }
+
+  .chat-messages.hidden-mobile {
+    display: flex;
+  }
+
+  .sidebar-header {
+    padding: 20px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .conversation-item {
+    padding: 16px 20px;
+  }
+
+  .conv-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .conv-header-row h3 {
+    font-size: 1rem;
+  }
+
+  .conv-last-message p {
+    font-size: 0.9rem;
+  }
+
+  .messages-header {
+    padding: 16px 24px;
+  }
+
+  .header-user-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .header-actions .btn {
+    width: auto;
+    height: auto;
+    padding: 8px 16px;
+  }
+
+  .header-actions .btn span {
+    display: inline;
+  }
+
+  .messages-content {
+    padding: 20px;
+  }
+
+  .message {
+    max-width: 70%;
+  }
+
+  .messages-input {
+    padding: 16px 24px;
+    padding-bottom: 16px;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* ── 1024px+ : sidebar 380px ──────────────────────────────── */
+@media (min-width: 1024px) {
+  .chat-main {
+    grid-template-columns: 380px 1fr;
+  }
 }

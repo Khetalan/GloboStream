@@ -1,10 +1,169 @@
+/* ============================================================
+   Navigation — Mobile-First
+   Mobile  : Hamburger button → panel slide depuis la droite
+   Desktop : Avatar+nom → dropdown classique (768px+)
+   ============================================================ */
+
 .navigation-container {
   position: relative;
   display: inline-block;
 }
 
-.nav-toggle {
+/* ── Avatar placeholder (partagé) ─────────────────────── */
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE : Bouton hamburger (avatar + icône ≡/X)
+   Visible par défaut, caché à 768px+
+   ══════════════════════════════════════════════════════════ */
+.hamburger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-primary);
+  min-height: 44px;
+  transition: var(--transition);
+}
+
+.hamburger-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary);
+}
+
+.hamburger-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hamburger-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hamburger-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Overlay backdrop (mobile) ─────────────────────────── */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 998;
+  animation: navFadeIn 0.2s ease;
+}
+
+@keyframes navFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Panneau navigation (mobile : slide depuis droite) ─── */
+.nav-panel {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: min(300px, 85vw);
+  height: 100dvh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  z-index: 999;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.nav-panel.open {
+  right: 0;
+}
+
+/* ── Bouton fermer (visible seulement sur mobile) ───────── */
+.nav-panel-close {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 16px 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 22px;
+  cursor: pointer;
+  min-height: auto;
+  align-self: flex-end;
+  transition: var(--transition);
+}
+
+.nav-panel-close:hover {
+  color: var(--primary);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESKTOP (768px+) : Dropdown classique, hamburger caché
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .hamburger-btn { display: none; }
+  .nav-overlay   { display: none !important; }
+
+  /* Rétablir le bouton desktop */
+  .nav-toggle { display: flex; }
+
+  /* Panneau = dropdown positionné en absolu */
+  .nav-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 280px;
+    height: auto;
+    max-height: 80vh;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    overflow-y: auto;
+  }
+
+  .nav-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    right: 0;
+  }
+
+  /* Cacher le bouton fermer sur desktop */
+  .nav-panel-close { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   Bouton toggle desktop (avatar + nom + chevron)
+   Caché par défaut, visible à 768px+
+   ══════════════════════════════════════════════════════════ */
+.nav-toggle {
+  display: none;
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
@@ -15,6 +174,7 @@
   transition: var(--transition);
   color: var(--text-primary);
   font-weight: 500;
+  min-height: 44px;
 }
 
 .nav-toggle:hover {
@@ -36,56 +196,18 @@
   object-fit: cover;
 }
 
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: white;
-}
-
-.nav-toggle-name {
-  font-size: 0.95rem;
-}
+.nav-toggle-name { font-size: 0.95rem; }
 
 .nav-toggle-icon {
   font-size: 18px;
   transition: var(--transition);
 }
 
-.nav-toggle-icon.open {
-  transform: rotate(180deg);
-}
+.nav-toggle-icon.open { transform: rotate(180deg); }
 
-/* Dropdown */
-.nav-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 280px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: 1000;
-  overflow: hidden;
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* ══════════════════════════════════════════════════════════
+   Contenu du panneau (commun mobile + desktop)
+   ══════════════════════════════════════════════════════════ */
 
 .nav-dropdown-header {
   padding: 20px;
@@ -110,10 +232,7 @@
   object-fit: cover;
 }
 
-.nav-dropdown-info {
-  flex: 1;
-  min-width: 0;
-}
+.nav-dropdown-info { flex: 1; min-width: 0; }
 
 .nav-dropdown-info h4 {
   font-size: 1rem;
@@ -126,27 +245,22 @@
 }
 
 .nav-dropdown-info p {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.nav-dropdown-divider {
-  height: 1px;
-  background: var(--border);
-}
+.nav-dropdown-divider { height: 1px; background: var(--border); }
 
-.nav-dropdown-menu {
-  padding: 8px 0;
-}
+.nav-dropdown-menu { padding: 8px 0; }
 
 .nav-dropdown-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
+  padding: 14px 20px;
   color: var(--text-primary);
   text-decoration: none;
   transition: var(--transition);
@@ -156,48 +270,36 @@
   width: 100%;
   text-align: left;
   font-size: 0.95rem;
+  min-height: 44px;
 }
 
-.nav-dropdown-item:hover {
-  background: var(--bg-secondary);
-}
+.nav-dropdown-item:hover { background: var(--bg-secondary); }
 
 .nav-item-icon {
   font-size: 18px;
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
-.nav-dropdown-item:hover .nav-item-icon {
-  color: var(--primary);
-}
+.nav-dropdown-item:hover .nav-item-icon { color: var(--primary); }
 
-.logout-item {
-  color: var(--error);
-}
+.logout-item { color: var(--error); }
+.logout-item:hover { background: rgba(239, 68, 68, 0.1); }
+.logout-item .nav-item-icon { color: var(--error); }
 
-.logout-item:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.logout-item .nav-item-icon {
-  color: var(--error);
-}
-
-/* Badge Modérateur */
 .moderator-badge {
   display: inline-block;
   margin-top: 6px;
-  padding: 4px 10px;
+  padding: 3px 8px;
   background: linear-gradient(135deg, var(--warning), var(--error));
-  border-radius: 12px;
-  font-size: 0.7rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
   font-weight: 700;
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* Item Modération avec style spécial */
 .nav-dropdown-item.moderation-item {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(239, 68, 68, 0.1));
   border-left: 3px solid var(--warning);
@@ -208,33 +310,4 @@
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(239, 68, 68, 0.2));
 }
 
-.nav-dropdown-item.moderation-item .nav-item-icon {
-  color: var(--warning);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .nav-dropdown {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    animation: slideUp 0.3s ease-out;
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  .nav-toggle-name {
-    display: none;
-  }
-}
+.nav-dropdown-item.moderation-item .nav-item-icon { color: var(--warning); }
