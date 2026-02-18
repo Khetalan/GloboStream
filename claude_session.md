@@ -951,4 +951,79 @@ backend/tests/live.test.js           (nouveau, 16 tests)
 
 ---
 
+## Session 12 : Refonte CSS Mobile-First complète (Phases 1-4)
+**Date** : 13 Février 2026
+**Branche** : `claude-work`
+**Commit** : `3ca1297`
+**Status** : Refonte CSS terminée ✅
+
+### Objectif
+Convertir tous les fichiers CSS de **desktop-first** (`@media (max-width: ...)`) vers **mobile-first** (`@media (min-width: ...)`) pour une expérience optimale sur 375px+.
+
+### Plan en 4 phases
+
+#### Phase 1 — Foundation (index.css + Navigation) ✅
+- **index.css** : Commentaire breakpoints de référence, utilitaires mobile-first
+- **Navigation.js** : Ajout état `isMobileMenuOpen`, hamburger button (`FiMenu`/`FiX`), overlay
+- **Navigation.css** : `.hamburger-btn` (44px touch target), `.nav-panel` (slide-in depuis droite), `.nav-overlay` → à 768px+ : dropdown classique
+
+#### Phase 2 — Pages critiques ✅
+- **Auth.css** : Form 100% largeur base → max-width 480px à 480px+
+- **Chat.css** : Sidebar cachée mobile, conversation plein écran → grid 280px/380px à 768px+/1024px+
+- **ModerationPanel.css** : Colonne unique → sidebar 220px/250px à 768px+/1024px+
+- **Swipe.css** : Carte 100% → max-width 450px/500px à 480px+/1024px+
+
+#### Phase 3 — Pages standard (10 fichiers) ✅
+| Fichier | Changements clés |
+|---------|-----------------|
+| Home.css | Grid 1fr → auto-fit minmax(280px) à 768px+, h1 2rem → 3rem |
+| Matches.css | Grid 160px base → 280px à 768px+, tabs `top: 60px` → `top: 70px` |
+| Profile.css | form-row 1fr → 1fr 1fr, photos 130px → 180px, info-grid 1fr → auto-fit |
+| Settings.css | setting-toggle colonne → ligne, danger-item colonne → ligne, btn 100% → auto |
+| Support.css | Cards 1fr → auto-fit 250px, padding 20px → 32px |
+| PublicProfile.css | Photo 280px → 400px, actions fixed bottom colonne → ligne, env(safe-area) |
+| Landing.css | Hero 1 col → 2 col 1024px+, hero-title 2.5rem → 3.5rem → 4.5rem |
+| StreamHub.css | Sections 1fr → auto-fit 340px, info-banner colonne → ligne |
+| LivePublic.css | Tab labels masqués (base) → visibles 768px+, grid 1fr → minmax(240px) |
+| LiveSurprise.css | Local-video 120×90 → 200×150, decision-buttons colonne → ligne, modal bottom-sheet → centré |
+
+#### Phase 4 — Composants (5 fichiers) ✅
+| Fichier | Changements clés |
+|---------|-----------------|
+| MessageRequestsPanel.css | Cards flex-col → flex-row à 768px+, btn 100% → auto |
+| FiltersPanel.css | Plein écran mobile (max-width: 100%), 480px à 768px+ |
+| MessageModal.css | Bottom-sheet mobile (align-items: flex-end) → centré à 768px+ |
+| LocationPicker.css | Suggestions fixed bottom mobile → absolute top à 768px+ |
+| LanguageSwitcher.css | min-height: 44px sur boutons |
+
+### Règles appliquées systématiquement
+- `100vh` → `100dvh` (dynamic viewport height, iOS Safari)
+- `min-height: 44px` sur **tous** les éléments interactifs
+- Padding horizontal : 16px (base) → 20-24px (768px+)
+- Grilles : `1fr` (base) → `auto-fit/auto-fill` (768px+)
+- `env(safe-area-inset-bottom)` sur modales et barres d'action fixes
+- Modales : bottom-sheet (base) → centrées (768px+)
+- Headers : `top: 60px` (base, hauteur réduite) → `top: 70px` (768px+)
+
+### Statistiques commit
+- **22 fichiers modifiés** (20 CSS + 1 JS + 1 CSS composant)
+- **+3008 lignes insérées, -1451 lignes supprimées**
+- Commit : `3ca1297` sur branche `claude-work`
+
+### Bug Apple OAuth (non corrigé, à faire)
+```javascript
+// backend/config/passport.js ligne 143
+// ❌ BUG : Ne vérifie PAS si email existe avant création
+// Cause : Erreur duplicate key si email déjà utilisé avec autre OAuth
+// FIX : Ajouter user = await User.findOne({ email: profile.email })
+//       avant la création (comme Google strategy lignes 41-49)
+```
+
+### Prochaines actions
+- 📋 **Corriger bug Apple OAuth** (passport.js ligne 143)
+- 📋 Merger `claude-work` → `main` après validation visuelle
+- 📋 Redéployer GitHub Pages avec refonte mobile-first
+
+---
+
 > **Rappel** : Ce fichier DOIT être mis à jour à la fin de chaque session Claude Code.
