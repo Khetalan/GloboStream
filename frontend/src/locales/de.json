@@ -380,7 +380,19 @@
     "loadError": "Fehler beim Laden der Lives",
     "removedFavorite": "Aus Favoriten entfernt",
     "addedFavorite": "Zu Favoriten hinzugefügt",
-    "favoriteError": "Fehler"
+    "favoriteError": "Fehler",
+    "startYourLive": "Starte deinen Live",
+    "startYourLiveDesc": "Sende live für alle Benutzer",
+    "startBtn": "Starten"
+  },
+  "liveStream": {
+    "welcomeMessage": "Willkommen im Livestream! Bitte befolge die Community-Regeln.",
+    "viewers": "Zuschauer",
+    "gifts": "Geschenke",
+    "totalViewers": "Zuschauer gesamt",
+    "totalGifts": "Geschenke gesamt",
+    "chatPlaceholder": "Nachricht schreiben...",
+    "startLive": "Starten"
   },
   "liveSurprise": {
     "quit": "Verlassen",

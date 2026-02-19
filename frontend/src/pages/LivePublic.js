@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { 
-  FiArrowLeft, FiSearch, FiTrendingUp, FiMapPin, FiClock, 
-  FiHeart, FiEye, FiPlay, FiX
+import {
+  FiArrowLeft, FiSearch, FiTrendingUp, FiMapPin, FiClock,
+  FiHeart, FiEye, FiPlay, FiX, FiGlobe
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
+import LiveStream from '../components/LiveStream';
 import { useAuth } from '../contexts/AuthContext';
 import './LivePublic.css';
 
@@ -15,6 +16,9 @@ const LivePublic = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
+
+  // État : navigation entre liste et interface live
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const [activeTab, setActiveTab] = useState('trending');
   const [liveStreams, setLiveStreams] = useState([]);
@@ -105,17 +109,28 @@ const LivePublic = () => {
     }
   };
 
+  // Si l'utilisateur est en streaming, afficher l'interface de live
+  if (isStreaming) {
+    return (
+      <LiveStream
+        mode="public"
+        onQuit={() => setIsStreaming(false)}
+        streamerName={user?.displayName || user?.firstName || 'Streamer'}
+      />
+    );
+  }
+
   return (
     <div className="live-public-container">
       <div className="live-public-header">
         <button className="btn btn-ghost" onClick={() => navigate('/stream')}>
           <FiArrowLeft />
         </button>
-        
+
         <h1>{t('livePublic.title')}</h1>
-        
+
         <div className="header-actions">
-          <button 
+          <button
             className="btn btn-ghost"
             onClick={() => setShowSearch(!showSearch)}
           >
@@ -123,6 +138,21 @@ const LivePublic = () => {
           </button>
           <Navigation />
         </div>
+      </div>
+
+      {/* Bouton Démarrer un live */}
+      <div className="start-live-banner">
+        <div className="start-live-info">
+          <FiGlobe size={20} />
+          <div>
+            <strong>{t('livePublic.startYourLive')}</strong>
+            <span>{t('livePublic.startYourLiveDesc')}</span>
+          </div>
+        </div>
+        <button className="start-live-btn" onClick={() => setIsStreaming(true)}>
+          <FiPlay />
+          <span>{t('livePublic.startBtn')}</span>
+        </button>
       </div>
 
       {showSearch && (
@@ -136,7 +166,7 @@ const LivePublic = () => {
             autoFocus
           />
           {searchQuery && (
-            <button 
+            <button
               className="clear-search"
               onClick={() => setSearchQuery('')}
             >

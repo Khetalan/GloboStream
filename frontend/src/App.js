@@ -24,6 +24,8 @@ import Settings from './pages/Settings';
 import StreamHub from './pages/StreamHub';
 import LiveSurprise from './pages/LiveSurprise';
 import LivePublic from './pages/LivePublic';
+import LiveCompetition from './pages/LiveCompetition';
+import LiveEvent from './pages/LiveEvent';
 
 // Route protégée
 const PrivateRoute = ({ children }) => {
@@ -149,33 +151,13 @@ function App() {
 
           <Route path="/stream/competition" element={
             <PrivateRoute>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                minHeight: '100vh',
-                flexDirection: 'column',
-                gap: '20px'
-              }}>
-                <h1>{t('app.competition')}</h1>
-                <p>{t('app.comingSoon')}</p>
-              </div>
+              <LiveCompetition />
             </PrivateRoute>
           } />
 
           <Route path="/stream/event" element={
             <PrivateRoute>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                minHeight: '100vh',
-                flexDirection: 'column',
-                gap: '20px'
-              }}>
-                <h1>{t('app.event')}</h1>
-                <p>{t('app.comingSoon')}</p>
-              </div>
+              <LiveEvent />
             </PrivateRoute>
           } />
 

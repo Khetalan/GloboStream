@@ -1026,4 +1026,194 @@ Convertir tous les fichiers CSS de **desktop-first** (`@media (max-width: ...)`)
 
 ---
 
+## Session 13 : Interface Live Surprise — Bouton Démarrer + Layout appel vidéo
+**Date** : 18 Février 2026
+**Branche** : `claude-work`
+**Status** : En cours
+
+### Objectif
+Créer une interface simple d'appel vidéo pour le Live Surprise :
+- Bouton "Démarrer" bien visible pour lancer la fonction
+- Layout vidéo simple : Streamer (PiP haut-droite) + Participant (plein écran)
+- Pas de zone de chat — comme un appel vidéo simple
+
+### Ce qui a été fait
+
+#### 1. Refonte complète de LiveSurprise.js — 3 écrans distincts
+**Fichier** : `frontend/src/pages/LiveSurprise.js`
+
+**Écran 1 — Accueil (`start-screen`)** :
+- Icône vidéo dans un cercle gradient (primary → secondary)
+- Titre + description (i18n)
+- **Bouton "Démarrer"** (`start-btn`) avec icône FiPlay, design arrondi (border-radius: 60px), gradient, glow lumineux
+- Indication de la durée de session (ex: "3 min par session")
+
+**Écran 2 — Recherche (`searching-screen`)** :
+- Animation de recherche (spinner FiRefreshCw dans cercle pulsant)
+- Texte "Recherche en cours..."
+- PiP de la vidéo locale en haut à droite pendant la recherche
+
+**Écran 3 — Appel vidéo (`videocall-layout`)** :
+- **Participant aléatoire** : vidéo plein écran (`participant-video-container`, `inset: 0`)
+- **Streamer** : petit cadre PiP en haut à droite (`streamer-video-container`, 120×90px mobile, 200×150px desktop)
+- Timer centré en haut
+- Barre de contrôles en bas (micro, caméra, skip)
+- Panel de décision (like/dislike/skip) quand le timer se termine
+- **Aucune zone de chat** — interface d'appel vidéo pure
+
+**Ajout** : Import de `FiPlay` depuis `react-icons/fi`
+
+#### 2. Refonte complète de LiveSurprise.css
+**Fichier** : `frontend/src/pages/LiveSurprise.css`
+
+**Nouveaux styles créés** :
+- `.start-screen` / `.start-screen-content` — écran d'accueil centré avec fond radial gradient
+- `.start-icon-wrapper` — cercle gradient 100px avec box-shadow glow
+- `.start-btn` — bouton Démarrer : gradient, border-radius 60px, glow animé, hover scale(1.05)
+- `.start-timer-hint` — indication durée de session
+- `.searching-screen` — écran de recherche avec fond radial
+- `.videocall-layout` — layout d'appel vidéo (absolute, inset 0)
+- `.participant-video-container` / `.participant-video` — vidéo participant plein écran
+- `.participant-loading` — état de chargement connexion WebRTC
+- `.streamer-video-container` / `.streamer-video` — PiP streamer (120×90 → 200×150 à 768px+)
+
+**Classes supprimées** (remplacées) :
+- `.remote-video-container` / `.remote-video` → remplacé par `.participant-video-container`
+- `.local-video-container` (contexte appel) → remplacé par `.streamer-video-container`
+- `.waiting-state` / `.searching-state` → remplacé par `.start-screen` et `.searching-screen`
+
+### Fichiers modifiés (Session 13)
+```
+frontend/src/pages/LiveSurprise.js   — refonte complète du JSX (3 écrans)
+frontend/src/pages/LiveSurprise.css  — refonte complète des styles
+```
+
+### Prochaines étapes (Partie 1)
+- ✅ ~~Interface Live Public~~ **FAIT** (Partie 2)
+- ✅ ~~Interface Live Compétition~~ **FAIT** (Partie 2)
+- ✅ ~~Interface Live Événementiel~~ **FAIT** (Partie 2)
+- 📋 **Corriger bug Apple OAuth** (passport.js ligne 143)
+- 📋 Merger `claude-work` → `main` après validation visuelle
+- 📋 Redéployer GitHub Pages
+
+---
+
+## Session 13 (suite) : Intégration interface de live — Public, Compétition, Événementiel
+**Date** : 18 Février 2026
+**Branche** : `claude-work`
+**Status** : Terminé ✅
+
+### Objectif
+Intégrer le prototype d'interface de live (dossier `interface de live/`) dans les 3 pages de live :
+- Live Public (`/stream/live`)
+- Live Compétition (`/stream/competition`)
+- Live Événementiel (`/stream/event`)
+
+Chaque page doit avoir un bouton "Démarrer" avant d'accéder à l'interface de streaming.
+Le Live Surprise garde son interface différente (appel vidéo simple, Partie 1).
+
+### Ce qui a été fait
+
+#### 1. Composant LiveStream réutilisable (NOUVEAU)
+**Fichiers** : `frontend/src/components/LiveStream.js` + `LiveStream.css`
+
+Conversion du prototype HTML/CSS/JS en composant React réutilisable :
+- **Props** : `mode` ('public'|'competition'|'event'), `onQuit`, `streamerName`
+- **Grille vidéo dynamique** : 9 layouts CSS (1→9 participants)
+- **Stats panel** : overlay avec onglets Viewers/Gifts (slide-down depuis le haut)
+- **Chat section** : auto-scroll, messages démo simulés (5 langues), envoi message
+- **Barre de contrôles** : micro, caméra, cadeaux, quitter + input chat
+- **Modes couleurs** : competition=#F59E0B, event=#22C55E (via `.ls-mode-*`)
+- **Préfixe CSS** : toutes les classes en `ls-` pour éviter les conflits
+
+#### 2. LivePublic — Ajout bannière Démarrer + LiveStream
+**Fichiers modifiés** : `frontend/src/pages/LivePublic.js` + `LivePublic.css`
+
+- Import de `LiveStream` et `FiGlobe`
+- État `isStreaming` : si true → affiche `<LiveStream mode="public" />`
+- Bannière "Démarrer un live" entre le header et les tabs
+- Bouton avec gradient violet et icône FiPlay
+- Styles `.start-live-banner`, `.start-live-btn`
+
+#### 3. LiveCompetition — Page complète (NOUVEAU)
+**Fichiers créés** : `frontend/src/pages/LiveCompetition.js` + `LiveCompetition.css`
+
+- Écran d'accueil : icône trophée (gradient orange/rouge), titre, description, 3 features
+- Bouton "Démarrer" (gradient #F59E0B → #EF4444, border-radius 60px, glow)
+- Si `isStreaming` → affiche `<LiveStream mode="competition" />`
+- Header avec navigation et bouton retour vers StreamHub
+
+#### 4. LiveEvent — Page complète (NOUVEAU)
+**Fichiers créés** : `frontend/src/pages/LiveEvent.js` + `LiveEvent.css`
+
+- Écran d'accueil : icône calendrier (gradient vert #22C55E → #10B981), titre, description, 3 features
+- Bouton "Démarrer" (gradient vert, border-radius 60px, glow)
+- Si `isStreaming` → affiche `<LiveStream mode="event" />`
+- Header avec navigation et bouton retour vers StreamHub
+
+#### 5. App.js — Routes mises à jour
+**Fichier modifié** : `frontend/src/App.js`
+
+- Import de `LiveCompetition` et `LiveEvent`
+- Route `/stream/competition` : `<LiveCompetition />` (remplace placeholder "Coming Soon")
+- Route `/stream/event` : `<LiveEvent />` (remplace placeholder "Coming Soon")
+
+### Fichiers créés (Session 13 suite)
+```
+frontend/src/components/LiveStream.js    (nouveau — composant réutilisable)
+frontend/src/components/LiveStream.css   (nouveau — 9 layouts, stats, chat, contrôles)
+frontend/src/pages/LiveCompetition.js    (nouveau — écran accueil + LiveStream)
+frontend/src/pages/LiveCompetition.css   (nouveau — thème orange/rouge)
+frontend/src/pages/LiveEvent.js          (nouveau — écran accueil + LiveStream)
+frontend/src/pages/LiveEvent.css         (nouveau — thème vert)
+```
+
+### Fichiers modifiés (Session 13 suite)
+```
+frontend/src/pages/LivePublic.js         (ajout bannière Démarrer + LiveStream)
+frontend/src/pages/LivePublic.css        (ajout styles bannière)
+frontend/src/App.js                      (import LiveCompetition/LiveEvent, remplacement routes)
+```
+
+### Clés i18n utilisées (à vérifier/ajouter dans les 5 locales)
+```
+liveStream.welcomeMessage, liveStream.viewers, liveStream.gifts
+liveStream.totalViewers, liveStream.totalGifts, liveStream.chatPlaceholder
+liveStream.startLive
+livePublic.startYourLive, livePublic.startYourLiveDesc, livePublic.startBtn
+streamHub.competitionTitle, streamHub.competitionDesc
+streamHub.competitionFeature1/2/3
+streamHub.eventTitle, streamHub.eventDesc
+streamHub.eventFeature1/2/3
+```
+
+---
+
+## État Actuel du Projet
+
+### Compteurs
+| Métrique | Valeur |
+|---|---|
+| Fonctionnalités codées | 90+ |
+| API backend testées | ~66/90 (~73%) |
+| **Tests automatisés Jest** | ✅ **210 tests (100% passent)** |
+| Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
+| Pages frontend testées (visuel) | 15/15 ✅ (nouvelles pages à tester) |
+| Responsive testé | 3 tailles ✅ (CSS mobile-first) |
+| WebSocket testé | Connexion OK ✅ |
+| i18n intégré | 22/22 fichiers ✅ (5 langues) |
+| Interface de live | ✅ LiveStream réutilisable (Public, Compétition, Événementiel) |
+| Bugs corrigés | 11 (9 backend + 1 visuel + 1 CSS i18n) |
+| ESLint warnings corrigés | 36 → 0 |
+| **Workflow Git** | ✅ **Normalisé** (main + claude-work uniquement) |
+
+### Prochaines Étapes
+1. 📋 **Ajouter les clés i18n manquantes** dans les 5 fichiers locales (liveStream.*, livePublic.start*, streamHub.competition*, streamHub.event*)
+2. 📋 **Corriger bug Apple OAuth** (passport.js ligne 143)
+3. 📋 **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent, LivePublic avec bannière)
+4. 📋 **Commit + merge** `claude-work` → `main`
+5. 📋 **Redéployer GitHub Pages**
+
+---
+
 > **Rappel** : Ce fichier DOIT être mis à jour à la fin de chaque session Claude Code.

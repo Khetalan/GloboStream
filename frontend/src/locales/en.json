@@ -380,7 +380,19 @@
     "loadError": "Error loading live streams",
     "removedFavorite": "Removed from favorites",
     "addedFavorite": "Added to favorites",
-    "favoriteError": "Error"
+    "favoriteError": "Error",
+    "startYourLive": "Start Your Live",
+    "startYourLiveDesc": "Broadcast live for all users",
+    "startBtn": "Start"
+  },
+  "liveStream": {
+    "welcomeMessage": "Welcome to the live! Please follow community guidelines.",
+    "viewers": "Viewers",
+    "gifts": "Gifts",
+    "totalViewers": "Total viewers",
+    "totalGifts": "Total gifts",
+    "chatPlaceholder": "Write a message...",
+    "startLive": "Start"
   },
   "liveSurprise": {
     "quit": "Quit",

@@ -123,8 +123,10 @@ GloboStream/
 │   │   │   ├── FiltersPanel.js
 │   │   │   ├── MessageModal.js
 │   │   │   ├── MessageRequestsPanel.js
-│   │   │   └── LanguageSwitcher.js  # Dropdown langues (🌐 FR)
-│   │   ├── pages/              # 15 pages principales
+│   │   │   ├── LanguageSwitcher.js  # Dropdown langues (🌐 FR)
+│   │   │   ├── LiveStream.js      # Interface live réutilisable (grille vidéo, chat, stats)
+│   │   │   └── LiveStream.css     # Styles LiveStream (9 layouts, stats panel, chat)
+│   │   ├── pages/              # 17+ pages principales
 │   │   │   ├── Landing.js     # Page d'accueil publique
 │   │   │   ├── Login.js       # Connexion
 │   │   │   ├── Register.js    # Inscription
@@ -138,8 +140,10 @@ GloboStream/
 │   │   │   ├── Support.js     # Support & aide
 │   │   │   ├── ModerationPanel.js # Panel modération
 │   │   │   ├── StreamHub.js   # Hub streaming
-│   │   │   ├── LiveSurprise.js # Live Surprise (speed dating)
-│   │   │   └── LivePublic.js  # Lives publics
+│   │   │   ├── LiveSurprise.js # Live Surprise (speed dating — interface appel vidéo)
+│   │   │   ├── LivePublic.js  # Lives publics (bannière Démarrer + LiveStream)
+│   │   │   ├── LiveCompetition.js # Live Compétition (écran accueil + LiveStream)
+│   │   │   └── LiveEvent.js   # Live Événementiel (écran accueil + LiveStream)
 │   │   ├── contexts/           # Contextes React
 │   │   │   └── AuthContext.js # Gestion authentification globale
 │   │   ├── locales/            # Traductions i18n (5 langues)
@@ -405,22 +409,24 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Compteurs
 | Métrique | Valeur |
 |---|---|
-| Fonctionnalités codées | 90 |
-| API backend testées | 48/90 (53%) |
+| Fonctionnalités codées | 90+ |
+| Tests automatisés Jest | 210 tests (100% passent) |
+| API backend testées | ~66/90 (~73%) |
+| Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
 | Pages frontend testées | 15/15 ✅ |
-| Responsive testé | 3 tailles ✅ |
+| Responsive testé | 3 tailles ✅ (CSS mobile-first) |
 | i18n intégré | 22/22 fichiers ✅ (5 langues) |
+| Interface de live | LiveStream réutilisable (Public, Compétition, Événementiel) |
 | Bugs corrigés | 11 |
-| Tests automatisés | En cours (Jest configuré) |
 
 ### Phase actuelle
 **MVP en progression** — Tests en cours, aucune fonctionnalité n'est considérée comme terminée tant qu'elle n'a pas été testée en conditions réelles.
 
 ### Prochaines étapes prioritaires
-1. **Tester uploads photos** (multipart/form-data)
-2. **Configurer tests automatisés Jest** (backend + frontend)
-3. **Tester OAuth** (nécessite credentials Google/Facebook/Apple)
-4. **Tests de charge** (Socket.IO + WebRTC avec plusieurs utilisateurs)
+1. **Ajouter les clés i18n manquantes** (liveStream.*, streamHub.competition*, streamHub.event*)
+2. **Corriger bug Apple OAuth** (passport.js ligne 143)
+3. **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent)
+4. **Commit + merge + redéploiement GitHub Pages**
 
 ---
 
@@ -476,6 +482,6 @@ APPLE_CLIENT_SECRET=...
 
 ---
 
-**Version** : 1.0
-**Dernière mise à jour** : 13 Février 2026
-**Statut** : ✅ Workflow Git normalisé — Main et claude-work synchronisés
+**Version** : 1.1
+**Dernière mise à jour** : 18 Février 2026
+**Statut** : ✅ Interface de live intégrée — LiveStream réutilisable (Public, Compétition, Événementiel)

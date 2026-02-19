@@ -5,10 +5,10 @@ import Peer from 'simple-peer';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { 
-  FiArrowLeft, FiHeart, FiX, FiSkipForward, FiClock, 
+import {
+  FiArrowLeft, FiHeart, FiX, FiSkipForward, FiClock,
   FiSettings, FiVideo, FiVideoOff, FiMic, FiMicOff,
-  FiRefreshCw
+  FiRefreshCw, FiPlay
 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import './LiveSurprise.css';
@@ -287,38 +287,97 @@ const LiveSurprise = () => {
 
   return (
     <div className="live-surprise-container">
+      {/* Header */}
       <div className="live-surprise-header">
         <button className="btn btn-ghost" onClick={stopAndExit}>
           <FiArrowLeft />
           {t('liveSurprise.quit')}
         </button>
-        
+
         <div className="header-center">
           <FiVideo className="header-icon" />
           <span>{t('liveSurprise.title')}</span>
         </div>
-        
-        <button 
+
+        <button
           className="btn btn-ghost"
           onClick={() => setShowSettings(true)}
         >
           <FiSettings />
         </button>
-
       </div>
 
       <div className="live-surprise-main">
-        {/* Vidéo du partenaire (grande) */}
-        <div className="remote-video-container">
-          {isConnected && remoteStream ? (
-            <>
+
+        {/* ── ÉCRAN D'ACCUEIL : bouton Démarrer ──────────────── */}
+        {!isSearching && !isConnected && (
+          <div className="start-screen">
+            <div className="start-screen-content">
+              <div className="start-icon-wrapper">
+                <FiVideo size={48} />
+              </div>
+              <h2>{t('liveSurprise.introTitle')}</h2>
+              <p>{t('liveSurprise.introDesc')}</p>
+
+              <button className="start-btn" onClick={startSearch}>
+                <FiPlay />
+                <span>{t('liveSurprise.start')}</span>
+              </button>
+
+              <div className="start-timer-hint">
+                <FiClock size={14} />
+                <span>{timerDuration} {t('common.min')} par session</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── RECHERCHE EN COURS ─────────────────────────────── */}
+        {isSearching && !isConnected && (
+          <div className="searching-screen">
+            <div className="searching-animation">
+              <FiRefreshCw className="spinning" size={60} />
+            </div>
+            <h2>{t('liveSurprise.searching')}</h2>
+            <p>{t('liveSurprise.searchingDesc')}</p>
+
+            {/* PiP locale pendant la recherche */}
+            <div className="local-video-container">
               <video
-                ref={remoteVideoRef}
+                ref={localVideoRef}
                 autoPlay
+                muted
                 playsInline
-                className="remote-video"
+                className="local-video"
               />
-              
+              {!videoEnabled && (
+                <div className="video-disabled-overlay">
+                  <FiVideoOff size={32} />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── APPEL VIDÉO : Streamer (PiP) + Participant (plein écran) ── */}
+        {isConnected && (
+          <div className="videocall-layout">
+            {/* Vidéo du participant aléatoire — plein écran */}
+            <div className="participant-video-container">
+              {remoteStream ? (
+                <video
+                  ref={remoteVideoRef}
+                  autoPlay
+                  playsInline
+                  className="participant-video"
+                />
+              ) : (
+                <div className="participant-loading">
+                  <FiRefreshCw className="spinning" size={40} />
+                  <span>Connexion en cours...</span>
+                </div>
+              )}
+
               {partner && (
                 <div className="partner-info">
                   <div className="partner-name">
@@ -326,158 +385,152 @@ const LiveSurprise = () => {
                   </div>
                   {partner.location && (
                     <div className="partner-location">
-                      📍 {partner.location.city}
+                      {partner.location.city}
                     </div>
                   )}
                 </div>
               )}
-            </>
-          ) : isSearching ? (
-            <div className="searching-state">
-              <div className="searching-animation">
-                <FiRefreshCw className="spinning" size={60} />
+            </div>
+
+            {/* Vidéo du streamer — petit cadre en haut à droite */}
+            <div className="streamer-video-container">
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="streamer-video"
+              />
+              {!videoEnabled && (
+                <div className="video-disabled-overlay">
+                  <FiVideoOff size={24} />
+                </div>
+              )}
+            </div>
+
+            {/* Timer */}
+            {timeRemaining !== null && !showDecision && (
+              <div className="timer-display">
+                <FiClock />
+                <span>{formatTime(timeRemaining)}</span>
               </div>
-              <h2>{t('liveSurprise.searching')}</h2>
-              <p>{t('liveSurprise.searchingDesc')}</p>
-            </div>
-          ) : (
-            <div className="waiting-state">
-              <FiVideo size={80} />
-              <h2>{t('liveSurprise.introTitle')}</h2>
-              <p>{t('liveSurprise.introDesc')}</p>
-              <button 
-                className="btn btn-primary btn-large"
-                onClick={startSearch}
-              >
-                <FiVideo />
-                {t('liveSurprise.start')}
-              </button>
-            </div>
-          )}
-        </div>
+            )}
 
-        {/* Vidéo locale (petite, coin) */}
-        <div className="local-video-container">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="local-video"
-          />
-          {!videoEnabled && (
-            <div className="video-disabled-overlay">
-              <FiVideoOff size={32} />
-            </div>
-          )}
-        </div>
+            {/* Barre de contrôles */}
+            {!showDecision && (
+              <div className="controls-bar">
+                <button
+                  className={`control-btn ${!audioEnabled ? 'disabled' : ''}`}
+                  onClick={toggleAudio}
+                >
+                  {audioEnabled ? <FiMic /> : <FiMicOff />}
+                </button>
 
-        {/* Timer */}
-        {isConnected && timeRemaining !== null && !showDecision && (
-          <div className="timer-display">
-            <FiClock />
-            <span>{formatTime(timeRemaining)}</span>
-          </div>
-        )}
+                <button
+                  className={`control-btn ${!videoEnabled ? 'disabled' : ''}`}
+                  onClick={toggleVideo}
+                >
+                  {videoEnabled ? <FiVideo /> : <FiVideoOff />}
+                </button>
 
-        {/* Contrôles */}
-        {isConnected && (
-          <div className="controls-bar">
-            <button 
-              className={`control-btn ${!audioEnabled ? 'disabled' : ''}`}
-              onClick={toggleAudio}
-            >
-              {audioEnabled ? <FiMic /> : <FiMicOff />}
-            </button>
-            
-            <button 
-              className={`control-btn ${!videoEnabled ? 'disabled' : ''}`}
-              onClick={toggleVideo}
-            >
-              {videoEnabled ? <FiVideo /> : <FiVideoOff />}
-            </button>
-            
-            {canSkip && !showDecision && (
-              <button 
-                className="control-btn skip-btn"
-                onClick={handleSkip}
-              >
-                <FiSkipForward />
-                {t('liveSurprise.skip')}
-              </button>
+                {canSkip && (
+                  <button
+                    className="control-btn skip-btn"
+                    onClick={handleSkip}
+                  >
+                    <FiSkipForward />
+                    {t('liveSurprise.skip')}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Panel de décision */}
+            {showDecision && (
+              <div className="decision-panel">
+                <h3>{t('liveSurprise.timeUp')}</h3>
+                <p>{t('liveSurprise.whatToDo')}</p>
+
+                <div className="decision-buttons">
+                  <button
+                    className="decision-btn dislike-btn"
+                    onClick={() => handleDecision('dislike')}
+                  >
+                    <FiX />
+                    <span>{t('liveSurprise.pass')}</span>
+                  </button>
+
+                  <button
+                    className="decision-btn like-btn"
+                    onClick={() => handleDecision('like')}
+                  >
+                    <FiHeart />
+                    <span>{t('liveSurprise.iLike')}</span>
+                  </button>
+
+                  <button
+                    className="decision-btn skip-btn"
+                    onClick={() => handleDecision('skip')}
+                  >
+                    <FiSkipForward />
+                    <span>{t('common.next')}</span>
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}
 
-        {/* Panel de décision */}
-        {showDecision && (
-          <div className="decision-panel">
-            <h3>{t('liveSurprise.timeUp')}</h3>
-            <p>{t('liveSurprise.whatToDo')}</p>
-            
-            <div className="decision-buttons">
-              <button 
-                className="decision-btn dislike-btn"
-                onClick={() => handleDecision('dislike')}
-              >
-                <FiX />
-                <span>{t('liveSurprise.pass')}</span>
-              </button>
-              
-              <button 
-                className="decision-btn like-btn"
-                onClick={() => handleDecision('like')}
-              >
-                <FiHeart />
-                <span>{t('liveSurprise.iLike')}</span>
-              </button>
-              
-              <button 
-                className="decision-btn skip-btn"
-                onClick={() => handleDecision('skip')}
-              >
-                <FiSkipForward />
-                <span>{t('common.next')}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Settings Modal */}
-        {showSettings && (
-          <div className="settings-modal-overlay" onClick={() => setShowSettings(false)}>
-            <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
-              <h3>{t('liveSurprise.settingsTitle')}</h3>
-              
-              <div className="setting-group">
-                <label>{t('liveSurprise.timerDuration')}</label>
-                <div className="timer-options">
-                  {[3, 5, 8, 10].map((minutes) => (
-                    <button
-                      key={minutes}
-                      className={`timer-option ${timerDuration === minutes ? 'active' : ''}`}
-                      onClick={() => setTimerDuration(minutes)}
-                      disabled={isConnected}
-                    >
-                      {minutes} {t('common.min')}
-                    </button>
-                  ))}
-                </div>
-                <p className="setting-hint">
-                  {isConnected ? t('liveSurprise.cannotChangeDuring') : t('liveSurprise.minTimeBeforeDecision')}
-                </p>
-              </div>
-              
-              <button 
-                className="btn btn-primary"
-                onClick={() => setShowSettings(false)}
-              >
-                {t('common.close')}
-              </button>
-            </div>
+        {/* ── Vidéo locale sur l'écran d'accueil (hors recherche/appel) ── */}
+        {!isSearching && !isConnected && localStream && (
+          <div className="local-video-container">
+            <video
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
+              className="local-video"
+            />
           </div>
         )}
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="settings-modal-overlay" onClick={() => setShowSettings(false)}>
+          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t('liveSurprise.settingsTitle')}</h3>
+
+            <div className="setting-group">
+              <label>{t('liveSurprise.timerDuration')}</label>
+              <div className="timer-options">
+                {[3, 5, 8, 10].map((minutes) => (
+                  <button
+                    key={minutes}
+                    className={`timer-option ${timerDuration === minutes ? 'active' : ''}`}
+                    onClick={() => setTimerDuration(minutes)}
+                    disabled={isConnected}
+                  >
+                    {minutes} {t('common.min')}
+                  </button>
+                ))}
+              </div>
+              <p className="setting-hint">
+                {isConnected
+                  ? t('liveSurprise.cannotChangeDuring')
+                  : t('liveSurprise.minTimeBeforeDecision')}
+              </p>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowSettings(false)}
+            >
+              {t('common.close')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
