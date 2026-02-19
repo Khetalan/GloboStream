@@ -321,21 +321,24 @@
 
 .message.other {
   align-self: flex-start;
+  align-items: flex-end;
   padding-right: 20%;
 }
 
 .message-avatar {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  border: 2px solid var(--border);
 }
 
 .message-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .avatar-placeholder-tiny {

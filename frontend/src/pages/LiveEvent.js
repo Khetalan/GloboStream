@@ -24,6 +24,7 @@ const LiveEvent = () => {
         mode="event"
         onQuit={() => setIsStreaming(false)}
         streamerName={user?.displayName || user?.firstName || 'Streamer'}
+        user={user}
       />
     );
   }

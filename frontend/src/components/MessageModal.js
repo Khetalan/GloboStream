@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiX, FiSend, FiMail } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { getPhotoUrl } from '../utils/photoUrl';
 import './MessageModal.css';
 
 const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
@@ -66,7 +67,7 @@ const MessageModal = ({ profile, onClose, onSend, alreadySent }) => {
         <div className="message-modal-header">
           <div className="profile-preview">
             {primaryPhoto ? (
-              <img src={primaryPhoto.url} alt={profile.displayName} />
+              <img src={getPhotoUrl(primaryPhoto.url)} alt={profile.displayName} />
             ) : (
               <div className="placeholder-avatar">
                 {(profile.displayName || profile.firstName || '?').charAt(0)}

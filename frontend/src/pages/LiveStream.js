@@ -99,7 +99,7 @@ const LiveStream = () => {
   return (
     <div className="livestream-container">
       <div className="livestream-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/stream')}>
           <FiArrowLeft />
         </button>
         <div className="logo">

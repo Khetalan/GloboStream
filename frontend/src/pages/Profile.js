@@ -11,6 +11,7 @@ import {
   FiMapPin, FiStar, FiAward
 } from 'react-icons/fi';
 import LocationPicker from '../components/LocationPicker';
+import { getPhotoUrl } from '../utils/photoUrl';
 import './Profile.css';
 
 const COMMON_LANGUAGES = [
@@ -202,7 +203,7 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <div className="logo">
@@ -221,7 +222,7 @@ const Profile = () => {
           <div className="photos-grid">
             {profile?.photos?.map((photo, index) => (
               <div key={photo._id} className="photo-item">
-                <img src={photo.url} alt={`${index + 1}`} />
+                <img src={getPhotoUrl(photo.url)} alt={`${index + 1}`} />
                 {photo.isPrimary && (
                   <span className="primary-badge">
                     <FiStar /> {t('profile.mainPhoto')}

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getPhotoUrl } from '../utils/photoUrl';
 import {
   FiHome, FiHeart, FiMessageSquare, FiUsers, FiVideo,
   FiUser, FiSettings, FiLogOut, FiLifeBuoy, FiChevronDown,
@@ -67,7 +68,7 @@ const Navigation = () => {
   }
 
   const avatarContent = user?.photos?.[0] ? (
-    <img src={user.photos[0].url} alt={user.displayName || user.firstName} />
+    <img src={getPhotoUrl(user.photos[0].url)} alt={user.displayName || user.firstName} />
   ) : (
     <div className="avatar-placeholder">
       {(user?.displayName || user?.firstName || 'U').charAt(0)}

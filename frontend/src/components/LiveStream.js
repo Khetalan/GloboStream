@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft
@@ -15,7 +17,7 @@ import './LiveStream.css';
  * - onQuit : callback pour quitter le live
  * - streamerName : nom du streamer (défaut: 'Streamer')
  */
-const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer' }) => {
+const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }) => {
   const { t } = useTranslation();
 
   // États flow
@@ -80,12 +82,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer' }) => {
     }
   }, [isLive, localStream]);
 
-  // Sécurité : stopper les tracks au démontage
+  // Sécurité : stopper les tracks et arrêter le live au démontage
   useEffect(() => {
     return () => {
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
       }
+      // Arrêter le live côté backend si le composant est démonté
+      axios.post('/api/live/stop').catch(() => {});
     };
   }, [localStream]);
 
@@ -145,8 +149,27 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer' }) => {
     setIsCamOff(prev => !prev);
   }, [localStream, isCamOff]);
 
-  // Quitter le live
-  const handleQuit = useCallback(() => {
+  // Démarrer le live (appel API backend)
+  const handleGoLive = useCallback(async () => {
+    try {
+      await axios.post('/api/live/start', {
+        title: `Live de ${streamerName}`,
+        tags: ['Rencontres', 'Discussion']
+      });
+      setIsLive(true);
+    } catch (error) {
+      console.error('Error starting live:', error);
+      toast.error('Erreur lors du démarrage du live');
+    }
+  }, [streamerName]);
+
+  // Quitter le live (appel API backend)
+  const handleQuit = useCallback(async () => {
+    try {
+      await axios.post('/api/live/stop');
+    } catch (error) {
+      console.error('Error stopping live:', error);
+    }
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
     }
@@ -186,10 +209,16 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer' }) => {
           </div>
           <h3 className="ls-preview-title">{t('liveStream.previewTitle')}</h3>
           <p className="ls-preview-desc">{t('liveStream.previewDesc')}</p>
-          <button className="ls-go-live-btn" onClick={() => setIsLive(true)}>
-            <FiPlay size={20} />
-            <span>{t('liveStream.goLive')}</span>
-          </button>
+          {user?.photos?.length > 0 ? (
+            <button className="ls-go-live-btn" onClick={handleGoLive}>
+              <FiPlay size={20} />
+              <span>{t('liveStream.goLive')}</span>
+            </button>
+          ) : (
+            <div className="ls-no-photo-warning">
+              <p>Ajoutez au moins une photo pour lancer un live</p>
+            </div>
+          )}
           <button className="ls-back-btn" onClick={handleQuit}>
             <FiArrowLeft size={16} />
             <span>{t('common.back')}</span>

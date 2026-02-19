@@ -182,7 +182,7 @@ const Settings = () => {
   return (
     <div className="settings-container">
       <div className="settings-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <h1>{t('settings.title')}</h1>

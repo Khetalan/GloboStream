@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getPhotoUrl } from '../utils/photoUrl';
 import { FiMail, FiCheck, FiX, FiUser } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import './MessageRequestsPanel.css';
@@ -150,7 +151,7 @@ const MessageRequestCard = ({
         onClick={() => onViewProfile(sender._id)}
       >
         {primaryPhoto ? (
-          <img src={primaryPhoto.url} alt={sender.displayName} />
+          <img src={getPhotoUrl(primaryPhoto.url)} alt={sender.displayName} />
         ) : (
           <div className="avatar-placeholder">
             {(sender.displayName || sender.firstName || '?').charAt(0)}

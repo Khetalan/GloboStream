@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import Navigation from '../components/Navigation';
+import { getPhotoUrl } from '../utils/photoUrl';
 import './PublicProfile.css';
 
 const PublicProfile = () => {
@@ -32,7 +33,7 @@ const PublicProfile = () => {
     } catch (error) {
       console.error('Erreur chargement profil:', error);
       toast.error(t('publicProfile.loadError'));
-      navigate(-1);
+      navigate('/home');
     } finally {
       setLoading(false);
     }
@@ -84,7 +85,7 @@ const PublicProfile = () => {
   return (
     <div className="public-profile-container">
       <div className="public-profile-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <h2>{t('publicProfile.title')}</h2>
@@ -96,7 +97,7 @@ const PublicProfile = () => {
         <div className="profile-photos-section">
           <div className="main-photo">
             {currentPhoto ? (
-              <img src={currentPhoto.url} alt={profile.displayName} />
+              <img src={getPhotoUrl(currentPhoto.url)} alt={profile.displayName} />
             ) : (
               <div className="placeholder-photo">
                 <FiUser size={80} />
@@ -149,7 +150,7 @@ const PublicProfile = () => {
                   className={`thumbnail ${index === currentPhotoIndex ? 'active' : ''}`}
                   onClick={() => setCurrentPhotoIndex(index)}
                 >
-                  <img src={photo.url} alt={`${index + 1}`} />
+                  <img src={getPhotoUrl(photo.url)} alt={`${index + 1}`} />
                 </div>
               ))}
             </div>

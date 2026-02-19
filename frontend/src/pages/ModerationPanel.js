@@ -162,7 +162,7 @@ const ModerationPanel = () => {
   return (
     <div className="moderation-container">
       <div className="moderation-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <div className="logo">

@@ -10,6 +10,7 @@ import {
 import Navigation from '../components/Navigation';
 import LiveStream from '../components/LiveStream';
 import { useAuth } from '../contexts/AuthContext';
+import { getPhotoUrl } from '../utils/photoUrl';
 import './LivePublic.css';
 
 const LivePublic = () => {
@@ -116,6 +117,7 @@ const LivePublic = () => {
         mode="public"
         onQuit={() => setIsStreaming(false)}
         streamerName={user?.displayName || user?.firstName || 'Streamer'}
+        user={user}
       />
     );
   }
@@ -255,9 +257,9 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
       {/* Thumbnail avec preview live */}
       <div className="stream-thumbnail">
         {stream.thumbnail ? (
-          <img src={stream.thumbnail} alt={stream.title} />
+          <img src={getPhotoUrl(stream.thumbnail)} alt={stream.title} />
         ) : primaryPhoto ? (
-          <img src={primaryPhoto.url} alt={stream.streamer.displayName} />
+          <img src={getPhotoUrl(primaryPhoto.url)} alt={stream.streamer.displayName} />
         ) : (
           <div className="placeholder-thumbnail">
             <FiPlay size={60} />
@@ -289,7 +291,7 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
         <div className="streamer-row">
           <div className="streamer-avatar">
             {primaryPhoto ? (
-              <img src={primaryPhoto.url} alt={stream.streamer.displayName} />
+              <img src={getPhotoUrl(primaryPhoto.url)} alt={stream.streamer.displayName} />
             ) : (
               <div className="avatar-placeholder">
                 {(stream.streamer.displayName || stream.streamer.firstName || '?').charAt(0)}

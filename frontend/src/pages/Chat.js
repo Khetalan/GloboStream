@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
+import { getPhotoUrl } from '../utils/photoUrl';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
@@ -162,7 +163,7 @@ const Chat = () => {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <button className="btn btn-ghost " onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost " onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <div className="logo">
@@ -201,7 +202,7 @@ const Chat = () => {
                 >
                   <div className="conv-avatar">
                     {conv.user.photos?.[0] ? (
-                      <img src={conv.user.photos[0].url} alt={conv.user.displayName} />
+                      <img src={getPhotoUrl(conv.user.photos[0].url)} alt={conv.user.displayName} />
                     ) : (
                       <div className="avatar-placeholder">
                         {conv.user.displayName.charAt(0)}
@@ -252,7 +253,7 @@ const Chat = () => {
                 <div className="header-user-info">
                   <div className="user-avatar-small">
                     {selectedConversation.user.photos?.[0] ? (
-                      <img src={selectedConversation.user.photos[0].url} alt="" />
+                      <img src={getPhotoUrl(selectedConversation.user.photos[0].url)} alt="" />
                     ) : (
                       <div className="avatar-placeholder-small">
                         {selectedConversation.user.displayName.charAt(0)}
@@ -291,7 +292,7 @@ const Chat = () => {
                         {!isOwn && (
                           <div className="message-avatar">
                             {selectedConversation.user.photos?.[0] ? (
-                              <img src={selectedConversation.user.photos[0].url} alt="" />
+                              <img src={getPhotoUrl(selectedConversation.user.photos[0].url)} alt="" />
                             ) : (
                               <div className="avatar-placeholder-tiny">
                                 {selectedConversation.user.displayName.charAt(0)}

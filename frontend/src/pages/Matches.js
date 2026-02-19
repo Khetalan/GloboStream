@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { getPhotoUrl } from '../utils/photoUrl';
 import { FiArrowLeft, FiHeart, FiEye, FiMessageCircle } from 'react-icons/fi';
 import './Matches.css';
 
@@ -47,7 +48,7 @@ const Matches = () => {
   return (
     <div className="matches-container">
       <div className="matches-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <div className="logo">
@@ -156,7 +157,7 @@ const MatchCard = ({ match, onClick, t }) => {
     <div className="match-card" onClick={onClick}>
       <div className="match-photo">
         {primaryPhoto ? (
-          <img src={primaryPhoto.url} alt={match.user.displayName} />
+          <img src={getPhotoUrl(primaryPhoto.url)} alt={match.user.displayName} />
         ) : (
           <div className="placeholder">
             <FiHeart size={40} />

@@ -38,12 +38,13 @@ function setupSurpriseHandlers(io, socket) {
         socketId: socket.id
       };
 
-      // Ajouter à la file
+      // Ajouter à la file (isSearching = false tant que l'utilisateur n'a pas cliqué "Start")
       surpriseQueue.set(userId, {
         socketId: socket.id,
         userInfo: userInfo,
         timestamp: Date.now(),
-        timerDuration: 3
+        timerDuration: 3,
+        isSearching: false
       });
 
       console.log(`User ${userId} joined surprise queue. Queue size: ${surpriseQueue.size}`);
@@ -57,10 +58,11 @@ function setupSurpriseHandlers(io, socket) {
   // Démarrer la recherche
   socket.on('start-search', ({ userId, timerDuration }) => {
     try {
-      // Mettre à jour timer duration
+      // Mettre à jour timer duration et marquer comme en recherche
       const queueEntry = surpriseQueue.get(userId);
       if (queueEntry) {
         queueEntry.timerDuration = timerDuration || 3;
+        queueEntry.isSearching = true;
         surpriseQueue.set(userId, queueEntry);
       }
 
@@ -152,11 +154,10 @@ function setupSurpriseHandlers(io, socket) {
   });
 }
 
-// Fonction pour trouver un partenaire compatible
+// Fonction pour trouver un partenaire compatible (uniquement parmi ceux en recherche)
 function findPartner(userId) {
-  // Logique simple : premier dans la file qui n'est pas soi-même
   for (const [candidateId, entry] of surpriseQueue.entries()) {
-    if (candidateId !== userId) {
+    if (candidateId !== userId && entry.isSearching) {
       return candidateId;
     }
   }

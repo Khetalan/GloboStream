@@ -131,7 +131,7 @@ const LiveSurprise = () => {
 
     newPeer.on('signal', (signal) => {
       socketRef.current.emit('send-signal', {
-        to: partnerData.userId,
+        to: partnerData.socketId,
         signal: signal
       });
     });

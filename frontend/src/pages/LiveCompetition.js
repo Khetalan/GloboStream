@@ -24,6 +24,7 @@ const LiveCompetition = () => {
         mode="competition"
         onQuit={() => setIsStreaming(false)}
         streamerName={user?.displayName || user?.firstName || 'Streamer'}
+        user={user}
       />
     );
   }

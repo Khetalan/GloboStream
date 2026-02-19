@@ -97,6 +97,22 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── Warning pas de photo ──────────────────────────────────── */
+.ls-no-photo-warning {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.ls-no-photo-warning p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
 /* ── Écran erreur permission ────────────────────────────────── */
 .ls-permission-error {
   display: flex;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getPhotoUrl } from '../utils/photoUrl';
 import { useTranslation } from 'react-i18next';
 import { FiHeart, FiX, FiMail, FiMapPin, FiSliders, FiArrowLeft, FiFilter } from 'react-icons/fi';
 // useAuth disponible pour fonctionnalités futures
@@ -146,7 +147,7 @@ const Swipe = () => {
     return (
       <div className="swipe-container">
         <div className="swipe-header">
-          <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+          <button className="btn btn-ghost" onClick={() => navigate('/home')}>
             <FiArrowLeft />
           </button>
           <div className="logo">
@@ -167,7 +168,7 @@ const Swipe = () => {
     return (
       <div className="swipe-container">
         <div className="swipe-header">
-          <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+          <button className="btn btn-ghost" onClick={() => navigate('/home')}>
             <FiArrowLeft />
           </button>
           <div className="logo">
@@ -211,7 +212,7 @@ const Swipe = () => {
   return (
     <div className="swipe-container">
       <div className="swipe-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <div className="logo">
@@ -353,7 +354,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
     >
       <div className="card-image" onClick={onShowProfile}>
         {primaryPhoto ? (
-          <img src={primaryPhoto.url} alt={profile.displayName} />
+          <img src={getPhotoUrl(primaryPhoto.url)} alt={profile.displayName} />
         ) : (
           <div className="placeholder-image">
             <FiHeart size={80} />
@@ -445,7 +446,7 @@ const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
 
         <div className="modal-photo">
           {primaryPhoto ? (
-            <img src={primaryPhoto.url} alt={profile.displayName} />
+            <img src={getPhotoUrl(primaryPhoto.url)} alt={profile.displayName} />
           ) : (
             <div className="placeholder-modal">
               <FiHeart size={80} />

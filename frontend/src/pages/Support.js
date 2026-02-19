@@ -49,7 +49,7 @@ const Support = () => {
   return (
     <div className="support-container">
       <div className="support-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
           <FiArrowLeft />
         </button>
         <div className="logo">
