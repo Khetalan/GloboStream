@@ -2,20 +2,20 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import io from 'socket.io-client';
+import Peer from 'simple-peer';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift,
-  FiX, FiEye, FiSend, FiPlay, FiArrowLeft
+  FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
+  FiUserPlus, FiCheck, FiSlash
 } from 'react-icons/fi';
 import './LiveStream.css';
 
+const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 /**
- * Composant LiveStream réutilisable
- * Flow : montage → getUserMedia (permission) → preview → "Go Live" → interface live
- *
- * Props :
- * - mode : 'public' | 'competition' | 'event' — détermine le style/contexte
- * - onQuit : callback pour quitter le live
- * - streamerName : nom du streamer (défaut: 'Streamer')
+ * Composant LiveStream (côté streamer)
+ * Flow : montage → getUserMedia → preview → "Go Live" → crée salon Socket.IO → WebRTC peers
  */
 const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }) => {
   const { t } = useTranslation();
@@ -26,23 +26,30 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [cameraError, setCameraError] = useState(false);
 
   // États live
-  const [participants] = useState([]); // eslint-disable-line no-unused-vars
-  const [localStream, setLocalStream] = useState(null);
+  const [participants, setParticipants] = useState([]);
+  const [, setLocalStream] = useState(null);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
-  const [viewerCount] = useState(0);
+  const [viewerCount, setViewerCount] = useState(0);
   const [giftCount] = useState(0);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
-  const [viewers] = useState([]);
+  const [viewers, setViewers] = useState([]);
   const [gifts] = useState([]);
+  const [joinRequests, setJoinRequests] = useState([]);
 
   // Refs
   const chatRef = useRef(null);
   const localVideoRef = useRef(null);
   const previewVideoRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const socketRef = useRef(null);
+  const roomIdRef = useRef(null);
+  const viewerPeersRef = useRef(new Map()); // socketId → Peer (send-only)
+  const participantPeersRef = useRef(new Map()); // socketId → { peer, stream }
+  // participantVideosRef removed — unused
 
   // Demander la permission caméra au montage (preview)
   useEffect(() => {
@@ -55,8 +62,8 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           audio: true
         });
         setLocalStream(stream);
+        localStreamRef.current = stream;
         setPermissionGranted(true);
-        // Attacher à la preview vidéo
         if (previewVideoRef.current) {
           previewVideoRef.current.srcObject = stream;
         }
@@ -77,33 +84,164 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
   // Quand isLive passe à true, rattacher le stream à la vidéo principale
   useEffect(() => {
-    if (isLive && localStream && localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
+    if (isLive && localStreamRef.current && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
     }
-  }, [isLive, localStream]);
+  }, [isLive]);
 
   // Sécurité : stopper les tracks et arrêter le live au démontage
   useEffect(() => {
+    const viewerPeers = viewerPeersRef.current;
+    const participantPeers = participantPeersRef.current;
     return () => {
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach(track => track.stop());
       }
-      // Arrêter le live côté backend si le composant est démonté
       axios.post('/api/live/stop').catch(() => {});
-    };
-  }, [localStream]);
 
-  // Message de bienvenue (seulement quand live démarre)
+      // Détruire tous les peers
+      for (const peer of viewerPeers.values()) {
+        peer.destroy();
+      }
+      for (const { peer } of participantPeers.values()) {
+        peer.destroy();
+      }
+
+      // Fermer le salon et déconnecter le socket
+      if (socketRef.current) {
+        if (roomIdRef.current) {
+          socketRef.current.emit('close-live-room', { roomId: roomIdRef.current });
+        }
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Connecter Socket.IO et enregistrer les listeners
   useEffect(() => {
-    if (isLive) {
-      setMessages([{
-        id: 'welcome',
-        username: 'System',
-        text: t('liveStream.welcomeMessage'),
-        isSystem: true
+    const socket = io(SOCKET_URL);
+    socketRef.current = socket;
+
+    // Quand le salon est créé
+    socket.on('room-created', ({ roomId }) => {
+      roomIdRef.current = roomId;
+      console.log('Room created:', roomId);
+      setIsLive(true);
+    });
+
+    // Un nouveau viewer rejoint
+    socket.on('viewer-joined', ({ viewerSocketId, viewerInfo }) => {
+      console.log('Viewer joined:', viewerInfo.displayName);
+
+      setViewerCount(prev => prev + 1);
+      setViewers(prev => [...prev, {
+        socketId: viewerSocketId,
+        name: viewerInfo.displayName,
+        joinedAt: new Date().toLocaleTimeString()
       }]);
+
+      // Créer un peer pour envoyer le stream au viewer
+      const stream = localStreamRef.current;
+      if (!stream) return;
+
+      const peer = new Peer({
+        initiator: true,
+        trickle: false,
+        stream: stream
+      });
+
+      peer.on('signal', (signal) => {
+        socket.emit('live-signal', { to: viewerSocketId, signal });
+      });
+
+      peer.on('error', (err) => {
+        console.error('Peer error (viewer):', err);
+        viewerPeersRef.current.delete(viewerSocketId);
+      });
+
+      viewerPeersRef.current.set(viewerSocketId, peer);
+    });
+
+    // Un viewer quitte
+    socket.on('viewer-left', ({ viewerSocketId }) => {
+      setViewerCount(prev => Math.max(0, prev - 1));
+      setViewers(prev => prev.filter(v => v.socketId !== viewerSocketId));
+
+      const peer = viewerPeersRef.current.get(viewerSocketId);
+      if (peer) {
+        peer.destroy();
+        viewerPeersRef.current.delete(viewerSocketId);
+      }
+
+      // Aussi vérifier si c'était un participant
+      const pData = participantPeersRef.current.get(viewerSocketId);
+      if (pData) {
+        pData.peer.destroy();
+        participantPeersRef.current.delete(viewerSocketId);
+        setParticipants(prev => prev.filter(p => p.socketId !== viewerSocketId));
+      }
+    });
+
+    // Signaling WebRTC (answer du viewer ou du participant)
+    socket.on('live-signal', ({ from, signal }) => {
+      // Vérifier d'abord dans les viewer peers
+      const viewerPeer = viewerPeersRef.current.get(from);
+      if (viewerPeer) {
+        viewerPeer.signal(signal);
+        return;
+      }
+      // Sinon dans les participant peers
+      const pData = participantPeersRef.current.get(from);
+      if (pData) {
+        pData.peer.signal(signal);
+      }
+    });
+
+    // Message chat reçu
+    socket.on('live-chat-message', ({ username, text, timestamp }) => {
+      setMessages(prev => [...prev, {
+        id: `msg-${timestamp}-${Math.random()}`,
+        username,
+        text,
+        isOwn: false
+      }]);
+    });
+
+    // Demande de participation reçue
+    socket.on('join-request-received', ({ viewerSocketId, viewerInfo }) => {
+      console.log('Join request from:', viewerInfo.displayName);
+      setJoinRequests(prev => [...prev, {
+        socketId: viewerSocketId,
+        displayName: viewerInfo.displayName,
+        userId: viewerInfo.userId
+      }]);
+      toast(`${viewerInfo.displayName} veut rejoindre le live`, { icon: '🙋' });
+    });
+
+    // Un participant rejoint (après acceptation)
+    socket.on('participant-joined', ({ participantSocketId, participantInfo, participantCount }) => {
+      console.log('Participant joined:', participantInfo.displayName);
+    });
+
+    // Un participant quitte
+    socket.on('participant-left', ({ participantSocketId }) => {
+      const pData = participantPeersRef.current.get(participantSocketId);
+      if (pData) {
+        pData.peer.destroy();
+        participantPeersRef.current.delete(participantSocketId);
+      }
+      setParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
+    });
+
+    // Enregistrer l'utilisateur
+    if (user?._id) {
+      socket.emit('register', user._id);
     }
-  }, [isLive, t]);
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user]);
 
   // Auto-scroll du chat
   useEffect(() => {
@@ -112,16 +250,15 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     }
   }, [messages]);
 
-  // Envoi message chat
+  // Envoi message chat via Socket.IO
   const handleSendMessage = useCallback(() => {
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || !socketRef.current || !roomIdRef.current) return;
 
-    setMessages(prev => [...prev, {
-      id: `msg-${Date.now()}`,
-      username: streamerName,
+    socketRef.current.emit('live-chat', {
+      roomId: roomIdRef.current,
       text: chatInput,
-      isOwn: true
-    }]);
+      username: streamerName
+    });
     setChatInput('');
   }, [chatInput, streamerName]);
 
@@ -133,48 +270,172 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
   // Toggle micro
   const toggleMic = useCallback(() => {
-    if (localStream) {
-      const audioTrack = localStream.getAudioTracks()[0];
+    if (localStreamRef.current) {
+      const audioTrack = localStreamRef.current.getAudioTracks()[0];
       if (audioTrack) audioTrack.enabled = isMuted;
     }
     setIsMuted(prev => !prev);
-  }, [localStream, isMuted]);
+  }, [isMuted]);
 
   // Toggle caméra
   const toggleCam = useCallback(() => {
-    if (localStream) {
-      const videoTrack = localStream.getVideoTracks()[0];
+    if (localStreamRef.current) {
+      const videoTrack = localStreamRef.current.getVideoTracks()[0];
       if (videoTrack) videoTrack.enabled = isCamOff;
     }
     setIsCamOff(prev => !prev);
-  }, [localStream, isCamOff]);
+  }, [isCamOff]);
 
-  // Démarrer le live (appel API backend)
+  // Démarrer le live : API + créer salon Socket.IO
   const handleGoLive = useCallback(async () => {
     try {
       await axios.post('/api/live/start', {
         title: `Live de ${streamerName}`,
-        tags: ['Rencontres', 'Discussion']
+        tags: ['Rencontres', 'Discussion'],
+        mode: mode
       });
-      setIsLive(true);
+
+      // Créer le salon Socket.IO
+      socketRef.current.emit('create-live-room', {
+        mode: mode,
+        title: `Live de ${streamerName}`,
+        tags: ['Rencontres', 'Discussion'],
+        userId: user?._id,
+        displayName: streamerName
+      });
+
+      // Le passage à isLive se fait dans le listener 'room-created'
+      setMessages([{
+        id: 'welcome',
+        username: 'System',
+        text: t('liveStream.welcomeMessage'),
+        isSystem: true
+      }]);
     } catch (error) {
       console.error('Error starting live:', error);
       toast.error('Erreur lors du démarrage du live');
     }
-  }, [streamerName]);
+  }, [streamerName, mode, user, t]);
 
-  // Quitter le live (appel API backend)
+  // Quitter le live
   const handleQuit = useCallback(async () => {
     try {
       await axios.post('/api/live/stop');
     } catch (error) {
       console.error('Error stopping live:', error);
     }
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
+
+    // Fermer le salon
+    if (socketRef.current && roomIdRef.current) {
+      socketRef.current.emit('close-live-room', { roomId: roomIdRef.current });
+    }
+
+    // Détruire tous les peers
+    for (const peer of viewerPeersRef.current.values()) {
+      peer.destroy();
+    }
+    for (const { peer } of participantPeersRef.current.values()) {
+      peer.destroy();
+    }
+    viewerPeersRef.current.clear();
+    participantPeersRef.current.clear();
+
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
     }
     onQuit();
-  }, [localStream, onQuit]);
+  }, [onQuit]);
+
+  // Accepter une demande de participation
+  const handleAcceptJoinRequest = useCallback((request) => {
+    if (!socketRef.current || !roomIdRef.current) return;
+
+    socketRef.current.emit('accept-join-request', {
+      roomId: roomIdRef.current,
+      viewerSocketId: request.socketId
+    });
+
+    // Retirer de la liste des demandes
+    setJoinRequests(prev => prev.filter(r => r.socketId !== request.socketId));
+
+    // Détruire l'ancien peer viewer (send-only) pour ce socket
+    const oldPeer = viewerPeersRef.current.get(request.socketId);
+    if (oldPeer) {
+      oldPeer.destroy();
+      viewerPeersRef.current.delete(request.socketId);
+    }
+
+    // Créer un peer bidirectionnel avec le participant
+    const stream = localStreamRef.current;
+    if (!stream) return;
+
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream: stream
+    });
+
+    peer.on('signal', (signal) => {
+      socketRef.current.emit('live-signal', { to: request.socketId, signal });
+    });
+
+    peer.on('stream', (remoteStream) => {
+      // Stocker le stream du participant
+      participantPeersRef.current.set(request.socketId, {
+        peer,
+        stream: remoteStream
+      });
+
+      // Ajouter le participant à l'affichage
+      setParticipants(prev => [...prev, {
+        socketId: request.socketId,
+        name: request.displayName,
+        id: request.userId,
+        stream: remoteStream
+      }]);
+    });
+
+    peer.on('error', (err) => {
+      console.error('Peer error (participant):', err);
+      participantPeersRef.current.delete(request.socketId);
+      setParticipants(prev => prev.filter(p => p.socketId !== request.socketId));
+    });
+
+    // Stocker temporairement sans stream (sera mis à jour quand on reçoit le stream)
+    participantPeersRef.current.set(request.socketId, { peer, stream: null });
+
+  }, []);
+
+  // Refuser une demande de participation
+  const handleRejectJoinRequest = useCallback((request) => {
+    if (!socketRef.current) return;
+
+    socketRef.current.emit('reject-join-request', {
+      viewerSocketId: request.socketId
+    });
+
+    setJoinRequests(prev => prev.filter(r => r.socketId !== request.socketId));
+  }, []);
+
+  // Composant vidéo participant avec ref callback
+  const ParticipantVideo = ({ stream }) => {
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+      if (videoRef.current && stream) {
+        videoRef.current.srcObject = stream;
+      }
+    }, [stream]);
+
+    return (
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="ls-participant-video"
+      />
+    );
+  };
 
   // ── ÉCRAN ERREUR PERMISSION ──
   if (cameraError) {
@@ -252,53 +513,18 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   };
 
   const renderParticipantCards = () => {
-    if (totalCards <= 3) {
-      return participants.map((p, i) => (
-        <div key={p.id || i} className="ls-video-card user">
-          <div className="ls-video-placeholder">
+    return participants.map((p, i) => (
+      <div key={p.socketId || i} className="ls-video-card user">
+        <div className="ls-video-placeholder">
+          {p.stream ? (
+            <ParticipantVideo stream={p.stream} />
+          ) : (
             <FiVideo size={32} />
-          </div>
-          <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
+          )}
         </div>
-      ));
-    }
-
-    const rightCards = participants.slice(0, 2);
-    const bottomCards = participants.slice(2);
-    const rows = [];
-    for (let i = 0; i < bottomCards.length; i += 3) {
-      rows.push(bottomCards.slice(i, i + 3));
-    }
-
-    return (
-      <>
-        {rightCards.map((p, i) => (
-          <div key={p.id || i} className="ls-video-card user">
-            <div className="ls-video-placeholder">
-              <FiVideo size={32} />
-            </div>
-            <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
-          </div>
-        ))}
-        {rows.map((row, rowIdx) => (
-          <div key={`row-${rowIdx}`} className={rowIdx === 0 ? 'ls-participants-bottom' : 'ls-participants-row2'}>
-            {row.map((p, i) => (
-              <div key={p.id || `${rowIdx}-${i}`} className="ls-video-card user">
-                <div className="ls-video-placeholder">
-                  <FiVideo size={24} />
-                </div>
-                <div className="ls-video-label">{p.name || `User ${rowIdx * 3 + i + 3}`}</div>
-              </div>
-            ))}
-            {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, i) => (
-              <div key={`empty-${rowIdx}-${i}`} className="ls-video-card empty">
-                <div className="ls-empty-slot"><FiX size={24} /></div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </>
-    );
+        <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
+      </div>
+    ));
   };
 
   return (
@@ -349,6 +575,31 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
         {renderParticipantCards()}
       </div>
+
+      {/* Notifications de demandes de participation */}
+      {joinRequests.length > 0 && (
+        <div className="ls-join-requests">
+          {joinRequests.map((req) => (
+            <div key={req.socketId} className="ls-join-request-card">
+              <FiUserPlus size={16} />
+              <span className="ls-join-request-name">{req.displayName}</span>
+              <span className="ls-join-request-text">veut rejoindre</span>
+              <button
+                className="ls-join-accept-btn"
+                onClick={() => handleAcceptJoinRequest(req)}
+              >
+                <FiCheck size={14} />
+              </button>
+              <button
+                className="ls-join-reject-btn"
+                onClick={() => handleRejectJoinRequest(req)}
+              >
+                <FiSlash size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {showStatsPanel && (
         <div className="ls-stats-overlay" onClick={() => setShowStatsPanel(false)} />

@@ -1,0 +1,354 @@
+/* ============================================================
+   LiveViewer — Interface spectateur
+   Vidéo streamer plein écran + chat + bouton rejoindre
+   ============================================================ */
+
+.lv-container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: #0a0a0a;
+  color: #fff;
+}
+
+/* ── Écrans erreur / chargement ───────────────────────────── */
+.lv-error-screen,
+.lv-loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 32px 24px;
+  gap: 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.lv-error-screen h3 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.lv-error-screen p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.lv-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.lv-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #FF3366;
+  border-radius: 50%;
+  animation: lvSpin 0.8s linear infinite;
+}
+
+@keyframes lvSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Section vidéo ────────────────────────────────────────── */
+.lv-video-section {
+  flex: 0 0 55%;
+  min-height: 240px;
+  position: relative;
+  background-color: #000;
+  overflow: hidden;
+}
+
+.lv-remote-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+.lv-waiting-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 5;
+}
+
+.lv-waiting-overlay p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Badge LIVE ───────────────────────────────────────────── */
+.lv-live-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  padding: 6px 10px;
+  z-index: 10;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lv-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #EF4444;
+  animation: lvPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes lvPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.lv-viewer-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ── Preview locale (participant) ─────────────────────────── */
+.lv-local-preview {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 100px;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.lv-local-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+/* ── Chat section ─────────────────────────────────────────── */
+.lv-chat-section {
+  flex: 1 1 0;
+  min-height: 80px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 10px 14px;
+}
+
+.lv-chat-message {
+  padding: 5px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  flex-wrap: wrap;
+}
+
+.lv-chat-message.system {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.lv-chat-username {
+  color: #ff9500;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.lv-chat-text {
+  color: #e0e0e0;
+  font-size: 13px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Barre du bas ─────────────────────────────────────────── */
+.lv-bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  background-color: rgba(0, 0, 0, 0.95);
+  flex-shrink: 0;
+}
+
+.lv-input-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lv-input-container input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  min-width: 0;
+}
+
+.lv-input-container input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.lv-send-btn {
+  background: none;
+  border: none;
+  color: var(--primary, #e4405f);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+/* ── Bouton rejoindre ─────────────────────────────────────── */
+.lv-join-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #FF3366, #FF6B9D);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+
+.lv-join-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.lv-join-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.lv-join-btn.pending {
+  background: linear-gradient(135deg, #F59E0B, #EF9500);
+}
+
+.lv-join-btn.accepted {
+  background: linear-gradient(135deg, #22C55E, #10B981);
+}
+
+.lv-join-btn.rejected {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+}
+
+/* ── Contrôles participant ────────────────────────────────── */
+.lv-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.lv-control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.lv-control-btn.muted {
+  color: var(--primary, #e4405f);
+  background-color: rgba(228, 64, 95, 0.15);
+}
+
+.lv-control-btn.quit-btn {
+  background-color: var(--primary, #e4405f);
+}
+
+.lv-control-btn.quit-btn:hover {
+  background-color: #d62d4a;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .lv-video-section {
+    flex: 0 0 50%;
+    min-height: 200px;
+  }
+
+  .lv-local-preview {
+    width: 80px;
+    height: 110px;
+  }
+
+  .lv-join-btn span {
+    display: none;
+  }
+
+  .lv-bottom-bar {
+    gap: 4px;
+    padding: 6px 10px;
+  }
+}
+
+@media (min-width: 481px) {
+  .lv-video-section {
+    flex: 0 0 58%;
+    min-height: 300px;
+  }
+
+  .lv-local-preview {
+    width: 120px;
+    height: 170px;
+  }
+}

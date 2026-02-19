@@ -14,8 +14,13 @@ router.get('/public', async (req, res) => {
   try {
     const { filter, userLat, userLon } = req.query;
 
-    // Trouver tous les utilisateurs en live
+    const { mode } = req.query;
+
+    // Trouver tous les utilisateurs en live, filtrer par mode si spécifié
     let query = { isLive: true };
+    if (mode) {
+      query.liveMode = mode;
+    }
 
     const liveUsers = await User.find(query)
       .select('displayName firstName photos isVerified location')
@@ -125,22 +130,21 @@ router.post('/favorite/:streamId', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/live/start - Démarrer un live public
+// POST /api/live/start - Démarrer un live
 router.post('/start', authMiddleware, async (req, res) => {
   try {
-    const { title, tags } = req.body;
+    const { title, tags, mode } = req.body;
 
-    // Mettre à jour isLive de l'utilisateur
+    // Mettre à jour isLive et liveMode de l'utilisateur
     await User.findByIdAndUpdate(req.user._id, {
-      isLive: true
+      isLive: true,
+      liveMode: mode || 'public'
     });
-
-    // TODO: Créer entrée LiveStream dans une collection dédiée
 
     res.json({
       success: true,
       message: 'Live démarré',
-      streamId: req.user._id // Temporaire
+      streamId: req.user._id
     });
 
   } catch (error) {
@@ -153,7 +157,8 @@ router.post('/start', authMiddleware, async (req, res) => {
 router.post('/stop', authMiddleware, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user._id, {
-      isLive: false
+      isLive: false,
+      liveMode: null
     });
 
     res.json({

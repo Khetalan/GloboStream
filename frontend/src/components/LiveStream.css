@@ -771,6 +771,104 @@
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
+/* ── Vidéo participant ─────────────────────────────────────── */
+.ls-participant-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Notifications de demandes de participation ───────────── */
+.ls-join-requests {
+  position: absolute;
+  top: 52%;
+  left: 8px;
+  right: 8px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ls-join-request-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 8px 12px;
+  animation: lsSlideIn 0.3s ease;
+}
+
+@keyframes lsSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.ls-join-request-card svg:first-child {
+  color: #ff9500;
+  flex-shrink: 0;
+}
+
+.ls-join-request-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ls-join-request-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  flex: 1;
+}
+
+.ls-join-accept-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(34, 197, 94, 0.2);
+  color: #22C55E;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.ls-join-accept-btn:hover {
+  background: rgba(34, 197, 94, 0.4);
+}
+
+.ls-join-reject-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.ls-join-reject-btn:hover {
+  background: rgba(239, 68, 68, 0.4);
+}
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 360px) {
   .ls-video-grid {

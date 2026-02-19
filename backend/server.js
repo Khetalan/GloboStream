@@ -9,6 +9,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
 const { setupSurpriseHandlers } = require('./socketHandlers/surprise');
+const { setupLiveRoomHandlers } = require('./socketHandlers/liveRoom');
 
 const app = express();
 const server = http.createServer(app);
@@ -129,6 +130,9 @@ io.on('connection', (socket) => {
 
   // Socket Live Surprise
   setupSurpriseHandlers(io, socket);
+
+  // Socket Live Rooms (Public/Competition/Event)
+  setupLiveRoomHandlers(io, socket);
 
   // WebRTC Signaling pour le streaming
   socket.on('offer', (data) => {

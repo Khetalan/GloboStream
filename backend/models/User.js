@@ -80,6 +80,7 @@ const userSchema = new mongoose.Schema({
   
   // Streaming
   isLive: { type: Boolean, default: false },
+  liveMode: { type: String, enum: ['public', 'competition', 'event', null], default: null },
   liveStreamId: String,
   
   // Statut

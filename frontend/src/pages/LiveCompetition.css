@@ -33,8 +33,107 @@
   padding-top: 60px;
   min-height: 100dvh;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-bottom: 24px;
+}
+
+/* ── Liste des rooms en cours ─────────────────────────────── */
+.live-rooms-section {
+  width: 100%;
+  max-width: 480px;
+  padding: 16px;
+}
+
+.live-rooms-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+.live-rooms-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #EF4444;
+  animation: roomPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes roomPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.live-rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.live-room-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.live-room-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.live-room-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.live-room-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.live-room-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.live-room-title {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-room-viewers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 /* ── Écran d'accueil ─────────────────────────────────────── */

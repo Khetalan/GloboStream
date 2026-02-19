@@ -15,7 +15,7 @@ function setupSurpriseHandlers(io, socket) {
   socket.on('join-surprise-queue', async ({ userId }) => {
     try {
       // Récupérer info utilisateur
-      const User = require('./models/User');
+      const User = require('../models/User');
       const user = await User.findById(userId)
         .select('displayName firstName age gender photos location birthDate');
 

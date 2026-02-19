@@ -46,6 +46,7 @@ const LiveSurprise = () => {
   const remoteVideoRef = useRef();
   const socketRef = useRef();
   const peerRef = useRef();
+  const localStreamRef = useRef(null);
 
   useEffect(() => {
     // Initialiser Socket.IO
@@ -98,6 +99,7 @@ const LiveSurprise = () => {
         audio: true
       });
       setLocalStream(stream);
+      localStreamRef.current = stream;
       return stream;
     } catch (error) {
       console.error('Error accessing media devices:', error);
@@ -122,11 +124,11 @@ const LiveSurprise = () => {
     setIsSearching(false);
     setIsConnected(true);
     
-    // Créer connexion WebRTC
+    // Créer connexion WebRTC (utiliser la ref pour éviter stale closure)
     const newPeer = new Peer({
       initiator: initiator,
       trickle: false,
-      stream: localStream
+      stream: localStreamRef.current
     });
 
     newPeer.on('signal', (signal) => {
@@ -258,8 +260,9 @@ const LiveSurprise = () => {
     }
 
     // Stopper les tracks média (caméra + micro)
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
       setLocalStream(null);
     }
 
@@ -271,16 +274,16 @@ const LiveSurprise = () => {
   };
 
   const toggleVideo = () => {
-    if (localStream) {
-      const videoTrack = localStream.getVideoTracks()[0];
+    if (localStreamRef.current) {
+      const videoTrack = localStreamRef.current.getVideoTracks()[0];
       videoTrack.enabled = !videoTrack.enabled;
       setVideoEnabled(videoTrack.enabled);
     }
   };
 
   const toggleAudio = () => {
-    if (localStream) {
-      const audioTrack = localStream.getAudioTracks()[0];
+    if (localStreamRef.current) {
+      const audioTrack = localStreamRef.current.getAudioTracks()[0];
       audioTrack.enabled = !audioTrack.enabled;
       setAudioEnabled(audioTrack.enabled);
     }

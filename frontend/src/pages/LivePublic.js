@@ -52,6 +52,7 @@ const LivePublic = () => {
       const response = await axios.get('/api/live/public', {
         params: {
           filter: activeTab,
+          mode: 'public',
           userLat: user?.location?.coordinates?.[1],
           userLon: user?.location?.coordinates?.[0]
         }
@@ -85,7 +86,7 @@ const LivePublic = () => {
   };
 
   const handleJoinStream = (streamId) => {
-    navigate(`/stream/public/${streamId}`);
+    navigate(`/stream/watch/${streamId}`);
   };
 
   const handleToggleFavorite = async (streamId) => {

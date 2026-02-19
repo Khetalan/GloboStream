@@ -26,6 +26,7 @@ import LiveSurprise from './pages/LiveSurprise';
 import LivePublic from './pages/LivePublic';
 import LiveCompetition from './pages/LiveCompetition';
 import LiveEvent from './pages/LiveEvent';
+import LiveViewerPage from './pages/LiveViewerPage';
 
 // Route protégée
 const PrivateRoute = ({ children }) => {
@@ -164,6 +165,12 @@ function App() {
           <Route path="/stream/event" element={
             <PrivateRoute>
               <LiveEvent />
+            </PrivateRoute>
+          } />
+
+          <Route path="/stream/watch/:roomId" element={
+            <PrivateRoute>
+              <LiveViewerPage />
             </PrivateRoute>
           } />
 
