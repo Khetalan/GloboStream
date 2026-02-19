@@ -38,8 +38,13 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Toaster 
+        <Toaster
           position="top-center"
+          containerStyle={{
+            top: 16,
+            left: 0,
+            right: 0,
+          }}
           toastOptions={{
             duration: 3000,
             style: {
@@ -47,6 +52,7 @@ function App() {
               color: '#fff',
               borderRadius: '12px',
               padding: '16px',
+              maxWidth: 'calc(100vw - 32px)',
             },
             success: {
               iconTheme: {

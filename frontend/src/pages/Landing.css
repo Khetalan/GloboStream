@@ -24,17 +24,35 @@
 
 .landing-header .container {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .landing-header .container {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
 }
 
 .logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   font-size: 20px;
   font-weight: 700;
   font-family: var(--font-display);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .logo {
+    width: auto;
+    justify-content: flex-start;
+  }
 }
 
 .logo-icon {
