@@ -34,7 +34,7 @@ const Chat = () => {
 
   useEffect(() => {
     // Connexion WebSocket
-    socket = io('http://localhost:5000');
+    socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000');
     
     socket.on('connect', () => {
       socket.emit('register', currentUser.id);
