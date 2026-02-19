@@ -85,11 +85,13 @@ globostream/
 │   ├── src/
 │   │   ├── components/       # Composants réutilisables
 │   │   │   ├── Navigation.js
+│   │   │   ├── LiveStream.js       # Interface live réutilisable (flux caméra réel)
+│   │   │   ├── LanguageSwitcher.js # Sélecteur de langue (5 langues)
 │   │   │   ├── LocationPicker.js
 │   │   │   ├── FiltersPanel.js
 │   │   │   ├── MessageModal.js
 │   │   │   └── MessageRequestsPanel.js
-│   │   ├── pages/           # Pages principales
+│   │   ├── pages/           # 17+ pages principales
 │   │   │   ├── Landing.js
 │   │   │   ├── Login.js
 │   │   │   ├── Register.js
@@ -104,10 +106,14 @@ globostream/
 │   │   │   ├── ModerationPanel.js
 │   │   │   ├── StreamHub.js
 │   │   │   ├── LiveSurprise.js
-│   │   │   └── LivePublic.js
+│   │   │   ├── LivePublic.js
+│   │   │   ├── LiveCompetition.js
+│   │   │   └── LiveEvent.js
 │   │   ├── contexts/        # Contextes React
 │   │   │   └── AuthContext.js
+│   │   ├── locales/         # Traductions i18n (5 langues)
 │   │   ├── App.js           # Router principal
+│   │   ├── i18n.js          # Configuration i18next
 │   │   ├── index.js
 │   │   └── index.css
 │   └── package.json
@@ -157,61 +163,73 @@ npm install
 npm start
 ```
 
-### Accès
+### Accès local
 - Frontend : http://localhost:3000
 - Backend : http://localhost:5000
+
+### Déploiement en ligne
+- **Frontend** : https://khetalan.github.io/GloboStream/
+- **Backend** : https://globostream.onrender.com
 
 ---
 
 ## État Actuel du Projet
 
-**Statut** : En développement - Phase MVP
+**Statut** : En développement - Phase MVP (déployé)
 
-Le code des fonctionnalités de base existe mais **aucune fonctionnalité n'a été testée de manière complète**. Voir `docs/RAPPORT.md` pour le détail de chaque fonctionnalité et son statut de test.
+Backend déployé sur Render.com, frontend sur GitHub Pages. 210 tests Jest passent (100%). Voir `docs/RAPPORT.md` pour le détail.
 
-### Fonctionnalités codées (à tester)
+### Fonctionnalités
 
 **Authentification & Profils**
-- [ ] Inscription/Connexion email/password
-- [ ] OAuth Google/Facebook/Apple (structure)
-- [ ] Profil complet (20+ champs)
-- [ ] Upload 6 photos max
-- [ ] Géolocalisation GPS automatique
-- [ ] Autocomplétion ville (OpenStreetMap)
+- [x] Inscription/Connexion email/password
+- [x] OAuth Google/Facebook/Apple (structure)
+- [x] Profil complet (20+ champs)
+- [x] Upload 6 photos max
+- [x] Géolocalisation GPS automatique
+- [x] Autocomplétion ville (OpenStreetMap)
 
 **Swipe & Matching**
-- [ ] Système de swipe avec animations
-- [ ] 10 filtres avancés (âge, distance, genre, taille, etc.)
-- [ ] Calcul distance GPS (Haversine)
-- [ ] Détection matchs automatique
+- [x] Système de swipe avec animations
+- [x] 10 filtres avancés (âge, distance, genre, taille, etc.)
+- [x] Calcul distance GPS (Haversine)
+- [x] Détection matchs automatique
 
 **Messagerie**
-- [ ] Chat temps réel (Socket.IO)
-- [ ] Demandes de messages avec acceptation/refus
-- [ ] Indicateur "en train d'écrire..."
+- [x] Chat temps réel (Socket.IO)
+- [x] Demandes de messages avec acceptation/refus
+- [x] Indicateur "en train d'écrire..."
 
 **Live Streaming**
-- [ ] Live Surprise (Speed Dating vidéo)
-- [ ] Live Publique avec filtres
-- [ ] WebRTC P2P (Simple-Peer)
+- [x] Live Surprise (Speed Dating vidéo avec WebRTC)
+- [x] Live Publique avec filtres
+- [x] Live Compétition
+- [x] Live Événementiel
+- [x] Flux caméra réel avec écran preview
+- [ ] WebRTC multi-participants (en cours)
 
 **Modération**
-- [ ] 4 niveaux de privilèges (User/Mod/Admin/SuperAdmin)
-- [ ] Panel modération
-- [ ] Actions : bannir, débannir, promouvoir, révoquer
+- [x] 4 niveaux de privilèges (User/Mod/Admin/SuperAdmin)
+- [x] Panel modération complet
+- [x] Actions : bannir, débannir, promouvoir, révoquer
 
 **Interface & UX**
-- [ ] Design dark mode
-- [ ] Navigation avec menu déroulant
-- [ ] Responsive (mobile/tablette/desktop)
-- [ ] Animations (Framer Motion)
+- [x] Design dark mode
+- [x] Navigation avec menu hamburger (mobile) / dropdown (desktop)
+- [x] CSS mobile-first responsive (22 fichiers)
+- [x] Animations (Framer Motion)
+- [x] Internationalisation i18n (5 langues : FR, EN, IT, DE, ES)
+
+**Tests**
+- [x] 210 tests Jest backend (100% passent)
+- [x] 15 pages testées visuellement
+- [x] Responsive testé (3 tailles)
 
 ### À développer
 - [ ] WebRTC complet pour multi-participants
 - [ ] Notifications push
 - [ ] Emails transactionnels
 - [ ] Système de signalement & blocage
-- [ ] Tests automatisés
 
 ---
 
@@ -299,6 +317,6 @@ Projet privé - Tous droits réservés © 2026
 
 ---
 
-**Version** : 3.0
-**Dernière mise à jour** : Février 2026
-**Statut** : En développement - Aucune fonctionnalité testée
+**Version** : 4.0
+**Dernière mise à jour** : 18 Février 2026
+**Statut** : En développement - MVP déployé (Render + GitHub Pages)

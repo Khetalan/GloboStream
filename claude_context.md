@@ -124,8 +124,8 @@ GloboStream/
 │   │   │   ├── MessageModal.js
 │   │   │   ├── MessageRequestsPanel.js
 │   │   │   ├── LanguageSwitcher.js  # Dropdown langues (🌐 FR)
-│   │   │   ├── LiveStream.js      # Interface live réutilisable (grille vidéo, chat, stats)
-│   │   │   └── LiveStream.css     # Styles LiveStream (9 layouts, stats panel, chat)
+│   │   │   ├── LiveStream.js      # Interface live réutilisable (flux caméra réel, grille vidéo, chat, stats)
+│   │   │   └── LiveStream.css     # Styles LiveStream (9 layouts, preview, stats panel, chat)
 │   │   ├── pages/              # 17+ pages principales
 │   │   │   ├── Landing.js     # Page d'accueil publique
 │   │   │   ├── Login.js       # Connexion
@@ -146,15 +146,12 @@ GloboStream/
 │   │   │   └── LiveEvent.js   # Live Événementiel (écran accueil + LiveStream)
 │   │   ├── contexts/           # Contextes React
 │   │   │   └── AuthContext.js # Gestion authentification globale
-│   │   ├── locales/            # Traductions i18n (5 langues)
-│   │   │   ├── fr.json        # Français (663 clés)
-│   │   │   ├── en.json        # Anglais
-│   │   │   ├── it.json        # Italien
-│   │   │   ├── de.json        # Allemand
-│   │   │   └── es.json        # Espagnol
-│   │   └── demo/               # Mode démo GitHub Pages
-│   │       ├── demoData.js    # Données mockées
-│   │       └── demoApi.js     # API mockée
+│   │   └── locales/            # Traductions i18n (5 langues)
+│   │       ├── fr.json        # Français (~665 clés)
+│   │       ├── en.json        # Anglais
+│   │       ├── it.json        # Italien
+│   │       ├── de.json        # Allemand
+│   │       └── es.json        # Espagnol
 │   ├── package.json            # Dépendances frontend
 │   └── build/                  # Build production (ignoré)
 │
@@ -397,7 +394,7 @@ git commit -m "Type: Description concise
 - Détail 2
 - Détail 3
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ```
 
 **Types** : `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
@@ -419,14 +416,20 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 | Interface de live | LiveStream réutilisable (Public, Compétition, Événementiel) |
 | Bugs corrigés | 11 |
 
+### Déploiement
+| Service | URL | Détails |
+|---------|-----|---------|
+| **Frontend** | https://khetalan.github.io/GloboStream/ | GitHub Pages (branche `gh-pages`) |
+| **Backend** | https://globostream.onrender.com | Render.com (free tier, cold start ~30s) |
+| **Repo** | https://github.com/Khetalan/GloboStream | Public |
+
 ### Phase actuelle
-**MVP en progression** — Tests en cours, aucune fonctionnalité n'est considérée comme terminée tant qu'elle n'a pas été testée en conditions réelles.
+**MVP en progression** — Backend déployé sur Render, frontend sur GitHub Pages. Système démo supprimé, flux caméra réel intégré. Tests en cours.
 
 ### Prochaines étapes prioritaires
-1. **Ajouter les clés i18n manquantes** (liveStream.*, streamHub.competition*, streamHub.event*)
-2. **Corriger bug Apple OAuth** (passport.js ligne 143)
+1. **Corriger bug Apple OAuth** (passport.js ligne 143)
+2. **Connecter les flux vidéo entre participants** (WebRTC multi-utilisateurs)
 3. **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent)
-4. **Commit + merge + redéploiement GitHub Pages**
 
 ---
 
@@ -482,6 +485,6 @@ APPLE_CLIENT_SECRET=...
 
 ---
 
-**Version** : 1.1
+**Version** : 1.2
 **Dernière mise à jour** : 18 Février 2026
-**Statut** : ✅ Interface de live intégrée — LiveStream réutilisable (Public, Compétition, Événementiel)
+**Statut** : ✅ Déployé (Render + GitHub Pages) — Système démo supprimé, flux caméra réel, CSS mobile-first

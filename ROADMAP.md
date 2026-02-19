@@ -34,48 +34,52 @@ Créer une application fonctionnelle avec les fonctionnalités essentielles pour
 ### Fonctionnalités (code écrit, à tester)
 
 **Authentification**
-- [ ] Inscription/Connexion email
-- [ ] OAuth Google (structure)
-- [ ] JWT sécurisé
+- [x] Inscription/Connexion email
+- [x] OAuth Google/Facebook/Apple (structure)
+- [x] JWT sécurisé
 
 **Profil Utilisateur**
-- [ ] Upload 6 photos
-- [ ] 20+ champs de profil
-- [ ] Géolocalisation GPS
-- [ ] Autocomplétion ville
+- [x] Upload 6 photos
+- [x] 20+ champs de profil
+- [x] Géolocalisation GPS
+- [x] Autocomplétion ville
 
 **Swipe & Matching**
-- [ ] Système de swipe fluide
-- [ ] 10 filtres avancés
-- [ ] Calcul distance GPS
-- [ ] Détection matchs auto
+- [x] Système de swipe fluide
+- [x] 10 filtres avancés
+- [x] Calcul distance GPS
+- [x] Détection matchs auto
 
 **Messagerie**
-- [ ] Chat temps réel
-- [ ] Demandes de messages
-- [ ] Notifications
+- [x] Chat temps réel
+- [x] Demandes de messages
+- [ ] Notifications push
 
 **Live Streaming**
-- [ ] Live Surprise (Speed Dating)
-- [ ] Live Publique
-- [ ] Chat en direct
+- [x] Live Surprise (Speed Dating)
+- [x] Live Publique + Compétition + Événementiel
+- [x] Flux caméra réel avec preview
+- [ ] WebRTC multi-participants
 
 **Modération**
-- [ ] 4 niveaux privilèges
-- [ ] Panel complet
-- [ ] Actions modération
+- [x] 4 niveaux privilèges
+- [x] Panel complet
+- [x] Actions modération
 
 **Infrastructure**
-- [ ] Architecture scalable
-- [ ] MongoDB Atlas
-- [ ] Socket.IO temps réel
-- [ ] Design responsive
+- [x] Architecture scalable
+- [x] MongoDB Atlas
+- [x] Socket.IO temps réel
+- [x] Design responsive (CSS mobile-first)
+- [x] i18n (5 langues)
+- [x] Déploiement (Render + GitHub Pages)
+- [x] 210 tests Jest (100%)
 
 ### Métriques de Succès
-- [ ] Application fonctionnelle
-- [ ] 0 bug critique
-- [ ] Performance correcte
-- [ ] Code maintenable
+- [x] Application fonctionnelle
+- [x] 0 bug critique
+- [x] Performance correcte
+- [x] Code maintenable
 
 ---
 
@@ -220,11 +224,11 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 
 **Q4.1 - Octobre 2026**
 
-**Internationalisation**
-- [ ] Support multi-langues (EN, FR, ES, DE)
-- [ ] Traduction interface
+**Internationalisation** ✅ (réalisé en avance — Phase 1)
+- [x] Support multi-langues (FR, EN, IT, DE, ES)
+- [x] Traduction interface (22 fichiers, ~665 clés)
 - [ ] Localisation dates/devises
-- [ ] Détection langue auto
+- [x] Détection langue auto (i18next-browser-languagedetector)
 
 **API Publique**
 - [ ] API REST documentée

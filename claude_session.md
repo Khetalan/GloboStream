@@ -1189,31 +1189,122 @@ streamHub.eventFeature1/2/3
 
 ---
 
-## État Actuel du Projet
+## Session 14 : Nettoyage demo, flux camera reel, corrections CSS/UX
+**Date** : 18 Fevrier 2026
+**Branche** : `claude-work` → `main` (merged)
+**Commits** : `79c74b2`, `57fae39`, `1d3b2f7`
+**Status** : Termine, deploye (sauf commit `1d3b2f7`)
 
-### Compteurs
-| Métrique | Valeur |
-|---|---|
-| Fonctionnalités codées | 90+ |
-| API backend testées | ~66/90 (~73%) |
-| **Tests automatisés Jest** | ✅ **210 tests (100% passent)** |
-| Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
-| Pages frontend testées (visuel) | 15/15 ✅ (nouvelles pages à tester) |
-| Responsive testé | 3 tailles ✅ (CSS mobile-first) |
-| WebSocket testé | Connexion OK ✅ |
-| i18n intégré | 22/22 fichiers ✅ (5 langues) |
-| Interface de live | ✅ LiveStream réutilisable (Public, Compétition, Événementiel) |
-| Bugs corrigés | 11 (9 backend + 1 visuel + 1 CSS i18n) |
-| ESLint warnings corrigés | 36 → 0 |
-| **Workflow Git** | ✅ **Normalisé** (main + claude-work uniquement) |
+### Objectifs
+1. Supprimer toutes les donnees fictives (demo mode)
+2. Activer le flux camera reel dans LiveStream (Public, Competition, Evenementiel)
+3. Corriger la fuite camera dans LiveSurprise
+4. Ameliorer le chat prive (distinction bulles envoyees/recues)
+5. Corriger le panneau hamburger visible en permanence
+6. Corriger le header landing et le toast sur mobile
 
-### Prochaines Étapes
-1. 📋 **Ajouter les clés i18n manquantes** dans les 5 fichiers locales (liveStream.*, livePublic.start*, streamHub.competition*, streamHub.event*)
-2. 📋 **Corriger bug Apple OAuth** (passport.js ligne 143)
-3. 📋 **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent, LivePublic avec bannière)
-4. 📋 **Commit + merge** `claude-work` → `main`
-5. 📋 **Redéployer GitHub Pages**
+### Ce qui a ete fait
+
+#### 1. Suppression systeme demo
+- **Supprime** : `frontend/src/demo/demoApi.js` (319 lignes, 38 endpoints mockes)
+- **Supprime** : `frontend/src/demo/demoData.js` (322 lignes, 5 profils fictifs)
+- **Nettoye** : `AuthContext.js` (imports demo + auto-login supprimes)
+- **Nettoye** : `StreamHub.js` (stats remises a 0, suppression donnees mockees)
+- **Supprime** : `REACT_APP_DEMO_MODE` de `.env.production`
+
+#### 2. LiveStream.js — flux camera reel + ecran preview
+- **Reecrit** : composant complet avec `getUserMedia` reel
+- **3 ecrans** : erreur permission → preview (avec vue de soi) → interface live complete
+- **Etats ajoutes** : `isLive`, `permissionGranted`, `cameraError`
+- **Refs** : `previewVideoRef` pour la preview, `localVideoRef` pour le live
+- **Toggle reels** : micro/camera affectent les vrais tracks MediaStream
+- **Cleanup** : `useEffect` de demontage stoppe toutes les tracks
+- **CSS ajoute** : ~130 lignes (preview screen, go-live button par mode, permission error, spinner)
+
+#### 3. LiveSurprise.js — correction fuite camera
+- `cleanup()` stoppe maintenant les tracks media (`localStream.getTracks().forEach(track => track.stop())`)
+- `useEffect` de securite ajoute pour stopper les tracks au demontage du composant
+- `stopAndExit()` simplifie (cleanup() gere tout)
+
+#### 4. Chat.js — amelioration visuelle + fix isOwn
+- **Fix** : comparaison `isOwn` utilise `currentUser._id?.toString()` (au lieu de `currentUser.id`)
+- **CSS** : border-radius asymetrique (18px 18px 4px 18px pour own, 18px 18px 18px 4px pour other)
+- **CSS** : gap 12px → 16px, max-width 85% → 75%, padding pour espacement, ombre sur bulles propres
+
+#### 5. Navigation.css — fix panneau hamburger
+- **Probleme** : `right: -320px` causait un debordement horizontal (panel visible a droite du site)
+- **Fix** : `right: 0` + `transform: translateX(100%)` (les transforms ne causent pas d'overflow)
+- **Ajout** : `visibility: hidden` sur mobile et desktop, `visibility: visible` quand `.open`
+
+#### 6. Landing.css — header 2 lignes sur mobile
+- **Probleme** : boutons (langue, Connexion, S'inscrire) coupes/invisibles sur mobile
+- **Fix** : `flex-wrap: wrap` sur le container, logo `width: 100%` centre sur mobile
+- **Desktop** : retour a une seule ligne (logo gauche, boutons droite) a 768px+
+
+#### 7. App.js — toast centre
+- **Probleme** : toast de notification debordait a droite sur mobile
+- **Fix** : `containerStyle: { top: 16, left: 0, right: 0 }` + `maxWidth: calc(100vw - 32px)`
+
+#### 8. i18n — 5 cles ajoutees dans 5 langues
+- `liveStream.previewTitle`, `liveStream.previewDesc`, `liveStream.goLive`
+- `liveStream.cameraError`, `liveStream.permissionDenied`
+- Fichiers : fr.json, en.json, it.json, de.json, es.json
+
+### Fichiers supprimes
+```
+frontend/src/demo/demoApi.js    (supprime)
+frontend/src/demo/demoData.js   (supprime)
+```
+
+### Fichiers modifies
+```
+frontend/src/components/LiveStream.js    (reecrit — flux camera reel + preview)
+frontend/src/components/LiveStream.css   (ajout ~130 lignes preview/error)
+frontend/src/components/Navigation.css   (translateX au lieu de right negatif)
+frontend/src/contexts/AuthContext.js     (suppression imports demo)
+frontend/src/pages/Chat.js              (fix isOwn comparison)
+frontend/src/pages/Chat.css             (bulles asymetriques)
+frontend/src/pages/LiveSurprise.js      (fix fuite camera)
+frontend/src/pages/StreamHub.js         (stats a 0)
+frontend/src/pages/Landing.css          (header 2 lignes mobile)
+frontend/src/App.js                     (toast centre)
+frontend/src/locales/fr.json            (+5 cles)
+frontend/src/locales/en.json            (+5 cles)
+frontend/src/locales/it.json            (+5 cles)
+frontend/src/locales/de.json            (+5 cles)
+frontend/src/locales/es.json            (+5 cles)
+frontend/.env.production                (suppression DEMO_MODE)
+```
+
+### Deploiement
+- **Backend** : https://globostream.onrender.com (Render free tier, deploye)
+- **Frontend** : https://khetalan.github.io/GloboStream/ (deploye jusqu'au commit `57fae39`)
+- **En attente** : commit `1d3b2f7` (header landing + toast) pas encore deploye
 
 ---
 
-> **Rappel** : Ce fichier DOIT être mis à jour à la fin de chaque session Claude Code.
+## Etat Actuel du Projet
+
+### Compteurs
+| Metrique | Valeur |
+|---|---|
+| Fonctionnalites codees | 90+ |
+| API backend testees | ~66/90 (~73%) |
+| **Tests automatises Jest** | 210 tests (100% passent) |
+| Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
+| Responsive teste | 3 tailles (CSS mobile-first) |
+| i18n integre | 22/22 fichiers (5 langues, ~665 cles) |
+| Interface de live | LiveStream reutilisable avec flux camera reel |
+| Bugs corriges | 17 (11 precedents + 6 Session 14) |
+| **Deploiement** | Backend Render + Frontend GitHub Pages |
+| **Workflow Git** | main + claude-work (normalise) |
+
+### Prochaines Etapes
+1. Deployer GitHub Pages avec dernier commit (`1d3b2f7`)
+2. Corriger bug Apple OAuth (passport.js ligne 143)
+3. Tester visuellement les nouvelles pages (LiveCompetition, LiveEvent)
+4. Connecter les flux video entre participants (WebRTC multi-utilisateurs)
+
+---
+
+> **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.

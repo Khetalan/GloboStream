@@ -35,6 +35,12 @@
 | Double `authMiddleware` sur routes users | `backend/routes/users.js` | Supprimé les doublons (déjà appliqué via `router.use`) |
 | Double point-virgule `});;` | `backend/routes/users.js` | Corrigé en `});` |
 | `.env.example` contenait `MONGODB_URI=MONGODB_URI=` | `backend/.env.example` | Supprimé le doublon |
+| Fuite caméra LiveSurprise (tracks non stoppées) | `frontend/src/pages/LiveSurprise.js` | `cleanup()` stoppe les tracks + useEffect sécurité au démontage |
+| LiveStream sans flux caméra réel (UI-only) | `frontend/src/components/LiveStream.js` | Réécriture complète avec `getUserMedia`, preview, 3 écrans |
+| Chat `isOwn` comparaison cassée (`id` vs `_id`) | `frontend/src/pages/Chat.js` | `currentUser._id?.toString()` au lieu de `currentUser.id` |
+| Panneau hamburger visible en permanence | `frontend/src/components/Navigation.css` | `translateX(100%)` au lieu de `right: -320px` + `visibility: hidden` |
+| Header landing boutons coupés sur mobile | `frontend/src/pages/Landing.css` | Header 2 lignes (flex-wrap) + logo centré sur mobile |
+| Toast notification déborde à droite | `frontend/src/App.js` | `containerStyle` + `maxWidth: calc(100vw - 32px)` |
 
 ---
 
@@ -142,7 +148,7 @@
 | Supprimer message | Oui | Non testé | `backend/routes/chat.js` |
 | Socket.IO temps réel | Oui | Non testé (nécessite 2 clients) | `backend/server.js` |
 | Indicateur typing | Oui | Non testé (nécessite 2 clients) | `backend/server.js` |
-| Interface chat (frontend) | Oui | Frontend non testé | `frontend/src/pages/Chat.js` |
+| Interface chat (frontend) | Oui | ✅ Corrigé (isOwn + CSS bulles) | `frontend/src/pages/Chat.js` |
 | Modal demande message | Oui | Frontend non testé | `frontend/src/components/MessageModal.js` |
 | Panel demandes reçues | Oui | Frontend non testé | `frontend/src/components/MessageRequestsPanel.js` |
 
@@ -169,13 +175,16 @@
 | Live Surprise - timer | Oui | Frontend non testé | `frontend/src/pages/LiveSurprise.js` |
 | Live Surprise - décision like/dislike | Oui | Non testé (WebSocket) | `backend/socketHandlers/surprise.js` |
 | Live Surprise - match si mutuel | Oui | OK | `backend/routes/surprise.js` |
-| Live Surprise - interface | Oui | Frontend non testé | `frontend/src/pages/LiveSurprise.js` |
+| Live Surprise - interface | Oui | ✅ Corrigé (fuite caméra) | `frontend/src/pages/LiveSurprise.js` |
 | Démarrer stream 1-on-1 | Oui | OK | `backend/routes/stream.js` |
 | Arrêter stream | Oui | OK | `backend/routes/stream.js` |
 | Streams actifs des matchs | Oui | OK | `backend/routes/stream.js` |
 | Rejoindre stream | Oui | OK | `backend/routes/stream.js` |
 | Lives publics (liste/filtres) | Oui | OK | `backend/routes/live.js` |
 | Lives publics (frontend) | Oui | Frontend non testé | `frontend/src/pages/LivePublic.js` |
+| LiveStream flux caméra réel | Oui | ✅ OK (preview + live) | `frontend/src/components/LiveStream.js` |
+| LiveCompetition page | Oui | Frontend non testé | `frontend/src/pages/LiveCompetition.js` |
+| LiveEvent page | Oui | Frontend non testé | `frontend/src/pages/LiveEvent.js` |
 | Favoris live | Partiel | Non testé | `backend/routes/live.js` (non persisté) |
 | Surprise session stats | Partiel | OK | `backend/routes/surprise.js` (données placeholder) |
 | StreamHub (hub central) | Oui | Frontend non testé | `frontend/src/pages/StreamHub.js` |
@@ -321,7 +330,7 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
 | Notifications push | Haute | Phase 2 |
 | Emails transactionnels | Haute | Phase 2 |
 | Système de blocage utilisateur | Haute | Phase 2 |
-| Tests automatisés (backend) | Haute | MVP |
+| Tests automatisés (backend) | ✅ FAIT | MVP — 210 tests Jest (100%) |
 | Tests automatisés (frontend) | Haute | MVP |
 | CI/CD pipeline | Moyenne | Phase 2 |
 | Dockerisation | Moyenne | Phase 2 |
@@ -340,11 +349,11 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
 | Modération | 14 | 18 | 0 | 0 |
 | Interface & UX | 10 | 0 | 10 (toutes pages + nav + responsive) | 36 ESLint |
 | i18n (5 langues) | 6 | 0 | 1 (build OK) | 0 |
-| **TOTAL** | **90** | **46** | **15 pages testées** | **10 + 36 ESLint** |
+| **TOTAL** | **93** | **46** | **15 pages testées** | **16 + 36 ESLint** |
 
 ### Taux de couverture
-- **Backend API** : 46/90 fonctionnalités testées (51%)
-- **Bugs backend trouvés et corrigés** : 9 bugs (dont 3 critiques)
+- **Backend API** : 46/93 fonctionnalités testées (49%)
+- **Bugs trouvés et corrigés** : 16 bugs (9 backend + 1 visuel + 6 frontend/CSS Session 14)
 - **Warnings ESLint corrigés** : 36 warnings dans 10 fichiers frontend → 0 warning
 - **Frontend compilation** : ✅ `Compiled successfully!` (dev + build production)
 - **Frontend visuel** : ✅ 15/15 pages testées via Chrome MCP, 1 bug corrigé (Profile.js)
@@ -368,5 +377,5 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
 ---
 
 **Document** : Rapport GloboStream
-**Version** : 6.0
-**Date** : 12 Février 2026
+**Version** : 7.0
+**Date** : 18 Février 2026
