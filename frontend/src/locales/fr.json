@@ -392,7 +392,12 @@
     "totalViewers": "Total spectateurs",
     "totalGifts": "Total cadeaux",
     "chatPlaceholder": "Écrire un message...",
-    "startLive": "Démarrer"
+    "startLive": "Démarrer",
+    "previewTitle": "Aperçu caméra",
+    "previewDesc": "Vérifiez votre caméra avant de démarrer le live",
+    "goLive": "Lancer le Live",
+    "cameraError": "Impossible d'accéder à la caméra",
+    "permissionDenied": "Autorisez la caméra et le micro dans les paramètres de votre navigateur"
   },
   "liveSurprise": {
     "quit": "Quitter",

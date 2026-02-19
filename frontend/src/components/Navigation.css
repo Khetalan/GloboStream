@@ -88,15 +88,17 @@
   background: var(--bg-card);
   border-left: 1px solid var(--border);
   z-index: 999;
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  visibility: hidden;
 }
 
 .nav-panel.open {
   right: 0;
+  visibility: visible;
 }
 
 /* ── Bouton fermer (visible seulement sur mobile) ───────── */
@@ -140,11 +142,12 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-8px);
     overflow-y: auto;
+    visibility: hidden;
   }
 
   .nav-panel.open {
@@ -152,6 +155,7 @@
     pointer-events: auto;
     transform: translateY(0);
     right: 0;
+    visibility: visible;
   }
 
   /* Cacher le bouton fermer sur desktop */

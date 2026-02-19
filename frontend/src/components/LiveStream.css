@@ -4,6 +4,136 @@
    chat et contrôles. Mobile-first, max-width 480px.
    ============================================================ */
 
+/* ── Écran Preview (avant le live) ──────────────────────────── */
+.ls-preview-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 32px 24px;
+  gap: 16px;
+}
+
+.ls-preview-video-wrapper {
+  width: 220px;
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.ls-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.ls-preview-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 8px 0 0;
+}
+
+.ls-preview-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin: 0;
+}
+
+.ls-go-live-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #FF3366, #FF6B9D);
+  color: white;
+  border: none;
+  border-radius: 60px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  box-shadow: 0 4px 20px rgba(255, 51, 102, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ls-mode-competition .ls-go-live-btn {
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+}
+
+.ls-mode-event .ls-go-live-btn {
+  background: linear-gradient(135deg, #22C55E, #10B981);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+}
+
+.ls-go-live-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 28px rgba(255, 51, 102, 0.5);
+}
+
+.ls-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: var(--transition);
+}
+
+.ls-back-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Écran erreur permission ────────────────────────────────── */
+.ls-permission-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 32px 24px;
+  gap: 12px;
+  text-align: center;
+}
+
+.ls-permission-error h3 {
+  font-size: 1.2rem;
+  color: #fff;
+  margin: 8px 0 0;
+}
+
+.ls-permission-error p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 300px;
+}
+
+.ls-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #FF3366;
+  border-radius: 50%;
+  animation: lsSpin 0.8s linear infinite;
+}
+
+@keyframes lsSpin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Container ─────────────────────────────────────────────── */
 .ls-container {
   display: flex;

@@ -304,22 +304,24 @@
 .messages-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .message {
   display: flex;
   gap: 8px;
-  max-width: 85%;
+  max-width: 75%;
 }
 
 .message.own {
   align-self: flex-end;
   margin-left: auto;
+  padding-left: 20%;
 }
 
 .message.other {
   align-self: flex-start;
+  padding-right: 20%;
 }
 
 .message-avatar {
@@ -349,9 +351,9 @@
 }
 
 .message-bubble {
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   padding: 10px 14px;
-  border-radius: 18px;
+  border-radius: 18px 18px 18px 4px;
   border: 1px solid var(--border);
 }
 
@@ -359,6 +361,8 @@
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   border: none;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 2px 8px rgba(255, 51, 102, 0.25);
 }
 
 .message-bubble p {

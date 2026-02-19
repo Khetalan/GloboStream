@@ -1,10 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import { setupDemoInterceptor, isDemoMode } from '../demo/demoApi';
-import { DEMO_TOKEN } from '../demo/demoData';
-
-// Activer l'intercepteur démo si nécessaire (avant tout appel API)
-setupDemoInterceptor();
 
 const AuthContext = createContext();
 
@@ -22,14 +17,6 @@ export const AuthProvider = ({ children }) => {
 
   // Configurer axios pour inclure le token dans toutes les requêtes
   useEffect(() => {
-    if (isDemoMode()) {
-      // En mode démo, auto-login avec token fictif
-      localStorage.setItem('token', DEMO_TOKEN);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${DEMO_TOKEN}`;
-      loadUser();
-      return;
-    }
-
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;

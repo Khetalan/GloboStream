@@ -82,6 +82,15 @@ const LiveSurprise = () => {
     }
   }, [remoteStream]);
 
+  // Sécurité : stopper les tracks si le composant est démonté
+  useEffect(() => {
+    return () => {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [localStream]);
+
   const startLocalStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -242,12 +251,18 @@ const LiveSurprise = () => {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
-    
+
     if (peerRef.current) {
       peerRef.current.destroy();
       setPeer(null);
     }
-    
+
+    // Stopper les tracks média (caméra + micro)
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+
     setRemoteStream(null);
     setPartner(null);
     setTimeRemaining(null);
@@ -272,11 +287,8 @@ const LiveSurprise = () => {
   };
 
   const stopAndExit = () => {
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
     cleanup();
-    navigate('/live');
+    navigate('/stream');
   };
 
   const formatTime = (seconds) => {

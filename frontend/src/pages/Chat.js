@@ -281,7 +281,8 @@ const Chat = () => {
               <div className="messages-content">
                 <div className="messages-list">
                   {messages.map((msg, index) => {
-                    const isOwn = msg.sender === currentUser.id || msg.sender?._id === currentUser.id;
+                    const isOwn = msg.sender?.toString() === currentUser._id?.toString()
+                      || msg.sender?._id?.toString() === currentUser._id?.toString();
                     return (
                       <div
                         key={index}

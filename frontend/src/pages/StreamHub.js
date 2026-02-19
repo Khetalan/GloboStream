@@ -23,10 +23,10 @@ const StreamHub = () => {
   const loadLiveStats = async () => {
     // TODO: Appel API pour stats réelles
     setLiveStats({
-      surprise: 127,
-      public: 45,
-      competition: 8,
-      event: 3
+      surprise: 0,
+      public: 0,
+      competition: 0,
+      event: 0
     });
   };
 
