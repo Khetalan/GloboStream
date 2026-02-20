@@ -201,6 +201,13 @@
   min-width: 0;
 }
 
+.lv-lang-badge {
+  font-size: 11px;
+  flex-shrink: 0;
+  align-self: center;
+  opacity: 0.7;
+}
+
 /* ── Barre du bas ─────────────────────────────────────────── */
 .lv-bottom-bar {
   display: flex;
@@ -304,6 +311,16 @@
 
 .lv-control-btn:hover {
   background-color: rgba(255, 255, 255, 0.18);
+}
+
+.lv-control-btn.translate-btn {
+  color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.lv-control-btn.translate-btn.active {
+  color: #3B82F6;
+  background-color: rgba(59, 130, 246, 0.15);
 }
 
 .lv-control-btn.muted {

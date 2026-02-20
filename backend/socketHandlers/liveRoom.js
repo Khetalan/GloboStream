@@ -123,12 +123,13 @@ function setupLiveRoomHandlers(io, socket) {
   });
 
   // ── Chat dans le salon ──
-  socket.on('live-chat', ({ roomId, text, username }) => {
+  socket.on('live-chat', ({ roomId, text, username, lang }) => {
     if (!roomId || !text) return;
 
     io.to(roomId).emit('live-chat-message', {
       username: username || 'Anonyme',
       text: text,
+      lang: lang || 'fr',
       timestamp: Date.now()
     });
   });

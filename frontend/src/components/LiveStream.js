@@ -7,8 +7,9 @@ import Peer from 'simple-peer';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
-  FiUserPlus, FiCheck, FiSlash
+  FiUserPlus, FiCheck, FiSlash, FiGlobe
 } from 'react-icons/fi';
+import { translateText, getLangFlag } from '../utils/translateChat';
 import './LiveStream.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -18,7 +19,7 @@ const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
  * Flow : montage → getUserMedia → preview → "Go Live" → crée salon Socket.IO → WebRTC peers
  */
 const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // États flow
   const [isLive, setIsLive] = useState(false);
@@ -39,6 +40,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [viewers, setViewers] = useState([]);
   const [gifts] = useState([]);
   const [joinRequests, setJoinRequests] = useState([]);
+  const [translateEnabled, setTranslateEnabled] = useState(true);
 
   // Refs
   const chatRef = useRef(null);
@@ -198,13 +200,31 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     });
 
     // Message chat reçu
-    socket.on('live-chat-message', ({ username, text, timestamp }) => {
+    socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+      const msgId = `msg-${timestamp}-${Math.random()}`;
+      const myLang = i18n.language?.split('-')[0] || 'fr';
+      const msgLang = lang || 'fr';
+
       setMessages(prev => [...prev, {
-        id: `msg-${timestamp}-${Math.random()}`,
+        id: msgId,
         username,
         text,
+        lang: msgLang,
+        flag: getLangFlag(msgLang),
+        translatedText: null,
         isOwn: false
       }]);
+
+      // Auto-traduction si langue différente
+      if (msgLang !== myLang) {
+        translateText(text, msgLang, myLang).then(translated => {
+          if (translated) {
+            setMessages(prev => prev.map(m =>
+              m.id === msgId ? { ...m, translatedText: translated } : m
+            ));
+          }
+        });
+      }
     });
 
     // Demande de participation reçue
@@ -241,7 +261,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     return () => {
       socket.disconnect();
     };
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-scroll du chat
   useEffect(() => {
@@ -257,10 +277,11 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     socketRef.current.emit('live-chat', {
       roomId: roomIdRef.current,
       text: chatInput,
-      username: streamerName
+      username: streamerName,
+      lang: i18n.language?.split('-')[0] || 'fr'
     });
     setChatInput('');
-  }, [chatInput, streamerName]);
+  }, [chatInput, streamerName, i18n.language]);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
@@ -678,8 +699,10 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         {messages.map((msg) => (
           <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isOwn ? 'own' : ''}`}>
             <span className="ls-chat-username">{msg.username} :</span>
-            <span className="ls-chat-text">{msg.text}</span>
-            {msg.lang && <span className="ls-lang-badge">{msg.lang}</span>}
+            <span className="ls-chat-text">
+              {translateEnabled && msg.translatedText ? msg.translatedText : msg.text}
+            </span>
+            {msg.flag && <span className="ls-lang-badge">{msg.flag}</span>}
           </div>
         ))}
       </div>
@@ -699,6 +722,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             </button>
           )}
         </div>
+
+        <button
+          className={`ls-control-btn translate-btn ${translateEnabled ? 'active' : ''}`}
+          onClick={() => setTranslateEnabled(prev => !prev)}
+          title={translateEnabled ? 'Traduction activée' : 'Traduction désactivée'}
+        >
+          <FiGlobe size={18} />
+        </button>
 
         <button
           className={`ls-control-btn ${isMuted ? 'muted' : ''}`}

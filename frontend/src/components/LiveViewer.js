@@ -5,8 +5,9 @@ import Peer from 'simple-peer';
 import toast from 'react-hot-toast';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
-  FiMic, FiMicOff, FiVideo, FiVideoOff
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGlobe
 } from 'react-icons/fi';
+import { translateText, getLangFlag } from '../utils/translateChat';
 import './LiveViewer.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -21,11 +22,12 @@ const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
  * - user : utilisateur courant
  */
 const LiveViewer = ({ roomId, onLeave, user }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [remoteStream, setRemoteStream] = useState(null);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
+  const [translateEnabled, setTranslateEnabled] = useState(true);
   const [viewerCount, setViewerCount] = useState(0);
   const [joinRequestStatus, setJoinRequestStatus] = useState('idle'); // idle | pending | accepted | rejected
   const [isParticipant, setIsParticipant] = useState(false);
@@ -102,13 +104,31 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Message chat
-    socket.on('live-chat-message', ({ username, text, timestamp }) => {
+    socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+      const msgId = `msg-${timestamp}-${Math.random()}`;
+      const myLang = i18n.language?.split('-')[0] || 'fr';
+      const msgLang = lang || 'fr';
+
       setMessages(prev => [...prev, {
-        id: `msg-${timestamp}-${Math.random()}`,
+        id: msgId,
         username,
         text,
+        lang: msgLang,
+        flag: getLangFlag(msgLang),
+        translatedText: null,
         isOwn: false
       }]);
+
+      // Auto-traduction si langue différente
+      if (msgLang !== myLang) {
+        translateText(text, msgLang, myLang).then(translated => {
+          if (translated) {
+            setMessages(prev => prev.map(m =>
+              m.id === msgId ? { ...m, translatedText: translated } : m
+            ));
+          }
+        });
+      }
     });
 
     // Demande de participation acceptée
@@ -225,10 +245,11 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     socketRef.current.emit('live-chat', {
       roomId,
       text: chatInput,
-      username: user?.displayName || user?.firstName || 'Viewer'
+      username: user?.displayName || user?.firstName || 'Viewer',
+      lang: i18n.language?.split('-')[0] || 'fr'
     });
     setChatInput('');
-  }, [chatInput, roomId, user]);
+  }, [chatInput, roomId, user, i18n.language]);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') handleSendMessage();
@@ -350,7 +371,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         {messages.map((msg) => (
           <div key={msg.id} className={`lv-chat-message ${msg.isSystem ? 'system' : ''}`}>
             <span className="lv-chat-username">{msg.username} :</span>
-            <span className="lv-chat-text">{msg.text}</span>
+            <span className="lv-chat-text">
+              {translateEnabled && msg.translatedText ? msg.translatedText : msg.text}
+            </span>
+            {msg.flag && <span className="lv-lang-badge">{msg.flag}</span>}
           </div>
         ))}
       </div>
@@ -371,6 +395,14 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
             </button>
           )}
         </div>
+
+        <button
+          className={`lv-control-btn translate-btn ${translateEnabled ? 'active' : ''}`}
+          onClick={() => setTranslateEnabled(prev => !prev)}
+          title={translateEnabled ? 'Traduction activée' : 'Traduction désactivée'}
+        >
+          <FiGlobe size={16} />
+        </button>
 
         {/* Bouton demander à rejoindre */}
         {!isParticipant && (
