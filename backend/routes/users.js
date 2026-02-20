@@ -1,42 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 
-// Créer le dossier uploads s'il n'existe pas
-const uploadsDir = path.join(__dirname, '../uploads/photos');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Configuration de multer pour l'upload des photos
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, req.user._id + '-' + uniqueSuffix + path.extname(file.originalname));
+// Configuration multer avec Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'globostream/photos',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 'auto' }]
   }
 });
 
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Seules les images (JPEG, PNG, WebP) sont autorisées'));
-    }
-  }
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
 });
 
 // Middleware d'authentification
@@ -166,15 +155,17 @@ router.post('/photos', upload.single('photo'), async (req, res) => {
 
     // Vérifier le nombre de photos
     if (user.photos.length >= 6) {
-      // Supprimer le fichier uploadé
-      fs.unlinkSync(req.file.path);
+      // Supprimer le fichier uploadé sur Cloudinary
+      if (req.file.filename) {
+        await cloudinary.uploader.destroy(req.file.filename);
+      }
       return res.status(400).json({ error: 'Maximum 6 photos autorisées' });
     }
 
-    // Ajouter la photo
+    // Ajouter la photo (req.file.path = URL Cloudinary complète)
     const photo = {
-      url: `/uploads/photos/${req.file.filename}`,
-      isPrimary: user.photos.length === 0, // Première photo = photo principale
+      url: req.file.path,
+      isPrimary: user.photos.length === 0,
       uploadedAt: new Date()
     };
 
@@ -206,12 +197,15 @@ router.delete('/photos/:photoId', async (req, res) => {
     }
 
     const photo = user.photos[photoIndex];
-    
-    // Supprimer le fichier physique
-    const filename = photo.url.split('/').pop();
-    const filepath = path.join(uploadsDir, filename);
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
+
+    // Supprimer le fichier sur Cloudinary
+    if (photo.url && photo.url.includes('cloudinary')) {
+      const urlParts = photo.url.split('/');
+      const folderAndFile = urlParts.slice(-2).join('/');
+      const publicId = folderAndFile.replace(/\.[^/.]+$/, '');
+      await cloudinary.uploader.destroy(publicId).catch(err => {
+        console.error('Cloudinary delete error:', err);
+      });
     }
 
     user.photos.splice(photoIndex, 1);
