@@ -171,18 +171,23 @@
 }
 
 .lv-chat-message {
-  padding: 5px 0;
+  padding: 6px 0;
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
+  flex-direction: column;
+  gap: 2px;
   line-height: 1.4;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  flex-wrap: wrap;
 }
 
 .lv-chat-message.system {
   opacity: 0.5;
   font-style: italic;
+}
+
+.lv-chat-message-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .lv-chat-username {
@@ -202,10 +207,52 @@
 }
 
 .lv-lang-badge {
-  font-size: 11px;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  padding: 1px 4px;
   flex-shrink: 0;
   align-self: center;
-  opacity: 0.7;
+  letter-spacing: 0.3px;
+}
+
+.lv-translate-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s;
+  margin-top: 1px;
+}
+
+.lv-translate-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.lv-translate-btn.loading {
+  animation: lvTranslateSpin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes lvTranslateSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.lv-translated-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  padding: 3px 0 2px 0;
+  border-left: 2px solid rgba(228, 64, 95, 0.5);
+  padding-left: 8px;
+  margin-left: 4px;
 }
 
 /* ── Barre du bas ─────────────────────────────────────────── */
@@ -311,16 +358,6 @@
 
 .lv-control-btn:hover {
   background-color: rgba(255, 255, 255, 0.18);
-}
-
-.lv-control-btn.translate-btn {
-  color: rgba(255, 255, 255, 0.5);
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-.lv-control-btn.translate-btn.active {
-  color: #3B82F6;
-  background-color: rgba(59, 130, 246, 0.15);
 }
 
 .lv-control-btn.muted {

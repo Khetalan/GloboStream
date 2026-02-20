@@ -7,9 +7,9 @@ import Peer from 'simple-peer';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
-  FiUserPlus, FiCheck, FiSlash, FiGlobe
+  FiUserPlus, FiCheck, FiSlash
 } from 'react-icons/fi';
-import { translateText, getLangFlag } from '../utils/translateChat';
+import { translateMessage } from '../utils/translateChat';
 import './LiveStream.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -40,7 +40,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [viewers, setViewers] = useState([]);
   const [gifts] = useState([]);
   const [joinRequests, setJoinRequests] = useState([]);
-  const [translateEnabled, setTranslateEnabled] = useState(true);
 
   // Refs
   const chatRef = useRef(null);
@@ -201,30 +200,16 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
     // Message chat reçu
     socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
-      const msgId = `msg-${timestamp}-${Math.random()}`;
-      const myLang = i18n.language?.split('-')[0] || 'fr';
-      const msgLang = lang || 'fr';
-
       setMessages(prev => [...prev, {
-        id: msgId,
+        id: `msg-${timestamp}-${Math.random()}`,
         username,
         text,
-        lang: msgLang,
-        flag: getLangFlag(msgLang),
+        lang: lang || null,
         translatedText: null,
+        showTranslation: false,
+        translating: false,
         isOwn: false
       }]);
-
-      // Auto-traduction si langue différente
-      if (msgLang !== myLang) {
-        translateText(text, msgLang, myLang).then(translated => {
-          if (translated) {
-            setMessages(prev => prev.map(m =>
-              m.id === msgId ? { ...m, translatedText: translated } : m
-            ));
-          }
-        });
-      }
     });
 
     // Demande de participation reçue
@@ -270,6 +255,33 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     }
   }, [messages]);
 
+  // Traduire un message à la demande (clic sur 🌐)
+  const handleTranslateMsg = useCallback(async (msgId) => {
+    setMessages(prev => prev.map(m => {
+      if (m.id !== msgId) return m;
+      // Si déjà traduit, toggle l'affichage
+      if (m.translatedText) return { ...m, showTranslation: !m.showTranslation };
+      return { ...m, translating: true };
+    }));
+
+    // Chercher le message
+    const msg = messages.find(m => m.id === msgId);
+    if (!msg || msg.translatedText) return;
+
+    const userLang = (i18n.language || navigator.language || 'fr').split('-')[0];
+    const translated = await translateMessage(msg.text, userLang);
+
+    setMessages(prev => prev.map(m => {
+      if (m.id !== msgId) return m;
+      return {
+        ...m,
+        translatedText: translated || null,
+        showTranslation: true,
+        translating: false
+      };
+    }));
+  }, [messages, i18n.language]);
+
   // Envoi message chat via Socket.IO
   const handleSendMessage = useCallback(() => {
     if (!chatInput.trim() || !socketRef.current || !roomIdRef.current) return;
@@ -278,7 +290,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       roomId: roomIdRef.current,
       text: chatInput,
       username: streamerName,
-      lang: i18n.language?.split('-')[0] || 'fr'
+      lang: (i18n.language || 'fr').split('-')[0]
     });
     setChatInput('');
   }, [chatInput, streamerName, i18n.language]);
@@ -698,11 +710,26 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       <div className="ls-chat-section" ref={chatRef}>
         {messages.map((msg) => (
           <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isOwn ? 'own' : ''}`}>
-            <span className="ls-chat-username">{msg.username} :</span>
-            <span className="ls-chat-text">
-              {translateEnabled && msg.translatedText ? msg.translatedText : msg.text}
-            </span>
-            {msg.flag && <span className="ls-lang-badge">{msg.flag}</span>}
+            <div className="ls-chat-message-top">
+              <span className="ls-chat-username">{msg.username} :</span>
+              <span className="ls-chat-text">{msg.text}</span>
+              {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
+              {!msg.isSystem && (
+                <button
+                  className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                  onClick={() => handleTranslateMsg(msg.id)}
+                  title="Traduire"
+                >
+                  🌐
+                </button>
+              )}
+            </div>
+            {msg.showTranslation && msg.translatedText && (
+              <div className="ls-translated-text">🌐 {msg.translatedText}</div>
+            )}
+            {msg.showTranslation && !msg.translatedText && !msg.translating && (
+              <div className="ls-translated-text">✓ Déjà dans votre langue</div>
+            )}
           </div>
         ))}
       </div>
@@ -722,14 +749,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             </button>
           )}
         </div>
-
-        <button
-          className={`ls-control-btn translate-btn ${translateEnabled ? 'active' : ''}`}
-          onClick={() => setTranslateEnabled(prev => !prev)}
-          title={translateEnabled ? 'Traduction activée' : 'Traduction désactivée'}
-        >
-          <FiGlobe size={18} />
-        </button>
 
         <button
           className={`ls-control-btn ${isMuted ? 'muted' : ''}`}

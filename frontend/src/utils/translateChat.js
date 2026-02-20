@@ -1,38 +1,18 @@
-const LANG_FLAGS = {
-  fr: '🇫🇷',
-  en: '🇬🇧',
-  it: '🇮🇹',
-  de: '🇩🇪',
-  es: '🇪🇸',
-  pt: '🇵🇹',
-  ar: '🇸🇦',
-  zh: '🇨🇳',
-  ja: '🇯🇵',
-  ru: '🇷🇺'
-};
-
-export const getLangFlag = (langCode) => {
-  if (!langCode) return '';
-  return LANG_FLAGS[langCode] || langCode.toUpperCase();
-};
-
 /**
- * Traduit un texte via l'API gratuite MyMemory.
- * Limite : ~5000 chars/jour en anonyme, largement suffisant pour un chat live.
+ * Traduit un texte via l'API gratuite MyMemory (autodetect → langue cible).
+ * Utilisé par le bouton 🌐 sur chaque message du chat live.
  */
-export async function translateText(text, fromLang, toLang) {
-  if (!text || !fromLang || !toLang || fromLang === toLang) return null;
+export async function translateMessage(text, targetLang) {
+  if (!text || !targetLang) return null;
 
   try {
     const res = await fetch(
-      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLang}|${toLang}`
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${targetLang}`
     );
     const data = await res.json();
+    const translated = data.responseData?.translatedText;
 
-    if (data.responseStatus === 200 && data.responseData?.translatedText) {
-      const translated = data.responseData.translatedText;
-      // MyMemory renvoie parfois le même texte en majuscules si pas de traduction
-      if (translated.toLowerCase() === text.toLowerCase()) return null;
+    if (translated && translated.toLowerCase() !== text.toLowerCase()) {
       return translated;
     }
     return null;
