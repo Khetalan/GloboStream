@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiArrowLeft, FiHeart } from 'react-icons/fi';
 import './Common.css';
 
 const Stream = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="page-container">
@@ -20,9 +22,9 @@ const Stream = () => {
       </div>
 
       <div className="page-content">
-        <h1>Stream</h1>
-        <p>Cette page est en construction...</p>
-        <p>Fonctionnalité à venir !</p>
+        <h1>{t('stream.title')}</h1>
+        <p>{t('stream.underConstruction')}</p>
+        <p>{t('stream.comingSoon')}</p>
       </div>
     </div>
   );

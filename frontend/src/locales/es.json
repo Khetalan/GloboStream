@@ -397,7 +397,30 @@
     "previewDesc": "Comprueba tu cámara antes de iniciar el directo",
     "goLive": "Iniciar directo",
     "cameraError": "No se puede acceder a la cámara",
-    "permissionDenied": "Permite la cámara y el micrófono en la configuración del navegador"
+    "permissionDenied": "Permite la cámara y el micrófono en la configuración del navegador",
+    "startError": "Error al iniciar el directo",
+    "noPhotoWarning": "Añade al menos una foto para iniciar un directo",
+    "wantsToJoin": "{{name}} quiere unirse al directo",
+    "wantsToJoinShort": "quiere unirse",
+    "translate": "Traducir",
+    "alreadyYourLang": "Ya está en tu idioma"
+  },
+  "liveViewer": {
+    "roomNotFound": "Sala no encontrada",
+    "roomClosed": "Este directo ya no existe o ha sido cerrado.",
+    "connecting": "Conectando al directo...",
+    "waitingStream": "Esperando el flujo de video...",
+    "cameraError": "No se puede acceder a la cámara",
+    "translate": "Traducir",
+    "alreadyYourLang": "Ya está en tu idioma",
+    "chatPlaceholder": "Enviar un mensaje...",
+    "join": "Unirse",
+    "pending": "Pendiente...",
+    "accepted": "¡Aceptado!",
+    "rejected": "Rechazado",
+    "joinedLive": "¡Te has unido al directo!",
+    "requestRejected": "Solicitud rechazada",
+    "liveEnded": "El directo ha terminado"
   },
   "liveSurprise": {
     "quit": "Salir",
@@ -422,7 +445,22 @@
     "likeSent": "¡Like enviado! 💕",
     "likeError": "Error al enviar",
     "itsAMatch": "🎉 ¡Es un match! Podéis continuar en privado",
-    "partnerDisconnected": "Tu compañero se ha desconectado"
+    "partnerDisconnected": "Tu compañero se ha desconectado",
+    "previewTitle": "Vista previa de cámara",
+    "previewDesc": "Comprueba tu aspecto antes de iniciar la búsqueda",
+    "launchSearch": "Iniciar búsqueda",
+    "connecting": "Conectando..."
+  },
+  "stream": {
+    "title": "Stream",
+    "underConstruction": "Esta página está en construcción...",
+    "comingSoon": "¡Funcionalidad próximamente!"
+  },
+  "accessibility": {
+    "menu": "Menú",
+    "close": "Cerrar",
+    "navigation": "Navegación",
+    "changeLang": "Cambiar idioma"
   },
   "moderation": {
     "title": "Panel de Moderación",

@@ -397,7 +397,30 @@
     "previewDesc": "Vérifiez votre caméra avant de démarrer le live",
     "goLive": "Lancer le Live",
     "cameraError": "Impossible d'accéder à la caméra",
-    "permissionDenied": "Autorisez la caméra et le micro dans les paramètres de votre navigateur"
+    "permissionDenied": "Autorisez la caméra et le micro dans les paramètres de votre navigateur",
+    "startError": "Erreur lors du démarrage du live",
+    "noPhotoWarning": "Ajoutez au moins une photo pour lancer un live",
+    "wantsToJoin": "{{name}} veut rejoindre le live",
+    "wantsToJoinShort": "veut rejoindre",
+    "translate": "Traduire",
+    "alreadyYourLang": "Déjà dans votre langue"
+  },
+  "liveViewer": {
+    "roomNotFound": "Salon introuvable",
+    "roomClosed": "Ce live n'existe plus ou a été fermé.",
+    "connecting": "Connexion au live...",
+    "waitingStream": "En attente du flux vidéo...",
+    "cameraError": "Impossible d'accéder à la caméra",
+    "translate": "Traduire",
+    "alreadyYourLang": "Déjà dans votre langue",
+    "chatPlaceholder": "Envoyer un message...",
+    "join": "Rejoindre",
+    "pending": "En attente...",
+    "accepted": "Accepté !",
+    "rejected": "Refusé",
+    "joinedLive": "Vous avez rejoint le live !",
+    "requestRejected": "Demande refusée",
+    "liveEnded": "Le live est terminé"
   },
   "liveSurprise": {
     "quit": "Quitter",
@@ -422,7 +445,22 @@
     "likeSent": "Like envoyé ! 💕",
     "likeError": "Erreur lors de l'envoi",
     "itsAMatch": "🎉 C'est un match ! Vous pouvez continuer en privé",
-    "partnerDisconnected": "Votre partenaire s'est déconnecté"
+    "partnerDisconnected": "Votre partenaire s'est déconnecté",
+    "previewTitle": "Aperçu caméra",
+    "previewDesc": "Vérifiez votre apparence avant de lancer la recherche",
+    "launchSearch": "Lancer la recherche",
+    "connecting": "Connexion en cours..."
+  },
+  "stream": {
+    "title": "Stream",
+    "underConstruction": "Cette page est en construction...",
+    "comingSoon": "Fonctionnalité à venir !"
+  },
+  "accessibility": {
+    "menu": "Menu",
+    "close": "Fermer",
+    "navigation": "Navigation",
+    "changeLang": "Changer la langue"
   },
   "moderation": {
     "title": "Panel de Modération",

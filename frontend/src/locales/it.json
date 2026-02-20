@@ -397,7 +397,30 @@
     "previewDesc": "Controlla la fotocamera prima di iniziare la diretta",
     "goLive": "Vai in diretta",
     "cameraError": "Impossibile accedere alla fotocamera",
-    "permissionDenied": "Consenti fotocamera e microfono nelle impostazioni del browser"
+    "permissionDenied": "Consenti fotocamera e microfono nelle impostazioni del browser",
+    "startError": "Errore durante l'avvio della diretta",
+    "noPhotoWarning": "Aggiungi almeno una foto per avviare una diretta",
+    "wantsToJoin": "{{name}} vuole unirsi alla diretta",
+    "wantsToJoinShort": "vuole unirsi",
+    "translate": "Traduci",
+    "alreadyYourLang": "Già nella tua lingua"
+  },
+  "liveViewer": {
+    "roomNotFound": "Sala non trovata",
+    "roomClosed": "Questa diretta non esiste più o è stata chiusa.",
+    "connecting": "Connessione alla diretta...",
+    "waitingStream": "In attesa del flusso video...",
+    "cameraError": "Impossibile accedere alla fotocamera",
+    "translate": "Traduci",
+    "alreadyYourLang": "Già nella tua lingua",
+    "chatPlaceholder": "Invia un messaggio...",
+    "join": "Partecipa",
+    "pending": "In attesa...",
+    "accepted": "Accettato!",
+    "rejected": "Rifiutato",
+    "joinedLive": "Ti sei unito alla diretta!",
+    "requestRejected": "Richiesta rifiutata",
+    "liveEnded": "La diretta è terminata"
   },
   "liveSurprise": {
     "quit": "Esci",
@@ -422,7 +445,22 @@
     "likeSent": "Like inviato! 💕",
     "likeError": "Errore durante l'invio",
     "itsAMatch": "🎉 È un match! Potete continuare in privato",
-    "partnerDisconnected": "Il tuo partner si è disconnesso"
+    "partnerDisconnected": "Il tuo partner si è disconnesso",
+    "previewTitle": "Anteprima fotocamera",
+    "previewDesc": "Controlla il tuo aspetto prima di avviare la ricerca",
+    "launchSearch": "Avvia la ricerca",
+    "connecting": "Connessione in corso..."
+  },
+  "stream": {
+    "title": "Stream",
+    "underConstruction": "Questa pagina è in costruzione...",
+    "comingSoon": "Funzionalità in arrivo!"
+  },
+  "accessibility": {
+    "menu": "Menu",
+    "close": "Chiudi",
+    "navigation": "Navigazione",
+    "changeLang": "Cambia lingua"
   },
   "moderation": {
     "title": "Pannello di Moderazione",

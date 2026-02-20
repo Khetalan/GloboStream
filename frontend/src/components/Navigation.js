@@ -82,7 +82,7 @@ const Navigation = () => {
       <button
         className="hamburger-btn"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Menu"
+        aria-label={t('accessibility.menu')}
         aria-expanded={isOpen}
       >
         <div className="hamburger-avatar">{avatarContent}</div>
@@ -112,10 +112,10 @@ const Navigation = () => {
       )}
 
       {/* Panneau de navigation (slide depuis la droite sur mobile, dropdown sur desktop) */}
-      <div className={`nav-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-label="Navigation">
+      <div className={`nav-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-label={t('accessibility.navigation')}>
 
         {/* Bouton fermer (mobile) */}
-        <button className="nav-panel-close" onClick={closeMenu} aria-label="Fermer">
+        <button className="nav-panel-close" onClick={closeMenu} aria-label={t('accessibility.close')}>
           <FiX />
         </button>
 

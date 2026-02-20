@@ -397,7 +397,30 @@
     "previewDesc": "Check your camera before going live",
     "goLive": "Go Live",
     "cameraError": "Unable to access camera",
-    "permissionDenied": "Allow camera and microphone in your browser settings"
+    "permissionDenied": "Allow camera and microphone in your browser settings",
+    "startError": "Error starting the live",
+    "noPhotoWarning": "Add at least one photo to start a live",
+    "wantsToJoin": "{{name}} wants to join the live",
+    "wantsToJoinShort": "wants to join",
+    "translate": "Translate",
+    "alreadyYourLang": "Already in your language"
+  },
+  "liveViewer": {
+    "roomNotFound": "Room not found",
+    "roomClosed": "This live no longer exists or has been closed.",
+    "connecting": "Connecting to live...",
+    "waitingStream": "Waiting for video stream...",
+    "cameraError": "Unable to access camera",
+    "translate": "Translate",
+    "alreadyYourLang": "Already in your language",
+    "chatPlaceholder": "Send a message...",
+    "join": "Join",
+    "pending": "Pending...",
+    "accepted": "Accepted!",
+    "rejected": "Rejected",
+    "joinedLive": "You joined the live!",
+    "requestRejected": "Request rejected",
+    "liveEnded": "The live has ended"
   },
   "liveSurprise": {
     "quit": "Quit",
@@ -422,7 +445,22 @@
     "likeSent": "Like sent! 💕",
     "likeError": "Error sending like",
     "itsAMatch": "🎉 It's a match! You can continue privately",
-    "partnerDisconnected": "Your partner has disconnected"
+    "partnerDisconnected": "Your partner has disconnected",
+    "previewTitle": "Camera preview",
+    "previewDesc": "Check your appearance before starting the search",
+    "launchSearch": "Start search",
+    "connecting": "Connecting..."
+  },
+  "stream": {
+    "title": "Stream",
+    "underConstruction": "This page is under construction...",
+    "comingSoon": "Feature coming soon!"
+  },
+  "accessibility": {
+    "menu": "Menu",
+    "close": "Close",
+    "navigation": "Navigation",
+    "changeLang": "Change language"
   },
   "moderation": {
     "title": "Moderation Panel",

@@ -21,6 +21,7 @@ const LiveSurprise = () => {
   const [, setPeer] = useState(null);
   
   // États de connexion
+  const [showPreview, setShowPreview] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [partner, setPartner] = useState(null);
@@ -44,6 +45,7 @@ const LiveSurprise = () => {
   // Refs
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
+  const previewVideoRef = useRef();
   const socketRef = useRef();
   const peerRef = useRef();
   const localStreamRef = useRef(null);
@@ -77,6 +79,13 @@ const LiveSurprise = () => {
     }
   }, [localStream]);
 
+  // Attacher le stream au preview vidéo
+  useEffect(() => {
+    if (showPreview && localStreamRef.current && previewVideoRef.current) {
+      previewVideoRef.current.srcObject = localStreamRef.current;
+    }
+  }, [showPreview]);
+
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
@@ -108,14 +117,31 @@ const LiveSurprise = () => {
     }
   };
 
-  const startSearch = async () => {
+  // Étape 1 : démarrer la caméra et afficher l'aperçu
+  const startPreview = async () => {
     const stream = await startLocalStream();
     if (!stream) return;
+    setShowPreview(true);
+  };
 
+  // Étape 2 : confirmer et lancer la recherche
+  const confirmSearch = () => {
+    setShowPreview(false);
     setIsSearching(true);
-    socketRef.current.emit('start-search', { 
+    socketRef.current.emit('start-search', {
       userId: user._id,
-      timerDuration: timerDuration 
+      timerDuration: timerDuration
+    });
+  };
+
+  // Relancer la recherche directement (skip → nouvelle recherche sans preview)
+  const restartSearch = async () => {
+    const stream = await startLocalStream();
+    if (!stream) return;
+    setIsSearching(true);
+    socketRef.current.emit('start-search', {
+      userId: user._id,
+      timerDuration: timerDuration
     });
   };
 
@@ -207,7 +233,7 @@ const LiveSurprise = () => {
       cleanup();
       
       if (decision === 'skip') {
-        startSearch(); // Nouvelle recherche
+        restartSearch(); // Nouvelle recherche
       } else {
         setIsConnected(false);
       }
@@ -325,7 +351,7 @@ const LiveSurprise = () => {
       <div className="live-surprise-main">
 
         {/* ── ÉCRAN D'ACCUEIL : bouton Démarrer ──────────────── */}
-        {!isSearching && !isConnected && (
+        {!showPreview && !isSearching && !isConnected && (
           <div className="start-screen">
             <div className="start-screen-content">
               <div className="start-icon-wrapper">
@@ -334,7 +360,7 @@ const LiveSurprise = () => {
               <h2>{t('liveSurprise.introTitle')}</h2>
               <p>{t('liveSurprise.introDesc')}</p>
 
-              <button className="start-btn" onClick={startSearch}>
+              <button className="start-btn" onClick={startPreview}>
                 <FiPlay />
                 <span>{t('liveSurprise.start')}</span>
               </button>
@@ -344,6 +370,27 @@ const LiveSurprise = () => {
                 <span>{timerDuration} {t('common.min')} par session</span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── ÉCRAN APERÇU CAMÉRA ──────────────────────────────── */}
+        {showPreview && !isSearching && !isConnected && (
+          <div className="preview-screen">
+            <div className="preview-video-wrapper">
+              <video
+                ref={previewVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="preview-video"
+              />
+            </div>
+            <h2>{t('liveSurprise.previewTitle', 'Aperçu caméra')}</h2>
+            <p className="preview-hint">{t('liveSurprise.previewDesc', 'Vérifiez votre apparence avant de lancer la recherche')}</p>
+            <button className="start-btn" onClick={confirmSearch}>
+              <FiPlay />
+              <span>{t('liveSurprise.launchSearch', 'Lancer la recherche')}</span>
+            </button>
           </div>
         )}
 
@@ -389,7 +436,7 @@ const LiveSurprise = () => {
               ) : (
                 <div className="participant-loading">
                   <FiRefreshCw className="spinning" size={40} />
-                  <span>Connexion en cours...</span>
+                  <span>{t('liveSurprise.connecting')}</span>
                 </div>
               )}
 
@@ -496,18 +543,6 @@ const LiveSurprise = () => {
           </div>
         )}
 
-        {/* ── Vidéo locale sur l'écran d'accueil (hors recherche/appel) ── */}
-        {!isSearching && !isConnected && localStream && (
-          <div className="local-video-container">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="local-video"
-            />
-          </div>
-        )}
       </div>
 
       {/* Settings Modal */}

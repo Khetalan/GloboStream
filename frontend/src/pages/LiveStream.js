@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiVideo, FiShuffle, FiGlobe, FiTrophy, FiCalendar, FiArrowLeft, FiUsers, FiClock } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import './LiveStream.css';
 
 const LiveStream = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState(null);
   const [liveStats, setLiveStats] = useState({
     surprise: 0,
@@ -32,66 +34,66 @@ const LiveStream = () => {
   const sections = [
     {
       id: 'surprise',
-      title: 'Live Surprise',
+      title: t('streamHub.surpriseTitle'),
       icon: FiShuffle,
-      description: 'Rencontre aléatoire en vidéo - Type Chatroulette + Speed Dating',
+      description: t('streamHub.surpriseDesc'),
       gradient: 'linear-gradient(135deg, #FF3366, #FF6B9D)',
       features: [
-        'Connexion aléatoire instantanée',
-        'Timer 3-10 minutes réglable',
-        'Like/Dislike après le temps',
-        'Changement rapide si souhaité'
+        t('streamHub.surpriseFeature1'),
+        t('streamHub.surpriseFeature2'),
+        t('streamHub.surpriseFeature3'),
+        t('streamHub.surpriseFeature4')
       ],
       path: '/live/surprise',
-      badge: 'HOT',
+      badge: t('streamHub.hot'),
       activeUsers: liveStats.surprise
     },
     {
       id: 'public',
-      title: 'Live Publique',
+      title: t('streamHub.publicTitle'),
       icon: FiGlobe,
-      description: 'Streams publics visibles par tous',
+      description: t('streamHub.publicDesc'),
       gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
       features: [
-        'Diffusion publique',
-        'Chat en direct',
-        'Dons et cadeaux virtuels',
-        'Enregistrements possibles'
+        t('streamHub.publicFeature1'),
+        t('streamHub.publicFeature2'),
+        t('streamHub.publicFeature3'),
+        t('streamHub.publicFeature4')
       ],
       path: '/live/public',
-      badge: 'NOUVEAU',
+      badge: t('streamHub.new'),
       activeUsers: liveStats.public
     },
     {
       id: 'competition',
-      title: 'Live de Compétition',
+      title: t('streamHub.competitionTitle'),
       icon: FiGlobe,
-      description: 'Compétitions et défis en direct',
+      description: t('streamHub.competitionDesc'),
       gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)',
       features: [
-        'Défis en temps réel',
-        'Classements live',
-        'Prix et récompenses',
-        'Votes du public'
+        t('streamHub.competitionFeature1'),
+        t('streamHub.competitionFeature2'),
+        t('streamHub.competitionFeature3'),
+        t('streamHub.competitionFeature4')
       ],
       path: '/live/competition',
-      badge: 'SOON',
+      badge: t('streamHub.soon'),
       activeUsers: liveStats.competition
     },
     {
       id: 'event',
-      title: 'Live Événementiel',
+      title: t('streamHub.eventTitle'),
       icon: FiCalendar,
-      description: 'Événements spéciaux et soirées thématiques',
+      description: t('streamHub.eventDesc'),
       gradient: 'linear-gradient(135deg, #22C55E, #10B981)',
       features: [
-        'Soirées à thème',
-        'Speed dating collectif',
-        'Événements exclusifs',
-        'Animations spéciales'
+        t('streamHub.eventFeature1'),
+        t('streamHub.eventFeature2'),
+        t('streamHub.eventFeature3'),
+        t('streamHub.eventFeature4')
       ],
       path: '/live/event',
-      badge: 'PREMIUM',
+      badge: t('streamHub.premiumBadge'),
       activeUsers: liveStats.event
     }
   ];
@@ -104,30 +106,30 @@ const LiveStream = () => {
         </button>
         <div className="logo">
           <FiVideo className="logo-icon" />
-          <span>Live Streaming</span>
+          <span>{t('streamHub.title')}</span>
         </div>
         <Navigation />
       </div>
 
       <div className="livestream-content">
         <div className="hero-section">
-          <h1>Rencontres en Live</h1>
+          <h1>{t('streamHub.heroTitle')}</h1>
           <p className="hero-subtitle">
-            Connectez-vous instantanément avec des personnes réelles en vidéo
+            {t('streamHub.heroSubtitle')}
           </p>
           <div className="hero-stats">
             <div className="stat-item">
               <FiUsers className="stat-icon" />
               <div className="stat-info">
                 <strong>{Object.values(liveStats).reduce((a, b) => a + b, 0)}</strong>
-                <span>En ligne maintenant</span>
+                <span>{t('streamHub.onlineNow')}</span>
               </div>
             </div>
             <div className="stat-item">
               <FiVideo className="stat-icon" />
               <div className="stat-info">
                 <strong>4</strong>
-                <span>Modes disponibles</span>
+                <span>{t('streamHub.modesAvailable')}</span>
               </div>
             </div>
           </div>
@@ -139,6 +141,7 @@ const LiveStream = () => {
               key={section.id}
               section={section}
               onSelect={() => navigate(section.path)}
+              t={t}
             />
           ))}
         </div>
@@ -146,8 +149,8 @@ const LiveStream = () => {
         <div className="info-banner">
           <FiClock />
           <div>
-            <h3>Comment ça marche ?</h3>
-            <p>Choisissez un mode de rencontre, activez votre caméra et commencez à vous connecter !</p>
+            <h3>{t('streamHub.howItWorks')}</h3>
+            <p>{t('streamHub.howItWorksDesc')}</p>
           </div>
         </div>
       </div>
@@ -155,7 +158,7 @@ const LiveStream = () => {
   );
 };
 
-const SectionCard = ({ section, onSelect }) => {
+const SectionCard = ({ section, onSelect, t }) => {
   const Icon = section.icon;
 
   return (
@@ -191,10 +194,10 @@ const SectionCard = ({ section, onSelect }) => {
       <div className="card-footer">
         <div className="active-users">
           <FiUsers />
-          <span>{section.activeUsers} en ligne</span>
+          <span>{section.activeUsers} {t('streamHub.online')}</span>
         </div>
         <button className="btn-card-action">
-          Rejoindre
+          {t('streamHub.join')}
           <Icon size={18} />
         </button>
       </div>

@@ -16,7 +16,7 @@ function setupLiveRoomHandlers(io, socket) {
   // ── Créer un salon ──
   socket.on('create-live-room', ({ mode, title, tags, userId, displayName }) => {
     try {
-      const roomId = `live-${userId}-${Date.now()}`;
+      const roomId = `live-${userId}`;
 
       liveRooms.set(roomId, {
         streamerId: userId,

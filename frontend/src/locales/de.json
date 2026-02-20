@@ -397,7 +397,30 @@
     "previewDesc": "Überprüfe deine Kamera bevor du live gehst",
     "goLive": "Live gehen",
     "cameraError": "Kein Zugriff auf die Kamera",
-    "permissionDenied": "Erlaube Kamera und Mikrofon in deinen Browser-Einstellungen"
+    "permissionDenied": "Erlaube Kamera und Mikrofon in deinen Browser-Einstellungen",
+    "startError": "Fehler beim Starten des Livestreams",
+    "noPhotoWarning": "Füge mindestens ein Foto hinzu, um einen Livestream zu starten",
+    "wantsToJoin": "{{name}} möchte dem Livestream beitreten",
+    "wantsToJoinShort": "möchte beitreten",
+    "translate": "Übersetzen",
+    "alreadyYourLang": "Bereits in deiner Sprache"
+  },
+  "liveViewer": {
+    "roomNotFound": "Raum nicht gefunden",
+    "roomClosed": "Dieser Livestream existiert nicht mehr oder wurde geschlossen.",
+    "connecting": "Verbindung zum Livestream...",
+    "waitingStream": "Warten auf Videostream...",
+    "cameraError": "Kein Zugriff auf die Kamera",
+    "translate": "Übersetzen",
+    "alreadyYourLang": "Bereits in deiner Sprache",
+    "chatPlaceholder": "Nachricht senden...",
+    "join": "Beitreten",
+    "pending": "Ausstehend...",
+    "accepted": "Akzeptiert!",
+    "rejected": "Abgelehnt",
+    "joinedLive": "Du bist dem Livestream beigetreten!",
+    "requestRejected": "Anfrage abgelehnt",
+    "liveEnded": "Der Livestream ist beendet"
   },
   "liveSurprise": {
     "quit": "Verlassen",
@@ -422,7 +445,22 @@
     "likeSent": "Like gesendet! 💕",
     "likeError": "Fehler beim Senden",
     "itsAMatch": "🎉 Es ist ein Match! Ihr könnt privat weitermachen",
-    "partnerDisconnected": "Dein Partner hat die Verbindung getrennt"
+    "partnerDisconnected": "Dein Partner hat die Verbindung getrennt",
+    "previewTitle": "Kamera-Vorschau",
+    "previewDesc": "Überprüfe dein Aussehen bevor du die Suche startest",
+    "launchSearch": "Suche starten",
+    "connecting": "Verbindung wird hergestellt..."
+  },
+  "stream": {
+    "title": "Stream",
+    "underConstruction": "Diese Seite befindet sich im Aufbau...",
+    "comingSoon": "Funktion kommt bald!"
+  },
+  "accessibility": {
+    "menu": "Menü",
+    "close": "Schließen",
+    "navigation": "Navigation",
+    "changeLang": "Sprache ändern"
   },
   "moderation": {
     "title": "Moderationspanel",

@@ -83,6 +83,13 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     };
   }, []);
 
+  // Attacher le stream au preview vidéo après que permissionGranted provoque le re-render
+  useEffect(() => {
+    if (permissionGranted && !isLive && previewVideoRef.current && localStreamRef.current) {
+      previewVideoRef.current.srcObject = localStreamRef.current;
+    }
+  }, [permissionGranted, isLive]);
+
   // Quand isLive passe à true, rattacher le stream à la vidéo principale
   useEffect(() => {
     if (isLive && localStreamRef.current && localVideoRef.current) {
@@ -220,7 +227,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         displayName: viewerInfo.displayName,
         userId: viewerInfo.userId
       }]);
-      toast(`${viewerInfo.displayName} veut rejoindre le live`, { icon: '🙋' });
+      toast(t('liveStream.wantsToJoin', { name: viewerInfo.displayName }), { icon: '🙋' });
     });
 
     // Un participant rejoint (après acceptation)
@@ -346,7 +353,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       }]);
     } catch (error) {
       console.error('Error starting live:', error);
-      toast.error('Erreur lors du démarrage du live');
+      toast.error(t('liveStream.startError'));
     }
   }, [streamerName, mode, user, t]);
 
@@ -510,7 +517,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             </button>
           ) : (
             <div className="ls-no-photo-warning">
-              <p>Ajoutez au moins une photo pour lancer un live</p>
+              <p>{t('liveStream.noPhotoWarning')}</p>
             </div>
           )}
           <button className="ls-back-btn" onClick={handleQuit}>
@@ -616,7 +623,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             <div key={req.socketId} className="ls-join-request-card">
               <FiUserPlus size={16} />
               <span className="ls-join-request-name">{req.displayName}</span>
-              <span className="ls-join-request-text">veut rejoindre</span>
+              <span className="ls-join-request-text">{t('liveStream.wantsToJoinShort')}</span>
               <button
                 className="ls-join-accept-btn"
                 onClick={() => handleAcceptJoinRequest(req)}
@@ -718,7 +725,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
                 <button
                   className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
                   onClick={() => handleTranslateMsg(msg.id)}
-                  title="Traduire"
+                  title={t('liveStream.translate')}
                 >
                   🌐
                 </button>
@@ -728,7 +735,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
               <div className="ls-translated-text">🌐 {msg.translatedText}</div>
             )}
             {msg.showTranslation && !msg.translatedText && !msg.translating && (
-              <div className="ls-translated-text">✓ Déjà dans votre langue</div>
+              <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
             )}
           </div>
         ))}

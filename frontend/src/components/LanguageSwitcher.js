@@ -12,7 +12,7 @@ const LANGUAGES = [
 ];
 
 const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
 
@@ -39,7 +39,7 @@ const LanguageSwitcher = () => {
       <button
         className="lang-switcher-btn"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Changer la langue"
+        aria-label={t('accessibility.changeLang')}
       >
         <FiGlobe />
         <span>{currentLang.label}</span>

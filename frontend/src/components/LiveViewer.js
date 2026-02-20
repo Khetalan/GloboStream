@@ -70,7 +70,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     socket.on('error', ({ message }) => {
       console.error('Room error:', message);
       setRoomError(true);
-      toast.error(message || 'Salon introuvable');
+      toast.error(message || t('liveViewer.roomNotFound'));
     });
 
     // Signaling WebRTC (offer du streamer)
@@ -120,7 +120,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     socket.on('join-accepted', ({ streamerSocketId }) => {
       setJoinRequestStatus('accepted');
       setIsParticipant(true);
-      toast.success('Vous avez rejoint le live !');
+      toast.success(t('liveViewer.joinedLive'));
 
       // Démarrer la caméra pour participer
       startLocalCamera(streamerSocketId);
@@ -129,13 +129,13 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     // Demande refusée
     socket.on('join-rejected', () => {
       setJoinRequestStatus('rejected');
-      toast.error('Demande refusée');
+      toast.error(t('liveViewer.requestRejected'));
       setTimeout(() => setJoinRequestStatus('idle'), 3000);
     });
 
     // Room fermée par le streamer
     socket.on('room-closed', () => {
-      toast('Le live est terminé');
+      toast(t('liveViewer.liveEnded'));
       cleanup();
       onLeave();
     });
@@ -208,7 +208,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       // Le streamer va initier la connexion via live-signal
     } catch (error) {
       console.error('Camera error:', error);
-      toast.error('Impossible d\'accéder à la caméra');
+      toast.error(t('liveViewer.cameraError'));
     }
   };
 
@@ -310,8 +310,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       <div className="lv-container">
         <div className="lv-error-screen">
           <FiX size={48} />
-          <h3>Salon introuvable</h3>
-          <p>Ce live n'existe plus ou a été fermé.</p>
+          <h3>{t('liveViewer.roomNotFound')}</h3>
+          <p>{t('liveViewer.roomClosed')}</p>
           <button className="lv-back-btn" onClick={onLeave}>
             <FiArrowLeft size={16} />
             <span>{t('common.back')}</span>
@@ -327,7 +327,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       <div className="lv-container">
         <div className="lv-loading-screen">
           <div className="lv-loading-spinner" />
-          <p>Connexion au live...</p>
+          <p>{t('liveViewer.connecting')}</p>
         </div>
       </div>
     );
@@ -348,7 +348,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         {!remoteStream && (
           <div className="lv-waiting-overlay">
             <div className="lv-loading-spinner" />
-            <p>En attente du flux vidéo...</p>
+            <p>{t('liveViewer.waitingStream')}</p>
           </div>
         )}
 
@@ -388,7 +388,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                 <button
                   className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
                   onClick={() => handleTranslateMsg(msg.id)}
-                  title="Traduire"
+                  title={t('liveViewer.translate')}
                 >
                   🌐
                 </button>
@@ -398,7 +398,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
               <div className="lv-translated-text">🌐 {msg.translatedText}</div>
             )}
             {msg.showTranslation && !msg.translatedText && !msg.translating && (
-              <div className="lv-translated-text">✓ Déjà dans votre langue</div>
+              <div className="lv-translated-text">✓ {t('liveViewer.alreadyYourLang')}</div>
             )}
           </div>
         ))}
@@ -409,7 +409,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         <div className="lv-input-container">
           <input
             type="text"
-            placeholder="Envoyer un message..."
+            placeholder={t('liveViewer.chatPlaceholder')}
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -430,10 +430,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           >
             <FiUserPlus size={16} />
             <span>
-              {joinRequestStatus === 'idle' && 'Rejoindre'}
-              {joinRequestStatus === 'pending' && 'En attente...'}
-              {joinRequestStatus === 'accepted' && 'Accepté !'}
-              {joinRequestStatus === 'rejected' && 'Refusé'}
+              {joinRequestStatus === 'idle' && t('liveViewer.join')}
+              {joinRequestStatus === 'pending' && t('liveViewer.pending')}
+              {joinRequestStatus === 'accepted' && t('liveViewer.accepted')}
+              {joinRequestStatus === 'rejected' && t('liveViewer.rejected')}
             </span>
           </button>
         )}

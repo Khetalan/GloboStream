@@ -54,12 +54,14 @@ Apres lecture, confirmer a l'utilisateur :
 
 ## Statut du projet
 
-- **Phase** : MVP en cours — tests en progression
-- **90 fonctionnalites codees, 210 tests Jest (100%)** — voir `docs/RAPPORT.md`
+- **Phase** : MVP en cours — architecture live complete
+- **95+ fonctionnalites codees, 210 tests Jest (100%)** — voir `docs/RAPPORT.md`
 - **17+ pages frontend** (15 originales + LiveCompetition + LiveEvent)
 - **i18n complet** : 5 langues (FR, EN, IT, DE, ES) — 22/22 fichiers integres
-- **11 bugs corriges** + 36 warnings ESLint elimines
-- **Interface de live integree** : composant LiveStream reutilisable (Public, Competition, Evenementiel)
+- **20+ bugs corriges** + 36 warnings ESLint elimines
+- **Architecture live complete** : LiveStream (streamer) + LiveViewer (spectateur) + Socket.IO rooms + WebRTC
+- **Traduction chat live** : bouton 🌐 par message, API MyMemory (autodetect)
+- **Photos Cloudinary** : stockage persistant (plus de 404 apres redemarrage Render)
 - **CSS mobile-first** : refonte complete (22 fichiers)
 
 ## Stack Technique

@@ -86,7 +86,7 @@ const LivePublic = () => {
   };
 
   const handleJoinStream = (streamId) => {
-    navigate(`/stream/watch/${streamId}`);
+    navigate(`/stream/watch/live-${streamId}`);
   };
 
   const handleToggleFavorite = async (streamId) => {

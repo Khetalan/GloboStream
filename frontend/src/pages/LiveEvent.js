@@ -73,7 +73,7 @@ const LiveEvent = () => {
                 <div
                   key={room._id}
                   className="live-room-card"
-                  onClick={() => navigate(`/stream/watch/${room._id}`)}
+                  onClick={() => navigate(`/stream/watch/live-${room._id}`)}
                 >
                   <div className="live-room-avatar">
                     {(room.streamer?.displayName || room.streamer?.firstName || '?').charAt(0)}

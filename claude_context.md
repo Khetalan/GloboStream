@@ -97,7 +97,8 @@ GloboStream/
 │   │   ├── publicProfile.js   # Profils publics (/api/public-profile/*)
 │   │   └── changePassword.js  # Changement mot de passe (/api/change-password/*)
 │   ├── socketHandlers/         # Gestionnaires Socket.IO
-│   │   └── surprise.js        # Live Surprise handlers
+│   │   ├── surprise.js        # Live Surprise handlers
+│   │   └── liveRoom.js        # Rooms live (Public/Competition/Event) — WebRTC signaling, chat, join requests
 │   ├── scripts/                # Utilitaires DB
 │   │   ├── createSuperAdmin.js
 │   │   ├── testSetPrimary.js
@@ -124,8 +125,10 @@ GloboStream/
 │   │   │   ├── MessageModal.js
 │   │   │   ├── MessageRequestsPanel.js
 │   │   │   ├── LanguageSwitcher.js  # Dropdown langues (🌐 FR)
-│   │   │   ├── LiveStream.js      # Interface live réutilisable (flux caméra réel, grille vidéo, chat, stats)
-│   │   │   └── LiveStream.css     # Styles LiveStream (9 layouts, preview, stats panel, chat)
+│   │   │   ├── LiveStream.js      # Interface live streamer (WebRTC, chat avec traduction, stats)
+│   │   │   ├── LiveStream.css     # Styles LiveStream (9 layouts, preview, stats, chat, traduction)
+│   │   │   ├── LiveViewer.js      # Interface live spectateur (reception WebRTC, chat, rejoindre)
+│   │   │   └── LiveViewer.css     # Styles LiveViewer
 │   │   ├── pages/              # 17+ pages principales
 │   │   │   ├── Landing.js     # Page d'accueil publique
 │   │   │   ├── Login.js       # Connexion
@@ -198,13 +201,14 @@ GloboStream/
    - Routes modération nécessitent privilège minimum selon la fonction
 
 4. **i18n** (`frontend/src/locales/*.json`) :
-   - 663 clés de traduction en 5 langues
+   - ~700 clés de traduction en 5 langues
    - Ne jamais supprimer une clé sans vérifier TOUS les fichiers qui l'utilisent
    - Utiliser `t('key')` dans les composants React
 
-5. **Socket.IO** (`backend/server.js` + `frontend`) :
-   - Namespace `/` pour chat
-   - Events : `join-room`, `send-message`, `typing`, etc.
+5. **Socket.IO** (`backend/server.js` + `socketHandlers/`) :
+   - Namespace `/` pour chat + live rooms
+   - Chat prive : `join-room`, `send-message`, `typing`
+   - Live rooms : `create-live-room`, `join-live-room`, `live-signal`, `live-chat`, `request-join-live`
    - Ne pas changer les noms d'events sans synchroniser client/serveur
 
 ---
@@ -365,16 +369,17 @@ export default MaPage;
 
 #### Internationalisation (i18n)
 - **5 langues** : FR (défaut), EN, IT, DE, ES
-- **663 clés** de traduction dans `frontend/src/locales/*.json`
+- **~700 clés** de traduction dans `frontend/src/locales/*.json`
 - **Usage** : `const { t } = useTranslation();` puis `t('key')`
 - **Changement de langue** : `i18n.changeLanguage('en')`
 - **Persistance** : `localStorage.getItem('i18nextLng')`
 
 #### Upload de photos
-- **Backend** : Multer avec limite 5MB par fichier
+- **Backend** : Multer + Cloudinary (stockage cloud persistant)
 - **Frontend** : FormData avec `multipart/form-data`
-- **Stockage** : `backend/uploads/photos/`
+- **Stockage** : Cloudinary (`globostream/photos/`) — URLs absolues `https://res.cloudinary.com/...`
 - **Maximum** : 6 photos par utilisateur
+- **Env vars** : `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 
 ### Erreurs connues à éviter
 
@@ -412,9 +417,10 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 | Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
 | Pages frontend testées | 15/15 ✅ |
 | Responsive testé | 3 tailles ✅ (CSS mobile-first) |
-| i18n intégré | 22/22 fichiers ✅ (5 langues) |
-| Interface de live | LiveStream réutilisable (Public, Compétition, Événementiel) |
-| Bugs corrigés | 11 |
+| i18n intégré | 29/29 fichiers ✅ (5 langues, ~700 clés) |
+| Interface de live | LiveStream (streamer) + LiveViewer (spectateur) + traduction chat |
+| Photos | Cloudinary (persistantes) |
+| Bugs corrigés | 20+ |
 
 ### Déploiement
 | Service | URL | Détails |
@@ -424,12 +430,13 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 | **Repo** | https://github.com/Khetalan/GloboStream | Public |
 
 ### Phase actuelle
-**MVP en progression** — Backend déployé sur Render, frontend sur GitHub Pages. Système démo supprimé, flux caméra réel intégré. Tests en cours.
+**MVP en progression** — Backend deploye sur Render, frontend sur GitHub Pages. Architecture live complete (Socket.IO rooms + WebRTC). Photos persistantes via Cloudinary. Traduction chat en temps reel.
 
-### Prochaines étapes prioritaires
+### Prochaines etapes prioritaires
 1. **Corriger bug Apple OAuth** (passport.js ligne 143)
-2. **Connecter les flux vidéo entre participants** (WebRTC multi-utilisateurs)
-3. **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent)
+2. **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent)
+3. **Ameliorer scaling WebRTC** multi-viewers
+4. **Deployer** les derniers changements (favicon, flows live, i18n complet)
 
 ---
 
