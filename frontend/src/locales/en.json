@@ -403,7 +403,13 @@
     "wantsToJoin": "{{name}} wants to join the live",
     "wantsToJoinShort": "wants to join",
     "translate": "Translate",
-    "alreadyYourLang": "Already in your language"
+    "alreadyYourLang": "Already in your language",
+    "viewerJoined": "{{name}} joined the live",
+    "joinRequestsTitle": "Join Requests",
+    "noJoinRequests": "No pending requests.",
+    "requestsButton": "Requests",
+    "accept": "Accept",
+    "reject": "Reject"
   },
   "liveViewer": {
     "roomNotFound": "Room not found",

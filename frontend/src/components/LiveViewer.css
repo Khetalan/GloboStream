@@ -109,7 +109,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px); /* Glassmorphism */
+  background: rgba(0, 0, 0, 0.4); /* Plus transparent */
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Bordure subtile */
   border-radius: 8px;
   padding: 6px 10px;
   z-index: 10;
@@ -149,9 +151,10 @@
   height: 140px;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Bordure subtile pour glassmorphism */
   z-index: 10;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Ombre plus prononcée */
+  backdrop-filter: blur(5px); /* Glassmorphism */
 }
 
 .lv-local-video {
@@ -166,7 +169,7 @@
   flex: 1 1 0;
   min-height: 80px;
   overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.7); /* Légèrement plus transparent pour le glassmorphism */
   padding: 10px 14px;
 }
 
@@ -255,6 +258,22 @@
   margin-left: 4px;
 }
 
+/* Style pour les messages de "spectateur a rejoint" */
+.lv-chat-message.is-join-event {
+  text-align: center;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 0;
+  border-bottom: none; /* Pas de bordure pour les messages système */
+  font-size: 0.85rem;
+}
+.lv-chat-message.is-join-event .lv-chat-message-top {
+    justify-content: center;
+}
+.lv-chat-message.is-join-event .lv-chat-username {
+    display: none; /* Masquer le 'username' pour les messages système */
+}
+
 /* ── Barre du bas ─────────────────────────────────────────── */
 .lv-bottom-bar {
   display: flex;
@@ -262,7 +281,9 @@
   gap: 6px;
   padding: 8px 12px;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
-  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px); /* Glassmorphism */
+  background-color: rgba(0, 0, 0, 0.75); /* Plus transparent */
+  border-top: 1px solid rgba(255, 255, 255, 0.08); /* Bordure subtile */
   flex-shrink: 0;
 }
 

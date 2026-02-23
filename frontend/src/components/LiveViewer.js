@@ -102,6 +102,22 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       }
     });
 
+    // Un nouveau viewer rejoint (pour l'affichage du chat des messages système)
+    socket.on('viewer-joined', ({ viewerSocketId, viewerInfo }) => {
+      setMessages(prev => [...prev, {
+        id: `sys-join-${viewerSocketId}-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.viewerJoined', { name: viewerInfo.displayName }),
+        isSystem: true,
+        isJoinEvent: true, // Nouveau flag
+        lang: null,
+        translatedText: null,
+        showTranslation: false,
+        translating: false,
+        isOwn: false
+      }]);
+    });
+
     // Message chat
     socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
       setMessages(prev => [...prev, {
@@ -379,7 +395,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       {/* Chat */}
       <div className="lv-chat-section" ref={chatRef}>
         {messages.map((msg) => (
-          <div key={msg.id} className={`lv-chat-message ${msg.isSystem ? 'system' : ''}`}>
+          <div key={msg.id} className={`lv-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''}`}>
             <div className="lv-chat-message-top">
               <span className="lv-chat-username">{msg.username} :</span>
               <span className="lv-chat-text">{msg.text}</span>

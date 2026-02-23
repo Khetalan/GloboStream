@@ -403,7 +403,13 @@
     "wantsToJoin": "{{name}} vuole unirsi alla diretta",
     "wantsToJoinShort": "vuole unirsi",
     "translate": "Traduci",
-    "alreadyYourLang": "Già nella tua lingua"
+    "alreadyYourLang": "Già nella tua lingua",
+    "viewerJoined": "{{name}} è entrato nella diretta",
+    "joinRequestsTitle": "Richieste di partecipazione",
+    "noJoinRequests": "Nessuna richiesta in sospeso.",
+    "requestsButton": "Richieste",
+    "accept": "Accetta",
+    "reject": "Rifiuta"
   },
   "liveViewer": {
     "roomNotFound": "Sala non trovata",

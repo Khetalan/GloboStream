@@ -403,7 +403,13 @@
     "wantsToJoin": "{{name}} veut rejoindre le live",
     "wantsToJoinShort": "veut rejoindre",
     "translate": "Traduire",
-    "alreadyYourLang": "Déjà dans votre langue"
+    "alreadyYourLang": "Déjà dans votre langue",
+    "viewerJoined": "{{name}} vient d'entrer sur le live",
+    "joinRequestsTitle": "Demandes de participation",
+    "noJoinRequests": "Aucune demande en attente.",
+    "requestsButton": "Demandes",
+    "accept": "Accepter",
+    "reject": "Refuser"
   },
   "liveViewer": {
     "roomNotFound": "Salon introuvable",

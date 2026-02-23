@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import Peer from 'simple-peer';
 import {
-  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift,
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiUsers,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
   FiUserPlus, FiCheck, FiSlash
 } from 'react-icons/fi';
@@ -40,6 +40,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [viewers, setViewers] = useState([]);
   const [gifts] = useState([]);
   const [joinRequests, setJoinRequests] = useState([]);
+  const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
 
   // Refs
   const chatRef = useRef(null);
@@ -146,6 +147,20 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         socketId: viewerSocketId,
         name: viewerInfo.displayName,
         joinedAt: new Date().toLocaleTimeString()
+      }]);
+
+      // Ajouter un message système pour l'entrée du spectateur
+      setMessages(prev => [...prev, {
+        id: `sys-join-${viewerSocketId}-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.viewerJoined', { name: viewerInfo.displayName }),
+        isSystem: true,
+        isJoinEvent: true, // Nouveau flag
+        lang: null,
+        translatedText: null,
+        showTranslation: false,
+        translating: false,
+        isOwn: false
       }]);
 
       // Créer un peer pour envoyer le stream au viewer
@@ -613,175 +628,200 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           )}
         </div>
 
-        {renderParticipantCards()}
-      </div>
-
-      {/* Notifications de demandes de participation */}
-      {joinRequests.length > 0 && (
-        <div className="ls-join-requests">
-          {joinRequests.map((req) => (
-            <div key={req.socketId} className="ls-join-request-card">
-              <FiUserPlus size={16} />
-              <span className="ls-join-request-name">{req.displayName}</span>
-              <span className="ls-join-request-text">{t('liveStream.wantsToJoinShort')}</span>
-              <button
-                className="ls-join-accept-btn"
-                onClick={() => handleAcceptJoinRequest(req)}
-              >
-                <FiCheck size={14} />
-              </button>
-              <button
-                className="ls-join-reject-btn"
-                onClick={() => handleRejectJoinRequest(req)}
-              >
-                <FiSlash size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showStatsPanel && (
-        <div className="ls-stats-overlay" onClick={() => setShowStatsPanel(false)} />
-      )}
-
-      <div className={`ls-stats-panel ${showStatsPanel ? 'visible' : ''}`}>
-        <div className="ls-stats-header">
-          <button
-            className={`ls-tab-btn ${activeStatsTab === 'viewers' ? 'active' : ''}`}
-            onClick={() => setActiveStatsTab('viewers')}
-          >
-            <FiEye size={14} />
-            {t('liveStream.viewers')}
-          </button>
-          <button
-            className={`ls-tab-btn ${activeStatsTab === 'gifts' ? 'active' : ''}`}
-            onClick={() => setActiveStatsTab('gifts')}
-          >
-            <FiGift size={14} />
-            {t('liveStream.gifts')}
-          </button>
-          <button className="ls-stats-close" onClick={() => setShowStatsPanel(false)}>
-            <FiX size={14} />
-          </button>
-        </div>
-
-        {activeStatsTab === 'viewers' && (
-          <div className="ls-tab-content">
-            <div className="ls-stats-total">
-              <span className="ls-stats-total-label">{t('liveStream.totalViewers')}</span>
-              <span className="ls-stats-total-value">{formatNumber(viewerCount)}</span>
-            </div>
-            <div className="ls-stats-list">
-              {viewers.map((v, i) => (
-                <div key={i} className="ls-stats-row">
-                  <div className="ls-stats-row-left">
-                    <div className="ls-stats-avatar">{v.name.charAt(0)}</div>
-                    <div>
-                      <div className="ls-stats-name">{v.name}</div>
-                      <div className="ls-stats-badge">{v.joinedAt}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeStatsTab === 'gifts' && (
-          <div className="ls-tab-content">
-            <div className="ls-stats-total">
-              <span className="ls-stats-total-label">{t('liveStream.totalGifts')}</span>
-              <span className="ls-stats-total-value">{giftCount}</span>
-            </div>
-            <div className="ls-stats-list">
-              {gifts.sort((a, b) => b.gifts - a.gifts).map((g, i) => (
-                <div key={i} className="ls-stats-row">
-                  <div className="ls-stats-row-left">
-                    <div className={`ls-stats-avatar ${i < 3 ? `rank-${i + 1}` : ''}`}>
-                      {i < 3 ? ['1', '2', '3'][i] : g.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="ls-stats-name">{g.name}</div>
-                      <div className="ls-stats-badge">#{i + 1}</div>
-                    </div>
-                  </div>
-                  <span className="ls-stats-value">{g.gifts}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="ls-chat-section" ref={chatRef}>
-        {messages.map((msg) => (
-          <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isOwn ? 'own' : ''}`}>
-            <div className="ls-chat-message-top">
-              <span className="ls-chat-username">{msg.username} :</span>
-              <span className="ls-chat-text">{msg.text}</span>
-              {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
-              {!msg.isSystem && (
-                <button
-                  className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                  onClick={() => handleTranslateMsg(msg.id)}
-                  title={t('liveStream.translate')}
-                >
-                  🌐
-                </button>
+                {renderParticipantCards()}
+              </div>
+        
+              {showStatsPanel && (
+                <div className="ls-stats-overlay" onClick={() => setShowStatsPanel(false)} />
               )}
-            </div>
-            {msg.showTranslation && msg.translatedText && (
-              <div className="ls-translated-text">🌐 {msg.translatedText}</div>
-            )}
-            {msg.showTranslation && !msg.translatedText && !msg.translating && (
-              <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="ls-bottom-bar">
-        <div className="ls-input-container">
-          <input
-            type="text"
-            placeholder={t('liveStream.chatPlaceholder')}
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          {chatInput.trim() && (
-            <button className="ls-send-btn" onClick={handleSendMessage}>
-              <FiSend size={16} />
-            </button>
-          )}
-        </div>
-
-        <button
-          className={`ls-control-btn ${isMuted ? 'muted' : ''}`}
-          onClick={toggleMic}
-        >
-          {isMuted ? <FiMicOff size={18} /> : <FiMic size={18} />}
-        </button>
-
-        <button
-          className={`ls-control-btn ${isCamOff ? 'muted' : ''}`}
-          onClick={toggleCam}
-        >
-          {isCamOff ? <FiVideoOff size={18} /> : <FiVideo size={18} />}
-        </button>
-
-        <button className="ls-control-btn gift-btn">
-          <FiGift size={18} />
-        </button>
-
-        <button
-          className="ls-control-btn quit-btn"
-          onClick={handleQuit}
-        >
-          <FiX size={18} />
-        </button>
-      </div>
+        
+              {/* Panel des statistiques */}
+              <div className={`ls-stats-panel ${showStatsPanel ? 'visible' : ''}`}>
+                <div className="ls-stats-header">
+                  <button
+                    className={`ls-tab-btn ${activeStatsTab === 'viewers' ? 'active' : ''}`}
+                    onClick={() => setActiveStatsTab('viewers')}
+                  >
+                    <FiEye size={14} />
+                    {t('liveStream.viewers')}
+                  </button>
+                  <button
+                    className={`ls-tab-btn ${activeStatsTab === 'gifts' ? 'active' : ''}`}
+                    onClick={() => setActiveStatsTab('gifts')}
+                  >
+                    <FiGift size={14} />
+                    {t('liveStream.gifts')}
+                  </button>
+                  <button className="ls-stats-close" onClick={() => setShowStatsPanel(false)}>
+                    <FiX size={14} />
+                  </button>
+                </div>
+        
+                {activeStatsTab === 'viewers' && (
+                  <div className="ls-tab-content">
+                    <div className="ls-stats-total">
+                      <span className="ls-stats-total-label">{t('liveStream.totalViewers')}</span>
+                      <span className="ls-stats-total-value">{formatNumber(viewerCount)}</span>
+                    </div>
+                    <div className="ls-stats-list">
+                      {viewers.map((v, i) => (
+                        <div key={i} className="ls-stats-row">
+                          <div className="ls-stats-row-left">
+                            <div className="ls-stats-avatar">{v.name.charAt(0)}</div>
+                            <div>
+                              <div className="ls-stats-name">{v.name}</div>
+                              <div className="ls-stats-badge">{v.joinedAt}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+        
+                {activeStatsTab === 'gifts' && (
+                  <div className="ls-tab-content">
+                    <div className="ls-stats-total">
+                      <span className="ls-stats-total-label">{t('liveStream.totalGifts')}</span>
+                      <span className="ls-stats-total-value">{giftCount}</span>
+                    </div>
+                    <div className="ls-stats-list">
+                      {gifts.sort((a, b) => b.gifts - a.gifts).map((g, i) => (
+                        <div key={i} className="ls-stats-row">
+                          <div className="ls-stats-row-left">
+                            <div className={`ls-stats-avatar ${i < 3 ? `rank-${i + 1}` : ''}`}>
+                              {i < 3 ? ['1', '2', '3'][i] : g.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="ls-stats-name">{g.name}</div>
+                              <div className="ls-stats-badge">#{i + 1}</div>
+                            </div>
+                          </div>
+                          <span className="ls-stats-value">{g.gifts}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+        
+              {/* Overlay et panneau des demandes de participation */}
+              {showJoinRequestsPanel && (
+                <div className="ls-stats-overlay" onClick={() => setShowJoinRequestsPanel(false)} />
+              )}
+              <div className={`ls-requests-panel ${showJoinRequestsPanel ? 'visible' : ''}`}>
+                <div className="ls-requests-header">
+                  <h3>{t('liveStream.joinRequestsTitle')} ({joinRequests.length})</h3>
+                  <button className="ls-requests-close" onClick={() => setShowJoinRequestsPanel(false)}>
+                    <FiX size={14} />
+                  </button>
+                </div>
+                <div className="ls-requests-list">
+                  {joinRequests.length === 0 ? (
+                    <p className="ls-no-requests">{t('liveStream.noJoinRequests')}</p>
+                  ) : (
+                    joinRequests.map((req) => (
+                      <div key={req.socketId} className="ls-request-item">
+                        <FiUserPlus size={18} />
+                        <span className="ls-request-name">{req.displayName}</span>
+                        <div className="ls-request-actions">
+                          <button
+                            className="ls-request-accept-btn"
+                            onClick={() => handleAcceptJoinRequest(req)}
+                          >
+                            <FiCheck size={16} />
+                            <span>{t('liveStream.accept')}</span>
+                          </button>
+                          <button
+                            className="ls-request-reject-btn"
+                            onClick={() => handleRejectJoinRequest(req)}
+                          >
+                            <FiSlash size={16} />
+                            <span>{t('liveStream.reject')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+        
+              <div className="ls-chat-section" ref={chatRef}>
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''} ${msg.isOwn ? 'own' : ''}`}>
+                    <div className="ls-chat-message-top">
+                      <span className="ls-chat-username">{msg.username} :</span>
+                      <span className="ls-chat-text">{msg.text}</span>
+                      {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
+                      {!msg.isSystem && (
+                        <button
+                          className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                          onClick={() => handleTranslateMsg(msg.id)}
+                          title={t('liveStream.translate')}
+                        >
+                          🌐
+                        </button>
+                      )}
+                    </div>
+                    {msg.showTranslation && msg.translatedText && (
+                      <div className="ls-translated-text">🌐 {msg.translatedText}</div>
+                    )}
+                    {msg.showTranslation && !msg.translatedText && !msg.translating && (
+                      <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+        
+              <div className="ls-bottom-bar">
+                <div className="ls-input-container">
+                  <input
+                    type="text"
+                    placeholder={t('liveStream.chatPlaceholder')}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                  />
+                  {chatInput.trim() && (
+                    <button className="ls-send-btn" onClick={handleSendMessage}>
+                      <FiSend size={16} />
+                    </button>
+                  )}
+                </div>
+        
+                <button
+                  className={`ls-control-btn ${isMuted ? 'muted' : ''}`}
+                  onClick={toggleMic}
+                >
+                  {isMuted ? <FiMicOff size={18} /> : <FiMic size={18} />}
+                </button>
+        
+                <button
+                  className={`ls-control-btn ${isCamOff ? 'muted' : ''}`}
+                  onClick={toggleCam}
+                >
+                  {isCamOff ? <FiVideoOff size={18} /> : <FiVideo size={18} />}
+                </button>
+        
+                <button className="ls-control-btn gift-btn">
+                  <FiGift size={18} />
+                </button>
+        
+                <button
+                  className="ls-control-btn requests-btn"
+                  onClick={() => setShowJoinRequestsPanel(true)}
+                >
+                  <FiUsers size={18} />
+                  {joinRequests.length > 0 && <span className="ls-requests-count">{joinRequests.length}</span>}
+                </button>
+        
+                <button
+                  className="ls-control-btn quit-btn"
+                  onClick={handleQuit}
+                >
+                  <FiX size={18} />
+                </button>
+              </div>
     </div>
   );
 };

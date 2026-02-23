@@ -403,7 +403,13 @@
     "wantsToJoin": "{{name}} möchte dem Livestream beitreten",
     "wantsToJoinShort": "möchte beitreten",
     "translate": "Übersetzen",
-    "alreadyYourLang": "Bereits in deiner Sprache"
+    "alreadyYourLang": "Bereits in deiner Sprache",
+    "viewerJoined": "{{name}} ist dem Live beigetreten",
+    "joinRequestsTitle": "Beitrittsanfragen",
+    "noJoinRequests": "Keine ausstehenden Anfragen.",
+    "requestsButton": "Anfragen",
+    "accept": "Annehmen",
+    "reject": "Ablehnen"
   },
   "liveViewer": {
     "roomNotFound": "Raum nicht gefunden",
