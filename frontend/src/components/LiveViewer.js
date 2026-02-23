@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import io from 'socket.io-client';
 import Peer from 'simple-peer';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
   FiMic, FiMicOff, FiVideo, FiVideoOff
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import './LiveViewer.css';
+import './LiveStream.css'; // Import pour les styles partagés (bordures, etc)
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -35,6 +37,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [isCamOff, setIsCamOff] = useState(false);
   const [connected, setConnected] = useState(false);
   const [roomError, setRoomError] = useState(false);
+  const [isUiVisible, setIsUiVisible] = useState(true);
+  const [isStreamerMuted, setIsStreamerMuted] = useState(false); // Nouvel état
 
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -154,6 +158,24 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       toast(t('liveViewer.liveEnded'));
       cleanup();
       onLeave();
+    });
+
+    // NOUVEAU: Le streamer nous met en sourdine ou réactive notre micro
+    socket.on('force-mute-toggle', ({ mute }) => {
+      if (localStreamRef.current) {
+        const audioTrack = localStreamRef.current.getAudioTracks()[0];
+        if (audioTrack) {
+          audioTrack.enabled = !mute;
+        }
+      }
+      // On met à jour notre propre état pour que l'icône corresponde
+      setIsMuted(mute);
+      toast(mute ? t('liveViewer.youWereMuted') : t('liveViewer.youWereUnmuted'));
+    });
+
+    // NOUVEAU: Le streamer coupe son propre micro
+    socket.on('streamer-mic-state', ({ isMuted }) => {
+      setIsStreamerMuted(isMuted);
     });
 
     return () => {
@@ -299,17 +321,29 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       const audioTrack = localStreamRef.current.getAudioTracks()[0];
       if (audioTrack) audioTrack.enabled = isMuted;
     }
-    setIsMuted(prev => !prev);
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    // On ne notifie pas le streamer, car c'est une action locale.
+    // Le streamer a son propre bouton pour nous forcer en sourdine.
   }, [isMuted]);
 
   // Toggle caméra (participant seulement)
   const toggleCam = useCallback(() => {
+    const newCamOffState = !isCamOff;
     if (localStreamRef.current) {
       const videoTrack = localStreamRef.current.getVideoTracks()[0];
-      if (videoTrack) videoTrack.enabled = isCamOff;
+      if (videoTrack) videoTrack.enabled = !newCamOffState;
     }
-    setIsCamOff(prev => !prev);
-  }, [isCamOff]);
+    setIsCamOff(newCamOffState);
+
+    // NOUVEAU: Informer le streamer de notre changement d'état de caméra
+    if (socketRef.current) {
+      socketRef.current.emit('participant-cam-state', {
+        roomId,
+        isCamOff: newCamOffState
+      });
+    }
+  }, [isCamOff, roomId]);
 
   // Quitter
   const handleLeave = useCallback(() => {
@@ -319,6 +353,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     }
     onLeave();
   }, [roomId, onLeave]);
+
+  const toggleUiVisibility = useCallback(() => {
+    setIsUiVisible(prev => !prev);
+  }, []);
 
   // ── Erreur room ──
   if (roomError) {
@@ -353,7 +391,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   return (
     <div className="lv-container">
       {/* Vidéo du streamer (plein écran) */}
-      <div className="lv-video-section">
+      <div className="lv-video-section" onClick={toggleUiVisibility}>
         <video
           ref={remoteVideoRef}
           autoPlay
@@ -368,15 +406,12 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           </div>
         )}
 
-        {/* Badge LIVE + viewers */}
-        <div className="lv-live-badge">
-          <span className="lv-live-dot" />
-          <span>LIVE</span>
-          <span className="lv-viewer-count">
-            <FiEye size={12} />
-            {viewerCount}
-          </span>
-        </div>
+        {/* Indicateur micro coupé du streamer */}
+        {isStreamerMuted && (
+          <div className="lv-mic-muted">
+            <FiMicOff />
+          </div>
+        )}
 
         {/* Preview locale si participant */}
         {isParticipant && localStream && (
@@ -392,90 +427,109 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         )}
       </div>
 
-      {/* Chat */}
-      <div className="lv-chat-section" ref={chatRef}>
-        {messages.map((msg) => (
-          <div key={msg.id} className={`lv-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''}`}>
-            <div className="lv-chat-message-top">
-              <span className="lv-chat-username">{msg.username} :</span>
-              <span className="lv-chat-text">{msg.text}</span>
-              {msg.lang && <span className="lv-lang-badge">{msg.lang.toUpperCase()}</span>}
-              {!msg.isSystem && (
+      <AnimatePresence>
+        {isUiVisible && (
+          <motion.div
+            className="lv-ui-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Top Bar */}
+            <div className="lv-top-bar">
+              <div className="lv-live-badge">
+                <span className="lv-live-dot" />
+                <span>LIVE</span>
+                <span className="lv-viewer-count">
+                  <FiEye size={12} />
+                  {viewerCount}
+                </span>
+              </div>
+              <button className="lv-close-btn" onClick={handleLeave}>
+                <FiX size={24} />
+              </button>
+            </div>
+
+            {/* Chat */}
+            <div className="lv-chat-section" ref={chatRef}>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`lv-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''}`}>
+                  <div className="lv-chat-body">
+                    <span className="lv-chat-username">{msg.username} :</span>
+                    <span className="lv-chat-text">{msg.text}</span>
+                    <div className="lv-chat-icons">
+                      {msg.lang && <span className="lv-lang-badge">{msg.lang.toUpperCase()}</span>}
+                      {!msg.isSystem && (
+                        <button
+                          className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
+                          onClick={() => handleTranslateMsg(msg.id)}
+                          title={t('liveViewer.translate')}
+                        >
+                          🌐
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {msg.showTranslation && msg.translatedText && (
+                    <div className="lv-translated-text">🌐 {msg.translatedText}</div>
+                  )}
+                  {msg.showTranslation && !msg.translatedText && !msg.translating && (
+                    <div className="lv-translated-text">✓ {t('liveViewer.alreadyYourLang')}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Barre du bas */}
+            <div className="lv-bottom-bar">
+              <div className="lv-input-container">
+                <input
+                  type="text"
+                  placeholder={t('liveViewer.chatPlaceholder')}
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+                {chatInput.trim() && (
+                  <button className="lv-send-btn" onClick={handleSendMessage}>
+                    <FiSend size={16} />
+                  </button>
+                )}
+              </div>
+
+              {/* Bouton demander à rejoindre */}
+              {!isParticipant && (
                 <button
-                  className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
-                  onClick={() => handleTranslateMsg(msg.id)}
-                  title={t('liveViewer.translate')}
+                  className={`lv-join-btn ${joinRequestStatus}`}
+                  onClick={handleRequestJoin}
+                  disabled={joinRequestStatus !== 'idle'}
                 >
-                  🌐
+                  <FiUserPlus size={20} />
                 </button>
               )}
+
+              {/* Contrôles participant */}
+              {isParticipant && (
+                <>
+                  <button
+                    className={`lv-control-btn ${isMuted ? 'off' : ''}`}
+                    onClick={toggleMic}
+                  >
+                    {isMuted ? <FiMicOff size={20} /> : <FiMic size={20} />}
+                  </button>
+                  <button
+                    className={`lv-control-btn ${isCamOff ? 'off' : ''}`}
+                    onClick={toggleCam}
+                  >
+                    {isCamOff ? <FiVideoOff size={20} /> : <FiVideo size={20} />}
+                  </button>
+                </>
+              )}
             </div>
-            {msg.showTranslation && msg.translatedText && (
-              <div className="lv-translated-text">🌐 {msg.translatedText}</div>
-            )}
-            {msg.showTranslation && !msg.translatedText && !msg.translating && (
-              <div className="lv-translated-text">✓ {t('liveViewer.alreadyYourLang')}</div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Barre du bas */}
-      <div className="lv-bottom-bar">
-        <div className="lv-input-container">
-          <input
-            type="text"
-            placeholder={t('liveViewer.chatPlaceholder')}
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          {chatInput.trim() && (
-            <button className="lv-send-btn" onClick={handleSendMessage}>
-              <FiSend size={16} />
-            </button>
-          )}
-        </div>
-
-        {/* Bouton demander à rejoindre */}
-        {!isParticipant && (
-          <button
-            className={`lv-join-btn ${joinRequestStatus}`}
-            onClick={handleRequestJoin}
-            disabled={joinRequestStatus !== 'idle'}
-          >
-            <FiUserPlus size={16} />
-            <span>
-              {joinRequestStatus === 'idle' && t('liveViewer.join')}
-              {joinRequestStatus === 'pending' && t('liveViewer.pending')}
-              {joinRequestStatus === 'accepted' && t('liveViewer.accepted')}
-              {joinRequestStatus === 'rejected' && t('liveViewer.rejected')}
-            </span>
-          </button>
+          </motion.div>
         )}
-
-        {/* Contrôles participant */}
-        {isParticipant && (
-          <>
-            <button
-              className={`lv-control-btn ${isMuted ? 'muted' : ''}`}
-              onClick={toggleMic}
-            >
-              {isMuted ? <FiMicOff size={16} /> : <FiMic size={16} />}
-            </button>
-            <button
-              className={`lv-control-btn ${isCamOff ? 'muted' : ''}`}
-              onClick={toggleCam}
-            >
-              {isCamOff ? <FiVideoOff size={16} /> : <FiVideo size={16} />}
-            </button>
-          </>
-        )}
-
-        <button className="lv-control-btn quit-btn" onClick={handleLeave}>
-          <FiX size={16} />
-        </button>
-      </div>
+      </AnimatePresence>
     </div>
   );
 };

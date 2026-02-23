@@ -1,588 +1,177 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
-import Peer from 'simple-peer';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  FiArrowLeft, FiHeart, FiX, FiSkipForward, FiClock,
-  FiSettings, FiVideo, FiVideoOff, FiMic, FiMicOff,
-  FiRefreshCw, FiPlay
-} from 'react-icons/fi';
-import { useAuth } from '../contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiPlay, FiRefreshCw, FiMic, FiMicOff, FiVideo, FiVideoOff, FiX, FiHeart, FiThumbsDown } from 'react-icons/fi';
 import './LiveSurprise.css';
 
 const LiveSurprise = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const { t } = useTranslation();
-  const [, setSocket] = useState(null);
-  const [, setPeer] = useState(null);
-  
-  // États de connexion
-  const [showPreview, setShowPreview] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [partner, setPartner] = useState(null);
-  
-  // États médias
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
-  const [videoEnabled, setVideoEnabled] = useState(true);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-  
-  // États timer et configuration
-  const [timerDuration, setTimerDuration] = useState(3); // minutes
-  const [timeRemaining, setTimeRemaining] = useState(null);
-  const [timerInterval, setTimerInterval] = useState(null);
-  const [showDecision, setShowDecision] = useState(false);
-  const [canSkip, setCanSkip] = useState(false);
-  
-  // États UI
-  const [showSettings, setShowSettings] = useState(false);
-  
-  // Refs
-  const localVideoRef = useRef();
-  const remoteVideoRef = useRef();
-  const previewVideoRef = useRef();
-  const socketRef = useRef();
-  const peerRef = useRef();
-  const localStreamRef = useRef(null);
+  const [screen, setScreen] = useState('start'); // 'start', 'searching', 'videocall', 'decision'
+  const [isUiVisible, setIsUiVisible] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCamOff, setIsCamOff] = useState(false);
+  const [timer, setTimer] = useState(180); // 3 minutes
 
-  useEffect(() => {
-    // Initialiser Socket.IO
-    const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000');
-    setSocket(newSocket);
-    socketRef.current = newSocket;
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const timerIntervalRef = useRef(null);
 
-    newSocket.on('connect', () => {
-      console.log('Connected to server');
-      newSocket.emit('join-surprise-queue', { userId: user._id });
-    });
-
-    newSocket.on('partner-found', handlePartnerFound);
-    newSocket.on('partner-disconnected', handlePartnerDisconnect);
-    newSocket.on('receive-signal', handleReceiveSignal);
-    newSocket.on('decision-received', handleDecisionReceived);
-
-    return () => {
-      cleanup();
-      newSocket.disconnect();
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (localStream && localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
-    }
-  }, [localStream]);
-
-  // Attacher le stream au preview vidéo
-  useEffect(() => {
-    if (showPreview && localStreamRef.current && previewVideoRef.current) {
-      previewVideoRef.current.srcObject = localStreamRef.current;
-    }
-  }, [showPreview]);
-
-  useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [remoteStream]);
-
-  // Sécurité : stopper les tracks si le composant est démonté
-  useEffect(() => {
-    return () => {
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [localStream]);
-
-  const startLocalStream = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 1280, height: 720 },
-        audio: true
-      });
-      setLocalStream(stream);
-      localStreamRef.current = stream;
-      return stream;
-    } catch (error) {
-      console.error('Error accessing media devices:', error);
-      toast.error(t('liveSurprise.cameraError'));
-      return null;
-    }
-  };
-
-  // Étape 1 : démarrer la caméra et afficher l'aperçu
-  const startPreview = async () => {
-    const stream = await startLocalStream();
-    if (!stream) return;
-    setShowPreview(true);
-  };
-
-  // Étape 2 : confirmer et lancer la recherche
-  const confirmSearch = () => {
-    setShowPreview(false);
-    setIsSearching(true);
-    socketRef.current.emit('start-search', {
-      userId: user._id,
-      timerDuration: timerDuration
-    });
-  };
-
-  // Relancer la recherche directement (skip → nouvelle recherche sans preview)
-  const restartSearch = async () => {
-    const stream = await startLocalStream();
-    if (!stream) return;
-    setIsSearching(true);
-    socketRef.current.emit('start-search', {
-      userId: user._id,
-      timerDuration: timerDuration
-    });
-  };
-
-  const handlePartnerFound = async ({ partner: partnerData, initiator }) => {
-    setPartner(partnerData);
-    setIsSearching(false);
-    setIsConnected(true);
-    
-    // Créer connexion WebRTC (utiliser la ref pour éviter stale closure)
-    const newPeer = new Peer({
-      initiator: initiator,
-      trickle: false,
-      stream: localStreamRef.current
-    });
-
-    newPeer.on('signal', (signal) => {
-      socketRef.current.emit('send-signal', {
-        to: partnerData.socketId,
-        signal: signal
-      });
-    });
-
-    newPeer.on('stream', (stream) => {
-      setRemoteStream(stream);
-    });
-
-    newPeer.on('error', (err) => {
-      console.error('Peer error:', err);
-      toast.error(t('liveSurprise.connectionError'));
-    });
-
-    setPeer(newPeer);
-    peerRef.current = newPeer;
-
-    // Démarrer le timer
-    startTimer();
-  };
-
-  const handleReceiveSignal = ({ from, signal }) => {
-    if (peerRef.current) {
-      peerRef.current.signal(signal);
-    }
-  };
-
-  const startTimer = () => {
-    const duration = timerDuration * 60; // en secondes
-    setTimeRemaining(duration);
-
-    const interval = setInterval(() => {
-      setTimeRemaining((prev) => {
+  const startTimer = useCallback(() => {
+    setTimer(180);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    timerIntervalRef.current = setInterval(() => {
+      setTimer(prev => {
         if (prev <= 1) {
-          clearInterval(interval);
-          handleTimerEnd();
+          clearInterval(timerIntervalRef.current);
+          setScreen('decision');
           return 0;
         }
-        
-        // Permettre skip après 0 secondes
-        if (prev === (duration - 180)) {
-          setCanSkip(true);
-        }
-        
         return prev - 1;
       });
     }, 1000);
+  }, []);
 
-    setTimerInterval(interval);
-  };
-
-  const handleTimerEnd = () => {
-    setShowDecision(true);
-    setCanSkip(false);
-  };
-
-  const handleDecision = async (decision) => {
-    // decision: 'like', 'dislike', 'skip'
-    
-    try {
-      socketRef.current.emit('send-decision', {
-        partnerId: partner.userId,
-        decision: decision
-      });
-
-      if (decision === 'like') {
-        await axios.post(`/api/swipe/like/${partner.userId}`);
-        toast.success(t('liveSurprise.likeSent'));
-      }
-
-      setShowDecision(false);
-      cleanup();
-      
-      if (decision === 'skip') {
-        restartSearch(); // Nouvelle recherche
-      } else {
-        setIsConnected(false);
-      }
-      
-    } catch (error) {
-      console.error('Error sending decision:', error);
-      toast.error(t('liveSurprise.likeError'));
+  const stopTimer = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
     }
+  }, []);
+
+  useEffect(() => {
+    // Cleanup timer on component unmount
+    return () => stopTimer();
+  }, [stopTimer]);
+
+  const toggleUiVisibility = useCallback(() => {
+    if (screen === 'videocall') {
+      setIsUiVisible(prev => !prev);
+    }
+  }, [screen]);
+
+  const handleStart = () => {
+    setScreen('searching');
+    // Simulate finding a partner
+    setTimeout(() => {
+      setScreen('videocall');
+      startTimer();
+    }, 3000);
   };
 
-  const handleDecisionReceived = async ({ decision }) => {
-    if (decision === 'like') {
-      // Vérifier si match mutuel
-      try {
-        const response = await axios.get(`/api/surprise/check-mutual/${partner.userId}`);
-        if (response.data.mutual) {
-          toast.success(t('liveSurprise.itsAMatch'));
-          navigate(`/chat/${partner.userId}`);
-        }
-      } catch (error) {
-        console.error('Error checking mutual:', error);
-      }
-    }
-  };
+  const handleSkip = useCallback(() => {
+    stopTimer();
+    setScreen('searching');
+    setTimeout(() => {
+      setScreen('videocall');
+      startTimer();
+    }, 3000);
+  }, [startTimer, stopTimer]);
 
-  const handleSkip = () => {
-    if (!canSkip) {
-      toast.error(t('liveSurprise.waitBeforeSkip'));
-      return;
-    }
-    
-    handleDecision('skip');
-  };
-
-  const handlePartnerDisconnect = () => {
-    toast(t('liveSurprise.partnerDisconnected'), { icon: '👋' });
-    cleanup();
-    setIsConnected(false);
-  };
-
-  const cleanup = () => {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      setTimerInterval(null);
-    }
-
-    if (peerRef.current) {
-      peerRef.current.destroy();
-      setPeer(null);
-    }
-
-    // Stopper les tracks média (caméra + micro)
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
-      localStreamRef.current = null;
-      setLocalStream(null);
-    }
-
-    setRemoteStream(null);
-    setPartner(null);
-    setTimeRemaining(null);
-    setShowDecision(false);
-    setCanSkip(false);
-  };
-
-  const toggleVideo = () => {
-    if (localStreamRef.current) {
-      const videoTrack = localStreamRef.current.getVideoTracks()[0];
-      videoTrack.enabled = !videoTrack.enabled;
-      setVideoEnabled(videoTrack.enabled);
-    }
-  };
-
-  const toggleAudio = () => {
-    if (localStreamRef.current) {
-      const audioTrack = localStreamRef.current.getAudioTracks()[0];
-      audioTrack.enabled = !audioTrack.enabled;
-      setAudioEnabled(audioTrack.enabled);
-    }
-  };
-
-  const stopAndExit = () => {
-    cleanup();
-    navigate('/stream');
+  const handleDecision = (decision) => {
+    console.log(`Decision: ${decision}`);
+    handleSkip(); // Move to the next partner after decision
   };
 
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   };
 
-  return (
-    <div className="live-surprise-container">
-      {/* Header */}
-      <div className="live-surprise-header">
-        <button className="btn btn-ghost" onClick={stopAndExit}>
-          <FiArrowLeft />
-          {t('liveSurprise.quit')}
-        </button>
+  const uiAnimation = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+    transition: { duration: 0.3 }
+  };
 
-        <div className="header-center">
-          <FiVideo className="header-icon" />
-          <span>{t('liveSurprise.title')}</span>
+  const renderStartScreen = () => (
+    <div className="lspr-start-screen">
+      <div className="lspr-start-screen-content">
+        <div className="lspr-start-icon-wrapper">
+          <FiVideo size={40} />
         </div>
-
-        <button
-          className="btn btn-ghost"
-          onClick={() => setShowSettings(true)}
-        >
-          <FiSettings />
+        <h2>{t('liveSurprise.title') || 'Live Surprise'}</h2>
+        <p>{t('liveSurprise.description') || 'Rencontrez des inconnus aléatoirement.'}</p>
+        <button className="lspr-start-btn" onClick={handleStart}>
+          <FiPlay />
+          <span>{t('liveSurprise.startBtn') || 'Démarrer'}</span>
         </button>
+        <span className="lspr-start-timer-hint">{t('liveSurprise.timerHint') || '3 min par appel'}</span>
       </div>
-
-      <div className="live-surprise-main">
-
-        {/* ── ÉCRAN D'ACCUEIL : bouton Démarrer ──────────────── */}
-        {!showPreview && !isSearching && !isConnected && (
-          <div className="start-screen">
-            <div className="start-screen-content">
-              <div className="start-icon-wrapper">
-                <FiVideo size={48} />
-              </div>
-              <h2>{t('liveSurprise.introTitle')}</h2>
-              <p>{t('liveSurprise.introDesc')}</p>
-
-              <button className="start-btn" onClick={startPreview}>
-                <FiPlay />
-                <span>{t('liveSurprise.start')}</span>
-              </button>
-
-              <div className="start-timer-hint">
-                <FiClock size={14} />
-                <span>{timerDuration} {t('common.min')} par session</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── ÉCRAN APERÇU CAMÉRA ──────────────────────────────── */}
-        {showPreview && !isSearching && !isConnected && (
-          <div className="preview-screen">
-            <div className="preview-video-wrapper">
-              <video
-                ref={previewVideoRef}
-                autoPlay
-                muted
-                playsInline
-                className="preview-video"
-              />
-            </div>
-            <h2>{t('liveSurprise.previewTitle', 'Aperçu caméra')}</h2>
-            <p className="preview-hint">{t('liveSurprise.previewDesc', 'Vérifiez votre apparence avant de lancer la recherche')}</p>
-            <button className="start-btn" onClick={confirmSearch}>
-              <FiPlay />
-              <span>{t('liveSurprise.launchSearch', 'Lancer la recherche')}</span>
-            </button>
-          </div>
-        )}
-
-        {/* ── RECHERCHE EN COURS ─────────────────────────────── */}
-        {isSearching && !isConnected && (
-          <div className="searching-screen">
-            <div className="searching-animation">
-              <FiRefreshCw className="spinning" size={60} />
-            </div>
-            <h2>{t('liveSurprise.searching')}</h2>
-            <p>{t('liveSurprise.searchingDesc')}</p>
-
-            {/* PiP locale pendant la recherche */}
-            <div className="local-video-container">
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                className="local-video"
-              />
-              {!videoEnabled && (
-                <div className="video-disabled-overlay">
-                  <FiVideoOff size={32} />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── APPEL VIDÉO : Streamer (PiP) + Participant (plein écran) ── */}
-        {isConnected && (
-          <div className="videocall-layout">
-            {/* Vidéo du participant aléatoire — plein écran */}
-            <div className="participant-video-container">
-              {remoteStream ? (
-                <video
-                  ref={remoteVideoRef}
-                  autoPlay
-                  playsInline
-                  className="participant-video"
-                />
-              ) : (
-                <div className="participant-loading">
-                  <FiRefreshCw className="spinning" size={40} />
-                  <span>{t('liveSurprise.connecting')}</span>
-                </div>
-              )}
-
-              {partner && (
-                <div className="partner-info">
-                  <div className="partner-name">
-                    {partner.displayName}, {partner.age}
-                  </div>
-                  {partner.location && (
-                    <div className="partner-location">
-                      {partner.location.city}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Vidéo du streamer — petit cadre en haut à droite */}
-            <div className="streamer-video-container">
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                className="streamer-video"
-              />
-              {!videoEnabled && (
-                <div className="video-disabled-overlay">
-                  <FiVideoOff size={24} />
-                </div>
-              )}
-            </div>
-
-            {/* Timer */}
-            {timeRemaining !== null && !showDecision && (
-              <div className="timer-display">
-                <FiClock />
-                <span>{formatTime(timeRemaining)}</span>
-              </div>
-            )}
-
-            {/* Barre de contrôles */}
-            {!showDecision && (
-              <div className="controls-bar">
-                <button
-                  className={`control-btn ${!audioEnabled ? 'disabled' : ''}`}
-                  onClick={toggleAudio}
-                >
-                  {audioEnabled ? <FiMic /> : <FiMicOff />}
-                </button>
-
-                <button
-                  className={`control-btn ${!videoEnabled ? 'disabled' : ''}`}
-                  onClick={toggleVideo}
-                >
-                  {videoEnabled ? <FiVideo /> : <FiVideoOff />}
-                </button>
-
-                {canSkip && (
-                  <button
-                    className="control-btn skip-btn"
-                    onClick={handleSkip}
-                  >
-                    <FiSkipForward />
-                    {t('liveSurprise.skip')}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Panel de décision */}
-            {showDecision && (
-              <div className="decision-panel">
-                <h3>{t('liveSurprise.timeUp')}</h3>
-                <p>{t('liveSurprise.whatToDo')}</p>
-
-                <div className="decision-buttons">
-                  <button
-                    className="decision-btn dislike-btn"
-                    onClick={() => handleDecision('dislike')}
-                  >
-                    <FiX />
-                    <span>{t('liveSurprise.pass')}</span>
-                  </button>
-
-                  <button
-                    className="decision-btn like-btn"
-                    onClick={() => handleDecision('like')}
-                  >
-                    <FiHeart />
-                    <span>{t('liveSurprise.iLike')}</span>
-                  </button>
-
-                  <button
-                    className="decision-btn skip-btn"
-                    onClick={() => handleDecision('skip')}
-                  >
-                    <FiSkipForward />
-                    <span>{t('common.next')}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-      </div>
-
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="settings-modal-overlay" onClick={() => setShowSettings(false)}>
-          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{t('liveSurprise.settingsTitle')}</h3>
-
-            <div className="setting-group">
-              <label>{t('liveSurprise.timerDuration')}</label>
-              <div className="timer-options">
-                {[3, 5, 8, 10].map((minutes) => (
-                  <button
-                    key={minutes}
-                    className={`timer-option ${timerDuration === minutes ? 'active' : ''}`}
-                    onClick={() => setTimerDuration(minutes)}
-                    disabled={isConnected}
-                  >
-                    {minutes} {t('common.min')}
-                  </button>
-                ))}
-              </div>
-              <p className="setting-hint">
-                {isConnected
-                  ? t('liveSurprise.cannotChangeDuring')
-                  : t('liveSurprise.minTimeBeforeDecision')}
-              </p>
-            </div>
-
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowSettings(false)}
-            >
-              {t('common.close')}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
+
+  const renderSearchingScreen = () => (
+    <div className="lspr-searching-screen">
+      <div className="lspr-searching-animation">
+        <FiRefreshCw size={48} />
+      </div>
+      <p>{t('liveSurprise.searching') || 'Recherche en cours...'}</p>
+      <div className="lspr-streamer-video-container searching-pip">
+        <video ref={localVideoRef} autoPlay playsInline muted className="lspr-streamer-video" />
+      </div>
+    </div>
+  );
+
+  const renderVideoCallScreen = () => (
+    <div className="lspr-videocall-layout" onClick={toggleUiVisibility}>
+      <div className="lspr-participant-video-container">
+        <video ref={remoteVideoRef} autoPlay playsInline className="lspr-participant-video" />
+      </div>
+      <div className="lspr-streamer-video-container">
+        <video ref={localVideoRef} autoPlay playsInline muted className="lspr-streamer-video" />
+      </div>
+
+      <AnimatePresence>
+        {isUiVisible && (
+          <motion.div className="lspr-ui-overlay" {...uiAnimation}>
+            <div className="lspr-top-bar">
+              <div className="lspr-timer">{formatTime(timer)}</div>
+            </div>
+            <div className="lspr-bottom-bar">
+              <button className={`lspr-control-btn ${isMuted ? 'off' : ''}`} onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}>
+                {isMuted ? <FiMicOff size={22} /> : <FiMic size={22} />}
+              </button>
+              <button className={`lspr-control-btn ${isCamOff ? 'off' : ''}`} onClick={(e) => { e.stopPropagation(); setIsCamOff(!isCamOff); }}>
+                {isCamOff ? <FiVideoOff size={22} /> : <FiVideo size={22} />}
+              </button>
+              <button className="lspr-control-btn skip" onClick={(e) => { e.stopPropagation(); handleSkip(); }}>
+                <FiX size={22} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {screen === 'decision' && (
+          <div className="lspr-decision-overlay">
+            <motion.div
+              className="lspr-decision-panel"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
+              <h3>{t('liveSurprise.sessionEnded') || 'Session terminée'}</h3>
+              <p>{t('liveSurprise.doYouLike') || 'Ce profil vous a plu ?'}</p>
+              <div className="lspr-decision-actions">
+                <button className="decision-btn dislike" onClick={() => handleDecision('dislike')}>
+                  <FiThumbsDown size={28} />
+                </button>
+                <button className="decision-btn like" onClick={() => handleDecision('like')}>
+                  <FiHeart size={28} />
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  if (screen === 'start') return renderStartScreen();
+  if (screen === 'searching') return renderSearchingScreen();
+  return renderVideoCallScreen();
 };
 
 export default LiveSurprise;

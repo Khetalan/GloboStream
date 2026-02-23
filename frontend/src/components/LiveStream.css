@@ -62,21 +62,6 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.ls-mode-competition .ls-go-live-btn {
-  background: linear-gradient(135deg, #F59E0B, #EF4444);
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
-}
-
-.ls-mode-event .ls-go-live-btn {
-  background: linear-gradient(135deg, #22C55E, #10B981);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
-}
-
-.ls-go-live-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 28px rgba(255, 51, 102, 0.5);
-}
-
 .ls-back-btn {
   display: flex;
   align-items: center;
@@ -156,23 +141,67 @@
   flex-direction: column;
   height: 100dvh;
   max-width: 100%;
+  width: 100%;
   overflow: hidden;
   position: relative;
   background-color: #0a0a0a;
   color: #fff;
+  --ls-accent-color: var(--primary, #e4405f);
+  --ls-accent-gradient: linear-gradient(135deg, #FF3366, #FF6B9D);
+  --ls-accent-shadow: 0 4px 20px rgba(255, 51, 102, 0.4);
+  --ls-accent-shadow-hover: 0 6px 28px rgba(255, 51, 102, 0.5);
 }
 
-/* ── Grille vidéo — 50% de l'écran ─────────────────────────── */
+.ls-mode-competition {
+  --ls-accent-color: #F59E0B;
+  --ls-accent-gradient: linear-gradient(135deg, #F59E0B, #EF4444);
+  --ls-accent-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+  --ls-accent-shadow-hover: 0 6px 28px rgba(245, 158, 11, 0.5);
+}
+
+.ls-mode-event {
+  --ls-accent-color: #22C55E;
+  --ls-accent-gradient: linear-gradient(135deg, #22C55E, #10B981);
+  --ls-accent-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+  --ls-accent-shadow-hover: 0 6px 28px rgba(34, 197, 94, 0.5);
+}
+
+/* Centrage Mobile First sur Desktop */
+@media (min-width: 768px) {
+  .ls-container {
+    max-width: 480px; /* Largeur tablette max */
+    margin: 0 auto;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ── Grille vidéo — Arrière-plan plein écran ─────────────────────────── */
 .ls-video-grid {
-  flex: 0 0 50%;
-  min-height: 240px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 4px;
+  padding: 0;
   overflow: hidden;
-  background-color: #1a1a1a;
-  position: relative;
+  background-color: #000;
+  cursor: pointer;
+  z-index: 0;
+}
+
+/* On applique les variables de mode au bouton Go Live */
+.ls-go-live-btn {
+  background: var(--ls-accent-gradient);
+  box-shadow: var(--ls-accent-shadow);
+}
+
+.ls-go-live-btn:hover {
+  transform: scale(1.05);
+  box-shadow: var(--ls-accent-shadow-hover);
 }
 
 /* ── Layouts dynamiques (1-9 participants) ──────────────────── */
@@ -245,33 +274,19 @@
 }
 
 /* Streamer toujours col1 row1-2 pour layouts 4+ */
-.ls-video-grid.layout-4 .ls-video-card.streamer,
-.ls-video-grid.layout-5 .ls-video-card.streamer,
-.ls-video-grid.layout-6 .ls-video-card.streamer,
-.ls-video-grid.layout-7 .ls-video-card.streamer,
-.ls-video-grid.layout-8 .ls-video-card.streamer,
-.ls-video-grid.layout-9 .ls-video-card.streamer {
+.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) .ls-video-card.streamer,
+.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) > .ls-video-card:first-child {
   grid-column: 1;
   grid-row: 1 / 3;
 }
 
 /* 2 cartes à droite du streamer */
-.ls-video-grid.layout-4 > .ls-video-card.user:nth-child(2),
-.ls-video-grid.layout-5 > .ls-video-card.user:nth-child(2),
-.ls-video-grid.layout-6 > .ls-video-card.user:nth-child(2),
-.ls-video-grid.layout-7 > .ls-video-card.user:nth-child(2),
-.ls-video-grid.layout-8 > .ls-video-card.user:nth-child(2),
-.ls-video-grid.layout-9 > .ls-video-card.user:nth-child(2) {
+.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) > .ls-video-card.user:nth-child(2) {
   grid-column: 2;
   grid-row: 1;
 }
 
-.ls-video-grid.layout-4 > .ls-video-card.user:nth-child(3),
-.ls-video-grid.layout-5 > .ls-video-card.user:nth-child(3),
-.ls-video-grid.layout-6 > .ls-video-card.user:nth-child(3),
-.ls-video-grid.layout-7 > .ls-video-card.user:nth-child(3),
-.ls-video-grid.layout-8 > .ls-video-card.user:nth-child(3),
-.ls-video-grid.layout-9 > .ls-video-card.user:nth-child(3) {
+.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) > .ls-video-card.user:nth-child(3) {
   grid-column: 2;
   grid-row: 2;
 }
@@ -307,16 +322,16 @@
 .ls-video-card {
   position: relative;
   background-color: #000;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 70px;
 }
 
-.ls-video-card.streamer {
-  border: 3px solid var(--primary, #e4405f);
+.ls-video-card.streamer,
+.ls-video-grid > .ls-video-card:first-child {
+  border: none;
 }
 
 .ls-video-card.user {
@@ -363,6 +378,14 @@
   font-weight: 500;
 }
 
+.ls-cam-off-photo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
 .ls-local-video {
   width: 100%;
   height: 100%;
@@ -384,10 +407,6 @@
   z-index: 5;
 }
 
-.ls-video-label.streamer-label {
-  background-color: rgba(228, 64, 95, 0.9);
-}
-
 .ls-empty-slot {
   width: 100%;
   height: 100%;
@@ -395,58 +414,6 @@
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.15);
-}
-
-/* ── Badge stats HUD ───────────────────────────────────────── */
-.ls-streamer-stats {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 6px;
-  padding: 4px 8px;
-  cursor: pointer;
-  z-index: 20;
-  user-select: none;
-  transition: background-color 0.15s;
-}
-
-.ls-streamer-stats:active {
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.ls-stat-row {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
-  white-space: nowrap;
-}
-
-.ls-stat-divider {
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 9px;
-}
-
-/* ── Indicateur micro coupé ────────────────────────────────── */
-.ls-mic-muted {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary, #e4405f);
-  z-index: 10;
 }
 
 /* ── Overlay + Panel stats ─────────────────────────────────── */
@@ -509,7 +476,7 @@
 
 .ls-tab-btn.active {
   color: #fff;
-  border-bottom-color: var(--primary, #e4405f);
+  border-bottom-color: var(--ls-accent-color);
 }
 
 .ls-stats-close {
@@ -538,9 +505,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background-color: rgba(228, 64, 95, 0.1);
-  border-bottom: 1px solid rgba(228, 64, 95, 0.2);
+  padding: 12px 16px;  
+  background-color: color-mix(in srgb, var(--ls-accent-color) 10%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ls-accent-color) 20%, transparent);
   flex-shrink: 0;
 }
 
@@ -552,7 +519,7 @@
 .ls-stats-total-value {
   font-size: 16px;
   font-weight: 700;
-  color: var(--primary, #e4405f);
+  color: var(--ls-accent-color);
 }
 
 .ls-stats-list {
@@ -618,12 +585,114 @@
   color: #ff9500;
 }
 
+/* ── UI Overlay (Cinématique) ────────────────────────────── */
+.ls-ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.8) 100%);
+  pointer-events: none;
+}
+
+.ls-top-bar, .ls-bottom-bar, .ls-chat-section {
+  pointer-events: auto;
+  padding: 1rem 1.5rem;
+}
+
+.ls-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-top: calc(1rem + env(safe-area-inset-top));
+}
+
+.ls-streamer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26, 26, 26, 0.6);
+  backdrop-filter: blur(12px);
+  padding: 6px 12px 6px 6px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ls-streamer-info img, .ls-streamer-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ls-streamer-avatar {
+  background: var(--ls-accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.ls-streamer-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding-right: 4px;
+}
+
+/* Stats Indicators (Top Right) */
+.ls-stats-indicators {
+  display: flex;
+  gap: 8px;
+}
+
+.ls-live-badge, .ls-viewer-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: rgba(26, 26, 26, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.ls-viewer-count {
+  cursor: pointer;
+}
+
+.ls-live-badge {
+  background-color: var(--ls-accent-color);
+  border-color: var(--ls-accent-color);
+  box-shadow: 0 0 10px rgba(228, 64, 95, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  50% { box-shadow: 0 0 20px rgba(228, 64, 95, 0.7); }
+}
+
 .ls-chat-section {
-  flex: 1 1 0;
-  min-height: 80px;
+  position: absolute;
+  bottom: 90px;
+  left: 1rem;
+  right: 1rem;
+  height: 30vh;
   overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.7); /* Légèrement plus transparent pour le glassmorphism */
-  padding: 10px 14px;
+  mask-image: linear-gradient(to bottom, transparent, black 20%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Correction scroll : permet de remonter */
+  padding: 0;
+  background: transparent;
 }
 
 .ls-chat-message {
@@ -632,7 +701,8 @@
   flex-direction: column;
   gap: 2px;
   line-height: 1.4;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
 
 .ls-chat-message.system {
@@ -640,21 +710,23 @@
   font-style: italic;
 }
 
-.ls-chat-message-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
 .ls-chat-message.own .ls-chat-username {
-  color: var(--primary, #e4405f);
+  color: var(--ls-accent-color);
 }
 
 .ls-chat-username {
   color: #ff9500;
   font-weight: 600;
   font-size: 13px;
-  flex-shrink: 0;
+  margin-right: 4px; /* Espace réduit après le nom */
+  white-space: nowrap;
+}
+
+.ls-chat-body {
+  display: inline; /* Pour que le texte suive le nom */
+  line-height: 1.4;
+  word-break: break-word;
+  flex-wrap: wrap;
 }
 
 .ls-chat-text {
@@ -662,8 +734,15 @@
   font-size: 13px;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  flex: 1;
-  min-width: 0;
+  display: inline;
+}
+
+.ls-chat-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
 .ls-lang-badge {
@@ -682,7 +761,7 @@
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.3);
-  font-size: 11px;
+  font-size: 15px;
   cursor: pointer;
   padding: 0 2px;
   flex-shrink: 0;
@@ -709,8 +788,8 @@
   font-size: 12px;
   color: rgba(255, 255, 255, 0.5);
   font-style: italic;
-  padding: 3px 0 2px 0;
-  border-left: 2px solid rgba(228, 64, 95, 0.5);
+  padding: 3px 0 2px 0;  
+  border-left: 2px solid color-mix(in srgb, var(--ls-accent-color) 50%, transparent);
   padding-left: 8px;
   margin-left: 4px;
 }
@@ -724,7 +803,7 @@
   border-bottom: none; /* Pas de bordure pour les messages système */
   font-size: 0.85rem;
 }
-.ls-chat-message.is-join-event .ls-chat-message-top {
+.ls-chat-message.is-join-event .ls-chat-body {
     justify-content: center;
 }
 .ls-chat-message.is-join-event .ls-chat-username {
@@ -735,103 +814,98 @@
 .ls-bottom-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom));
-  -webkit-backdrop-filter: blur(20px); /* Glassmorphism pour compatibilité */
-  backdrop-filter: blur(20px); /* Glassmorphism */
-  background-color: rgba(0, 0, 0, 0.75); /* Plus transparent */
-  border-top: 1px solid rgba(255, 255, 255, 0.08); /* Bordure subtile */
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  background: transparent;
+  border-top: none;
   flex-shrink: 0;
+}
+
+.ls-controls-left, .ls-controls-right {
+  display: flex;
+  gap: 8px;
 }
 
 .ls-input-container {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 8px 12px;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  border: none; /* Suppression de la bordure pour un look plus clean */
+  background-color: rgba(255, 255, 255, 0.15); /* Fond unifié */
+  border-radius: 24px; /* Plus arrondi */
+  padding: 0 16px;
+  height: 48px;
   flex: 1;
   min-width: 0;
+  order: 1; /* Input en premier (gauche) */
 }
 
 .ls-input-container input {
-  flex: 1;
-  background: none;
-  border: none;
+  font-size: 1rem;
   color: #fff;
-  font-size: 13px;
-  outline: none;
-  min-width: 0;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  appearance: none;
 }
 
 .ls-input-container input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Réorganisation des boutons */
+.ls-controls-left {
+  order: 2; /* Boutons demandes/cadeaux après l'input */
+}
+
+.ls-controls-right {
+  order: 3; /* Contrôles média à la fin */
 }
 
 .ls-send-btn {
-  background: none;
-  border: none;
-  color: var(--primary, #e4405f);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 0;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.2s;
+}
+.ls-send-btn:hover {
+  color: var(--ls-accent-color);
 }
 
 .ls-control-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .ls-control-btn:hover {
-  background-color: rgba(255, 255, 255, 0.18);
+  background-color: var(--ls-accent-color);
+  border-color: var(--ls-accent-color);
 }
 
-.ls-control-btn.muted {
-  color: var(--primary, #e4405f);
-  background-color: rgba(228, 64, 95, 0.15);
+.ls-control-btn.off {
+  background-color: rgba(255, 59, 48, 0.8);
+  border-color: rgba(255, 59, 48, 0.8);
 }
 
-.ls-control-btn.gift-btn {
-  color: #ff9500;
-  background-color: rgba(255, 149, 0, 0.15);
+.ls-control-btn.stop-stream {
+  background-color: rgba(255, 59, 48, 0.8);
+  border-color: rgba(255, 59, 48, 0.8);
 }
 
-.ls-control-btn.quit-btn {
-  background-color: var(--primary, #e4405f);
-}
-
-.ls-control-btn.quit-btn:hover {
-  background-color: #d62d4a;
-}
-
-/* ── Modes : couleurs d'accent par type de live ────────────── */
-.ls-mode-competition .ls-video-card.streamer {
-  border-color: #F59E0B;
-}
-
-.ls-mode-competition .ls-streamer-stats {
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.ls-mode-event .ls-video-card.streamer {
-  border-color: #22C55E;
-}
-
-.ls-mode-event .ls-streamer-stats {
-  border: 1px solid rgba(34, 197, 94, 0.3);
+.ls-control-btn.stop-stream:hover {
+  background-color: #d32f2f;
 }
 
 /* ── Vidéo participant ─────────────────────────────────────── */
@@ -841,6 +915,29 @@
   object-fit: cover;
   position: absolute;
   inset: 0;
+}
+
+/* ── Indicateur micro coupé ────────────────────────────────── */
+.ls-mic-muted {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(128, 128, 128, 0.5); /* Gris transparent */
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.ls-mic-muted svg {
+  width: 40px;
+  height: 40px;
 }
 
 /* ── Notifications de demandes de participation ───────────── */
@@ -1070,8 +1167,8 @@
 .ls-requests-count {
   position: absolute;
   top: -4px;
-  right: -4px;
-  background-color: var(--primary, #e4405f);
+  right: -4px;  
+  background-color: var(--ls-accent-color);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -1086,63 +1183,57 @@
   transform-origin: top right;
 }
 
+/* -- Contrôles sur la carte d'un participant (visibles au survol) -- */
+.ls-participant-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 15;
+}
+
+.ls-video-card.user:hover .ls-participant-controls {
+  opacity: 1;
+}
+
+.ls-participant-ctrl-btn {
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.ls-participant-ctrl-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
+
+/* ── Styles partagés pour LiveViewer ──────────────────────── */
+.lv-video-section {
+  border: 3px solid var(--primary, #e4405f);
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 360px) {
-  .ls-video-grid {
-    flex: 0 0 48%;
-    min-height: 220px;
-    gap: 3px;
-    padding: 3px;
-  }
-
   .ls-video-grid.layout-2 .ls-video-card:nth-child(2) {
     width: 80px;
     height: 110px;
     top: 6px;
     right: 6px;
   }
-
-  .ls-chat-section {
-    min-height: 80px;
-    padding: 8px 10px;
-  }
-
-  .ls-chat-username,
-  .ls-chat-text {
-    font-size: 11px;
-  }
-
-  .ls-bottom-bar {
-    padding: 6px 10px;
-    gap: 4px;
-  }
-
-  .ls-control-btn {
-    width: 34px;
-    height: 34px;
-  }
 }
 
 @media (min-width: 481px) {
-  .ls-video-grid {
-    flex: 0 0 52%;
-    min-height: 290px;
-    gap: 6px;
-    padding: 6px;
-  }
-
   .ls-video-grid.layout-2 .ls-video-card:nth-child(2) {
     width: 120px;
     height: 170px;
-  }
-
-  .ls-chat-section {
-    min-height: 120px;
-    padding: 12px 16px;
-  }
-
-  .ls-chat-username,
-  .ls-chat-text {
-    font-size: 14px;
   }
 }
