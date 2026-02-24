@@ -323,5 +323,30 @@
 ### Build
 - [x] npm run build réussi
 - [x] Déploiement GitHub Pages effectué
+
+## Session 9 — 24 Février 2026
+
+### Objectifs
+- Corriger l'affichage "cassé" de la page Matches (contenu invisible).
+
+### Ce qui a été fait
+- Ajout de la classe `.loading-spinner` manquante dans `Matches.css`.
+- Amélioration de la classe `.no-matches` pour assurer la visibilité des messages d'état vide.
+
+## Session 10 — 24 Février 2026
+
+### Objectifs
+- Améliorer la gestion des erreurs sur la page Matches suite au signalement d'une erreur 500.
+
+### Ce qui a été fait
+- Ajout d'une notification `toast.error` dans `Matches.js` pour informer l'utilisateur en cas d'échec API.
+
+### Fichiers modifiés
+- `frontend/src/pages/Matches.js`
+- `gemini_session.md`
+
+### Fichiers modifiés
+- `frontend/src/pages/Matches.css`
+- `gemini_session.md`
 > **Rappel** : Ce fichier DOIT être mis à jour par Gemini à la fin de chaque session.
 > Format de mise à jour : voir la section "Instructions de mise à jour" dans GEMINI.md.

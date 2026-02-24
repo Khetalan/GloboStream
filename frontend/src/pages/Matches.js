@@ -1,214 +1,236 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { getPhotoUrl } from '../utils/photoUrl';
-import { FiArrowLeft, FiHeart, FiEye, FiMessageCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiUser, FiX, FiHeart, FiEye } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 import './Matches.css';
 
 const Matches = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('matches');
-  const [matches, setMatches] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [likes, setLikes] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [views, setViews] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  // États
+  const [activeTab, setActiveTab] = useState('matches'); // matches, likes, views
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProfile, setSelectedProfile] = useState(null); // Pour la modale
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  // Fonction de récupération des données selon l'onglet
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const matchesRes = await axios.get('/api/matches');
-      setMatches(matchesRes.data.matches || []);
-      
-      // Pour l'instant, simulons des likes et vues
-      //setLikes([
-        //{ id: 1, name: 'Sophie', age: 26, photo: null, isBlurred: true },
-        //{ id: 2, name: 'Marie', age: 24, photo: null, isBlurred: true },
-      //]);
-      
-      //setViews([
-        //{ id: 3, name: 'Julie', age: 28, photo: null, isBlurred: true },
-      //]);
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      let endpoint = '';
+
+      switch (activeTab) {
+        case 'matches':
+          endpoint = '/api/matches';
+          break;
+        case 'likes':
+          endpoint = '/api/swipe/likes-received'; 
+          break;
+        case 'views':
+          endpoint = '/api/users/views';
+          break;
+        default:
+          endpoint = '/api/matches';
+      }
+
+      const response = await axios.get(endpoint, { headers });
+      // Adaptation selon la structure de réponse
+      if (activeTab === 'matches') {
+        // /api/matches retourne { matches: [...] }
+        setData(response.data.matches || []);
+      } else {
+        // Les autres endpoints retourneront probablement un tableau direct ou { users: [...] }
+        setData(response.data.users || response.data || []);
+      }
     } catch (error) {
+      console.error(`Error fetching ${activeTab}:`, error);
       toast.error(t('matches.loadError'));
+      setData([]); // Fallback vide en cas d'erreur (ex: endpoint pas encore créé)
     } finally {
       setLoading(false);
     }
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Gestion de l'ouverture du chat
+  const handleStartChat = (userId, e) => {
+    if (e) e.stopPropagation();
+    navigate(`/chat/${userId}`);
+  };
+
+  // Gestion de l'ouverture de la modale profil
+  const handleOpenProfile = (profile) => {
+    // Normalisation de l'objet profil (parfois imbriqué dans 'user')
+    const user = profile.user || profile;
+    setSelectedProfile(user);
+  };
+
+  // Fermeture modale
+  const handleCloseModal = () => {
+    setSelectedProfile(null);
+  };
+
+  // Rendu du contenu vide
+  const renderEmptyState = () => {
+    let message = t('matches.noMatches');
+    if (activeTab === 'likes') message = t('matches.noLikes');
+    if (activeTab === 'views') message = t('matches.noViews');
+
+    return (
+      <div className="no-matches">
+        <p>{message}</p>
+      </div>
+    );
   };
 
   return (
-    <div className="matches-container">
-      <div className="matches-header">
-        <button className="btn btn-ghost" onClick={() => navigate('/home')}>
-          <FiArrowLeft />
-        </button>
-        <div className="logo">
-          <FiHeart className="logo-icon" />
-          <span>{t('matches.title')}</span>
+    <div className="matches-page">
+      {/* En-tête avec Onglets */}
+      <div className="matches-tabs-container">
+        <div className="matches-tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
+            onClick={() => setActiveTab('matches')}
+          >
+            {t('matches.tabMatches')}
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'likes' ? 'active' : ''}`}
+            onClick={() => setActiveTab('likes')}
+          >
+            {t('matches.tabLikes')}
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'views' ? 'active' : ''}`}
+            onClick={() => setActiveTab('views')}
+          >
+            {t('matches.tabViews')}
+          </button>
         </div>
-        <div style={{ width: 40 }}></div>
       </div>
 
-      <div className="matches-tabs">
-        <button 
-          className={`tab ${activeTab === 'matches' ? 'active' : ''}`}
-          onClick={() => setActiveTab('matches')}
-        >
-          <FiHeart />
-          {t('matches.tabMatches')} ({matches.length})
-        </button>
-        <button
-          className={`tab ${activeTab === 'likes' ? 'active' : ''}`}
-          onClick={() => setActiveTab('likes')}
-        >
-          <FiHeart />
-          {t('matches.tabLikes')} ({likes.length})
-        </button>
-        <button
-          className={`tab ${activeTab === 'views' ? 'active' : ''}`}
-          onClick={() => setActiveTab('views')}
-        >
-          <FiEye />
-          {t('matches.tabViews')} ({views.length})
-        </button>
-      </div>
-
+      {/* Contenu Principal */}
       <div className="matches-content">
-        {activeTab === 'matches' && (
-          <div className="matches-grid">
-            {matches.length === 0 ? (
-              <div className="empty-message">
-                <FiHeart size={60} />
-                <p>{t('matches.noMatches')}</p>
-                <button className="btn btn-primary" onClick={() => navigate('/swipe')}>
-                  {t('matches.startSwiping')}
-                </button>
-              </div>
-            ) : (
-              matches.map((match) => (
-                <MatchCard
-                  key={match.id}
-                  match={match}
-                  onClick={() => navigate(`/chat/${match.user.id}`)}
-                  t={t}
-                />
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === 'likes' && (
-          <div className="matches-grid">
-            {likes.length === 0 ? (
-              <div className="empty-message">
-                <FiHeart size={60} />
-                <p>{t('matches.noLikes')}</p>
-              </div>
-            ) : (
-              likes.map((like) => (
-                <LikeCard
-                  key={like.id}
-                  like={like}
-                  onClick={() => toast(t('matches.premiumRequired'))}
-                  t={t}
-                />
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === 'views' && (
-          <div className="matches-grid">
-            {views.length === 0 ? (
-              <div className="empty-message">
-                <FiEye size={60} />
-                <p>{t('matches.noViews')}</p>
-              </div>
-            ) : (
-              views.map((view) => (
-                <ViewCard
-                  key={view.id}
-                  view={view}
-                  onClick={() => toast(t('matches.premiumRequired'))}
-                  t={t}
-                />
-              ))
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const MatchCard = ({ match, onClick, t }) => {
-  const primaryPhoto = match.user.photos?.find(p => p.isPrimary) || match.user.photos?.[0];
-
-  return (
-    <div className="match-card" onClick={onClick}>
-      <div className="match-photo">
-        {primaryPhoto ? (
-          <img src={getPhotoUrl(primaryPhoto.url)} alt={match.user.displayName} />
+        {loading ? (
+          <div className="loading-spinner"></div>
+        ) : data.length === 0 ? (
+          renderEmptyState()
         ) : (
-          <div className="placeholder">
-            <FiHeart size={40} />
+          <div className="matches-grid">
+            {data.map((item) => {
+              const user = item.user || item; // Gérer structure {match: {...}} ou {user: {...}}
+              const photoUrl = user.photos?.find(p => p.isPrimary)?.url || user.photos?.[0]?.url || '/default-avatar.png';
+              
+              return (
+                <motion.div
+                  key={user.id || user._id}
+                  className="match-card"
+                  layoutId={`card-${user.id || user._id}`}
+                  onClick={() => handleOpenProfile(user)}
+                  whileHover={{ y: -5 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <div 
+                    className="match-image" 
+                    style={{ backgroundImage: `url(${photoUrl})` }}
+                  >
+                    {/* Badge si c'est un match */}
+                    {activeTab === 'matches' && (
+                      <div className="match-badge">
+                        <FiHeart className="filled-heart" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="match-info">
+                    <h3>{user.displayName || user.firstName}, {user.age}</h3>
+                    <p>{user.location?.city || t('matches.unknownCity')}</p>
+                    
+                    {activeTab === 'matches' && (
+                      <button 
+                        className="quick-chat-btn"
+                        onClick={(e) => handleStartChat(user.id || user._id, e)}
+                      >
+                        <FiMessageCircle /> {t('matches.startChat')}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
-      <div className="match-info">
-        <h3>{match.user.displayName}, {match.user.age}</h3>
-        <p>{match.user.location?.city || t('matches.unknownCity')}</p>
-      </div>
-      <button className="chat-btn">
-        <FiMessageCircle />
-      </button>
+
+      {/* Modale Profil */}
+      <AnimatePresence>
+        {selectedProfile && (
+          <motion.div 
+            className="profile-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCloseModal}
+          >
+            <motion.div 
+              className="profile-modal-card"
+              layoutId={`card-${selectedProfile.id || selectedProfile._id}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="close-modal-btn" onClick={handleCloseModal}>
+                <FiX />
+              </button>
+
+              <div 
+                className="modal-image-header"
+                style={{ backgroundImage: `url(${selectedProfile.photos?.find(p => p.isPrimary)?.url || selectedProfile.photos?.[0]?.url || '/default-avatar.png'})` }}
+              >
+                <div className="modal-gradient"></div>
+                <div className="modal-title-info">
+                  <h2>{selectedProfile.displayName || selectedProfile.firstName}, {selectedProfile.age}</h2>
+                  <span className="modal-location">{selectedProfile.location?.city}</span>
+                </div>
+              </div>
+
+              <div className="modal-body">
+                <div className="modal-section">
+                  <h4>{t('profile.about')}</h4>
+                  <p>{selectedProfile.bio || t('profile.noBio')}</p>
+                </div>
+
+                <div className="modal-actions">
+                  <button 
+                    className="modal-action-btn primary"
+                    onClick={() => {
+                      handleStartChat(selectedProfile.id || selectedProfile._id);
+                      handleCloseModal();
+                    }}
+                  >
+                    <FiMessageCircle /> {t('matches.startChat')}
+                  </button>
+                  <button 
+                    className="modal-action-btn secondary"
+                    onClick={() => navigate(`/profile/${selectedProfile.id || selectedProfile._id}`)}
+                  >
+                    <FiUser /> {t('matches.viewProfile')}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-
-const LikeCard = ({ like, onClick, t }) => {
-  return (
-    <div className="match-card blurred" onClick={onClick}>
-      <div className="match-photo">
-        <div className="placeholder blurred-placeholder">
-          <FiHeart size={40} />
-        </div>
-      </div>
-      <div className="match-info">
-        <h3>{like.name}, {like.age}</h3>
-        <div className="premium-badge">
-          {t('matches.premium')}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ViewCard = ({ view, onClick, t }) => {
-  return (
-    <div className="match-card blurred" onClick={onClick}>
-      <div className="match-photo">
-        <div className="placeholder blurred-placeholder">
-          <FiEye size={40} />
-        </div>
-      </div>
-      <div className="match-info">
-        <h3>{view.name}, {view.age}</h3>
-        <div className="premium-badge">
-          {t('matches.premium')}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default Matches;
