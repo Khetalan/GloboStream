@@ -179,7 +179,8 @@
     "geoSuccess": "📍 ¡Ubicación obtenida!",
     "geoError": "Error al obtener la ubicación",
     "geoImpossible": "No se pudo obtener tu ubicación",
-    "loadError": "Error al cargar el perfil"
+    "loadError": "Error al cargar el perfil",
+    "joinedAt": "Unido el: {{date}}"
   },
   "settings": {
     "title": "Ajustes",
@@ -264,7 +265,11 @@
     "noMatches": "Ningún match por el momento",
     "startSwiping": "Empezar a deslizar",
     "noLikes": "Nadie te ha dado like todavía",
+    "noLikesDesc": "¡Da 'Me gusta' a otros usuarios para ver a quién le gustas!",
     "noViews": "Nadie ha visto tu perfil recientemente",
+    "noViewsDesc": "¡Mantén tu perfil público y visible para ver quién te ha visitado!",
+    "views": "Visitas",
+    "likes": "Me gusta",
     "premium": "💎 Premium",
     "unknownCity": "Ciudad desconocida",
     "premiumRequired": "Se requiere versión premium 💎",
@@ -455,7 +460,12 @@
     "previewTitle": "Vista previa de cámara",
     "previewDesc": "Comprueba tu aspecto antes de iniciar la búsqueda",
     "launchSearch": "Iniciar búsqueda",
-    "connecting": "Conectando..."
+    "connecting": "Conectando...",
+    "description": "Conoce extraños aleatoriamente.",
+    "startBtn": "Comenzar",
+    "timerHint": "3 min por llamada",
+    "sessionEnded": "Sesión terminada",
+    "doYouLike": "¿Te gustó este perfil?"
   },
   "stream": {
     "title": "Stream",

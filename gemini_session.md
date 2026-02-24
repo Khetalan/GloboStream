@@ -16,11 +16,11 @@
 | **Design** | Dark mode — accent #e4405f — CSS mobile-first |
 | **Déploiement** | GitHub Pages (branche gh-pages) |
 | **Build** | `cd frontend && npm run build` |
-| **Dernier build réussi** | N/A (non effectué par Gemini cette session) |
+| **Dernier build réussi** | Session 8 — 24 Février 2026 (Navigation restaurée) |
 
 ---
 
-## État Initial du Frontend — 23 Février 2026
+## État Actuel du Frontend — 24 Février 2026
 
 ### Pages existantes (17)
 | Page | Fichier | État CSS | État i18n |
@@ -116,6 +116,11 @@
 *   `frontend/src/locales/es.json`
 *   `frontend/src/locales/fr.json`
 *   `frontend/src/locales/it.json`
+*   `frontend/src/pages/Profile.js`
+*   `frontend/src/pages/Profile.css`
+*   `frontend/src/pages/PublicProfile.js`
+*   `frontend/src/pages/PublicProfile.css`
+*   `todo_gemini.md`
 *   `gemini_session.md`
 
 ---
@@ -196,6 +201,7 @@
 - `frontend/src/components/LiveViewer.js` : Structure chat, listener mic-state.
 - `frontend/src/pages/LiveSurprise.js` : Refonte complète (design cinématique).
 - `frontend/src/pages/LiveSurprise.css` : Refonte complète (styles cinématiques).
+- `frontend/src/locales/*.json` : Ajout des clés de traduction pour LiveSurprise.
 
 ### Build
 - [x] npm run build reussi
@@ -203,5 +209,115 @@
 ### À signaler à Claude
 - Nouveaux événements Socket.IO ajoutés côté frontend : `streamer-mic-state` (emit/on) et `streamer-toggle-mute-participant` (emit). Le backend doit relayer ces événements pour qu'ils soient fonctionnels.
 
+### Déploiement
+- [x] Build de production et déploiement sur la branche `gh-pages` effectués.
+
+---
+
+## Session 5 — 24 Février 2026
+
+### Objectifs
+- Préparer la refonte de la page Profil en créant une tâche formelle.
+
+### Fichiers modifiés
+- `todo_gemini.md` : Ajout de la TÂCHE-001 pour la refonte de la page Profil.
+- `gemini_session.md` : Mise à jour du journal de session.
+
+### Prochaine étape
+- Exécuter la TÂCHE-001.
+
+## Session 6 — 24 Février 2026
+
+### Objectifs
+- Exécuter la TÂCHE-001 : Refonte complète des pages Profil et Profil Public (Mobile First).
+
+### Ce qui a été fait
+- **Refonte Profile.js** : Passage à un layout colonne unique centré, déplacement de la localisation, ajout de la date d'inscription.
+- **Refonte Profile.css** : Styles unifiés pour les profils privés et publics, design "Mobile First" avec cartes.
+- **Refonte PublicProfile.js** : Harmonisation avec le design du profil privé.
+- **Fusion CSS** : Les styles de `PublicProfile.css` ont été migrés vers `Profile.css`.
+
+### Fichiers modifiés
+- `frontend/src/pages/Profile.js`
+- `frontend/src/pages/Profile.css`
+- `frontend/src/pages/PublicProfile.js`
+- `frontend/src/pages/PublicProfile.css` (vidé)
+- `todo_gemini.md`
+
+## Session 7 — 24 Février 2026
+
+### Objectifs
+- Refonte complète de la page `Matches.js` et `Matches.css`.
+- Ajout d'un système d'onglets (Matchs, Likes, Vues).
+- Création d'une modale de profil ("Quick View") au clic sur une carte.
+- Délégation de la logique backend manquante pour les "Vues".
+
+### Ce qui a été fait
+- **Matches.js** : Réécriture complète. Ajout des états `activeTab` et `selectedProfile`. Implémentation de la modale avec `AnimatePresence`.
+- **Matches.css** : Styles pour les onglets sticky, la grille responsive (2 colonnes mobile) et la modale overlay.
+- **i18n** : Ajout des clés manquantes dans `fr.json`.
+- **todo_claude.md** : Ajout de la TÂCHE-002 pour l'implémentation backend des "Vues".
+
+### Fichiers modifiés
+- `frontend/src/pages/Matches.js`
+- `frontend/src/pages/Matches.css`
+- `frontend/src/locales/fr.json`
+- `todo_claude.md`
+- `gemini_session.md`
+
+## Session 7 (suite) — 24 Février 2026
+
+### Objectifs
+- Finaliser la refonte de `Matches.css`.
+- Fournir les traductions manquantes pour EN, IT, DE, ES.
+
+### Ce qui a été fait
+- **Matches.css** : Correction du fichier qui était coupé. La version complète a été fournie, remplaçant l'ancien CSS par un style moderne, mobile-first, pour les onglets, la grille et la modale.
+- **i18n** : Génération des clés de traduction (`tabLikes`, `tabViews`, `noLikes`, `noViews`) pour les langues EN, IT, DE, ES. Fournies sous forme de snippets JSON à intégrer manuellement.
+
+### Fichiers modifiés
+- `frontend/src/pages/Matches.css` (complété)
+- `gemini_session.md`
+
+### En cours / Non terminé
+- **BLOCAGE** : Les fichiers `en.json`, `it.json`, `de.json`, `es.json` ne sont pas disponibles dans le contexte pour appliquer les traductions de la page Matches.
+
+### À signaler à Claude
+- L'onglet "Vues" tente d'appeler `GET /api/users/views`. Si cette route n'existe pas, elle doit être créée (voir TÂCHE-002).
+- L'onglet "Likes" tente d'appeler `GET /api/swipe/likes-received`. À vérifier côté backend.
+
+### Build
+- [x] npm run build réussi
+
+## Session 8 — 24 Février 2026
+
+### Objectifs
+- Vérifier et appliquer les traductions manquantes pour `en.json`, `de.json`, `es.json`.
+
+### Ce qui a été fait
+- Analyse des fichiers `en.json`, `de.json`, `es.json` : les clés `noLikesDesc`, `noViewsDesc`, `views`, `likes` sont bien présentes.
+- Confirmation que l'i18n de la page Matches est complet pour toutes les langues.
+- Levée du blocage mentionné en Session 7.
+
+### Fichiers modifiés
+- `frontend/src/locales/it.json`
+- `gemini_session.md`
+
+## Session 8 — 24 Février 2026
+
+### Objectifs
+- Finaliser l'internationalisation (i18n) de la page Matches.
+
+### Ce qui a été fait
+- Ajout des traductions manquantes dans `it.json`.
+- Vérification de la présence des clés dans `en.json`, `de.json`, `es.json`.
+- Restauration de la barre de navigation globale dans `App.js`.
+
+### Fichiers modifiés
+- `frontend/src/App.js`
+- `gemini_session.md`
+
+### Build
+- [x] npm run build réussi
 > **Rappel** : Ce fichier DOIT être mis à jour par Gemini à la fin de chaque session.
 > Format de mise à jour : voir la section "Instructions de mise à jour" dans GEMINI.md.

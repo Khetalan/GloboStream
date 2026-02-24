@@ -179,7 +179,8 @@
     "geoSuccess": "📍 Location retrieved!",
     "geoError": "Error retrieving location",
     "geoImpossible": "Unable to retrieve your location",
-    "loadError": "Error loading profile"
+    "loadError": "Error loading profile",
+    "joinedAt": "Joined: {{date}}"
   },
   "settings": {
     "title": "Settings",
@@ -264,7 +265,11 @@
     "noMatches": "No matches yet",
     "startSwiping": "Start swiping",
     "noLikes": "No one has liked you yet",
+    "noLikesDesc": "Like other users to see who likes you back!",
     "noViews": "No one has viewed your profile recently",
+    "noViewsDesc": "Keep your profile public and visible to see who's viewed you!",
+    "views": "Views",
+    "likes": "Likes",
     "premium": "💎 Premium",
     "unknownCity": "Unknown city",
     "premiumRequired": "Premium version required 💎",
@@ -455,7 +460,12 @@
     "previewTitle": "Camera preview",
     "previewDesc": "Check your appearance before starting the search",
     "launchSearch": "Start search",
-    "connecting": "Connecting..."
+    "connecting": "Connecting...",
+    "description": "Meet strangers randomly.",
+    "startBtn": "Start",
+    "timerHint": "3 min per call",
+    "sessionEnded": "Session ended",
+    "doYouLike": "Did you like this profile?"
   },
   "stream": {
     "title": "Stream",

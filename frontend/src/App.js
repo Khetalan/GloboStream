@@ -1,8 +1,9 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import Navigation from './components/Navigation';
 
 // Pages publiques
 import Landing from './pages/Landing';
@@ -32,6 +33,12 @@ import LiveViewerPage from './pages/LiveViewerPage';
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   return token ? children : <Navigate to="/login" />;
+};
+
+const NavigationWrapper = () => {
+  const location = useLocation();
+  const publicPaths = ['/', '/login', '/register'];
+  return publicPaths.includes(location.pathname) ? null : <Navigation />;
 };
 
 function App() {
@@ -69,6 +76,7 @@ function App() {
             },
           }}
         />
+        <NavigationWrapper />
         
         <Routes>
           {/* Routes publiques */}

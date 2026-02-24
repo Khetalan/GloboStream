@@ -179,7 +179,8 @@
     "geoSuccess": "📍 Position récupérée !",
     "geoError": "Erreur lors de la récupération de la position",
     "geoImpossible": "Impossible de récupérer votre position",
-    "loadError": "Erreur lors du chargement du profil"
+    "loadError": "Erreur lors du chargement du profil",
+    "joinedAt": "Inscrit le : {{date}}"
   },
   "settings": {
     "title": "Paramètres",
@@ -259,13 +260,15 @@
   "matches": {
     "title": "Mes Matchs",
     "tabMatches": "Matchs",
-    "tabLikes": "Likes",
+    "tabLikes": "Likes reçus",
     "tabViews": "Vues",
-    "noMatches": "Aucun match pour le moment",
-    "startSwiping": "Commencer à swiper",
-    "noLikes": "Personne ne vous a encore liké",
-    "noViews": "Personne n'a vu votre profil récemment",
+    "noMatches": "Pas encore de matchs. Continuez à swiper !",
+    "startSwiping": "Swiper",
+    "noLikes": "Aucun like pour le moment.",
+    "noViews": "Personne n'a encore vu votre profil.",
     "premium": "💎 Premium",
+    "startChat": "Discuter",
+    "viewProfile": "Voir le profil",
     "unknownCity": "Ville inconnue",
     "premiumRequired": "Version premium requise 💎",
     "loadError": "Erreur lors du chargement"
@@ -455,7 +458,12 @@
     "previewTitle": "Aperçu caméra",
     "previewDesc": "Vérifiez votre apparence avant de lancer la recherche",
     "launchSearch": "Lancer la recherche",
-    "connecting": "Connexion en cours..."
+    "connecting": "Connexion en cours...",
+    "description": "Rencontrez des inconnus aléatoirement.",
+    "startBtn": "Démarrer",
+    "timerHint": "3 min par appel",
+    "sessionEnded": "Session terminée",
+    "doYouLike": "Ce profil vous a plu ?"
   },
   "stream": {
     "title": "Stream",
