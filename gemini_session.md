@@ -307,11 +307,14 @@
 
 ### Objectifs
 - Finaliser l'internationalisation (i18n) de la page Matches.
+- Restaurer la navigation globale.
+- Mettre à jour les branches et déployer en production.
 
 ### Ce qui a été fait
 - Ajout des traductions manquantes dans `it.json`.
 - Vérification de la présence des clés dans `en.json`, `de.json`, `es.json`.
 - Restauration de la barre de navigation globale dans `App.js`.
+- Fusion de `claude-work` vers `main` et déploiement sur GitHub Pages.
 
 ### Fichiers modifiés
 - `frontend/src/App.js`
@@ -319,5 +322,6 @@
 
 ### Build
 - [x] npm run build réussi
+- [x] Déploiement GitHub Pages effectué
 > **Rappel** : Ce fichier DOIT être mis à jour par Gemini à la fin de chaque session.
 > Format de mise à jour : voir la section "Instructions de mise à jour" dans GEMINI.md.
