@@ -15,6 +15,14 @@ import './LiveStream.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
+const PEER_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ]
+};
+
 /**
  * Composant LiveStream (côté streamer)
  * Flow : montage → getUserMedia → preview → "Go Live" → crée salon Socket.IO → WebRTC peers
@@ -118,12 +126,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         peer.destroy();
       }
 
-      // Fermer le salon et déconnecter le socket
-      if (socketRef.current) {
-        if (roomIdRef.current) {
-          socketRef.current.emit('close-live-room', { roomId: roomIdRef.current });
-        }
-        socketRef.current.disconnect();
+      // Fermer le salon (le socket se déconnecte dans son propre useEffect)
+      if (socketRef.current && roomIdRef.current) {
+        socketRef.current.emit('close-live-room', { roomId: roomIdRef.current });
       }
     };
   }, []);
@@ -171,7 +176,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
       const peer = new Peer({
         initiator: true,
-        trickle: false,
+        config: PEER_CONFIG,
         stream: stream
       });
 
@@ -457,7 +462,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
     const peer = new Peer({
       initiator: true,
-      trickle: false,
+      config: PEER_CONFIG,
       stream: stream
     });
 

@@ -13,6 +13,14 @@ import './LiveViewer.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
+const PEER_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ]
+};
+
 /**
  * Composant LiveViewer (côté spectateur)
  * Flow : connecter Socket.IO → join room → recevoir WebRTC stream → afficher vidéo
@@ -50,6 +58,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const chatRef = useRef(null);
+  const hasLeftRef = useRef(false);
 
   // Connecter Socket.IO et rejoindre le salon
   useEffect(() => {
@@ -57,16 +66,17 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     const socket = io(SOCKET_URL);
     socketRef.current = socket;
 
-    // Enregistrer l'utilisateur
-    if (user?._id) {
-      socket.emit('register', user._id);
-    }
-
-    // Rejoindre le salon
-    socket.emit('join-live-room', {
-      roomId,
-      userId: user?._id,
-      displayName: user?.displayName || user?.firstName || 'Viewer'
+    // Rejoindre le salon seulement après que la connexion socket est confirmée
+    // (évite la race condition où live-signal arrive avant l'enregistrement du listener)
+    socket.on('connect', () => {
+      if (user?._id) {
+        socket.emit('register', user._id);
+      }
+      socket.emit('join-live-room', {
+        roomId,
+        userId: user?._id,
+        displayName: user?.displayName || user?.firstName || 'Viewer'
+      });
     });
 
     // Infos de la room reçues
@@ -91,7 +101,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         // Créer un peer non-initiator pour recevoir le stream
         const peer = new Peer({
           initiator: false,
-          trickle: false,
+          config: PEER_CONFIG,
           stream: localStreamRef.current || undefined
         });
 
@@ -105,6 +115,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
 
         peer.on('error', (err) => {
           console.error('Peer error:', err);
+          peerRef.current = null;
         });
 
         peer.signal(signal);
@@ -196,8 +207,11 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     return () => {
-      cleanup();
-      socket.emit('leave-live-room', { roomId });
+      // N'émettre leave que si handleLeave ne l'a pas déjà fait (évite le double emit)
+      if (!hasLeftRef.current) {
+        cleanup();
+        socket.emit('leave-live-room', { roomId });
+      }
       socket.disconnect();
     };
   }, [roomId, user]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -242,7 +256,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       // Créer un nouveau peer bidirectionnel (envoyer + recevoir)
       const peer = new Peer({
         initiator: false,
-        trickle: false,
+        config: PEER_CONFIG,
         stream: stream
       });
 
@@ -364,6 +378,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
 
   // Quitter
   const handleLeave = useCallback(() => {
+    hasLeftRef.current = true;
     cleanup();
     if (socketRef.current) {
       socketRef.current.emit('leave-live-room', { roomId });
