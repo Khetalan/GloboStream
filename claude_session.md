@@ -1382,3 +1382,80 @@ backend/socketHandlers/liveRoom.js
 - ⚠️ Bug Apple OAuth signalé (passport.js ligne 143) — non traité
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
+
+---
+
+## Session 17 : LivePublic FAB + MEMORY.md + Apple OAuth fix (25 Février 2026)
+**Date** : 25 Février 2026
+**Branche** : `claude-work`
+**Commits** : `1e2bab9`, `fc651ef`, `73d8f57` + commit passport.js (à faire)
+**Status** : En cours → déploiement final
+
+### Ce qui a été fait
+
+#### 1. LivePublic.js — FAB + grille 2 colonnes + favoris fonctionnels
+
+**Fichiers** : `frontend/src/pages/LivePublic.js`, `frontend/src/pages/LivePublic.css`
+
+- **Bouton flottant (FAB)** : Suppression de la bannière `.start-live-banner` remplacée par un bouton fixe en bas à droite (`.start-live-fab`, `position: fixed; bottom: 24px; right: 16px; z-index: 200`).
+- **Grille 2 colonnes** : `.streams-grid` passe de `1fr` à `repeat(2, 1fr)` (mobile), `repeat(3, 1fr)` à 768px+. Gap réduit à 10px.
+- **Favoris fonctionnels** : Toggle réel via `POST /api/live/favorite/:streamerId`, lecture correcte de `wasAlreadyFavorite` avant la mise à jour optimiste, rechargement si on est dans l'onglet Favoris.
+
+**Backend associé** :
+- `backend/models/User.js` : Ajout du champ `favoriteStreamers: [ObjectId]` dans la section streaming.
+- `backend/routes/live.js` : `GET /api/live/public` — fetch `favoriteStreamers` de l'utilisateur courant + `isFavorite` calculé avec un Set. `POST /api/live/favorite/:streamerId` — toggle réel avec `$addToSet`/`$pull`.
+
+#### 2. MEMORY.md — Mémoire persistante multi-agent
+
+**Fichier créé** : `GloboStream/MEMORY.md`
+
+- Mémoire persistante partagée entre Claude et Gemini (lue en priorité P1 au démarrage).
+- Contient : résumé `agent.js` (commandes, modèles, limites), règles UI/UX tablet-max + no-zoom, tableau des décisions architecturales clés, liste des fichiers critiques.
+
+#### 3. CLAUDE.md + GEMINI.md — Mise à jour protocole
+
+- `MEMORY.md` ajouté en première position P1 (avant `claude_context.md`) dans les deux fichiers.
+- `agent.js` ajouté dans les tableaux de documentation.
+- `GEMINI.md` : Section Design System mise à jour — breakpoint 768px maximum, breakpoints desktop (1024px/1200px) explicitement interdits.
+
+#### 4. Désactivation zoom + cap 768px
+
+**Fichiers modifiés** :
+- `frontend/public/index.html` : `maximum-scale=1, user-scalable=no` dans la meta viewport.
+- `frontend/src/index.css` : `.container` max-width 1200px → 768px, commentaire breakpoints mis à jour.
+- 6 fichiers CSS : `Common.css`, `Home.css`, `LiveStream.css`, `Matches.css`, `Profile.css`, `StreamHub.css` — tous les `max-width > 768px` ramenés à 768px.
+- `LivePublic.css` : Suppression du bloc `@media (min-width: 1200px)` restant.
+
+#### 5. Correction référence agent.js
+
+- Partout où `agent.md` était écrit dans `MEMORY.md`, `CLAUDE.md`, `GEMINI.md` → corrigé en `agent.js`.
+- Le fichier sur le disque était déjà nommé `.js`, seules les références textuelles devaient être mises à jour.
+
+#### 6. Fix Apple OAuth — passport.js
+
+**Fichier** : `backend/config/passport.js`
+
+**Bugs** :
+- `profile.id` est `undefined` avec `passport-apple` — l'identifiant réel est dans `idToken.sub`.
+- Absence de vérification email avant création (contrairement aux stratégies Google/Facebook) → doublon si l'email existe déjà via un autre provider.
+
+**Corrections** :
+- Extraction de l'ID via `idToken?.sub || profile?.id` avec guard si absent.
+- Parsing de `req.body.user` (Apple n'envoie name/email qu'à la première connexion).
+- Email récupéré depuis `idToken?.email || profile?.email`.
+- Ajout du bloc `User.findOne({ email })` → liaison compte existant (comme Google/Facebook).
+
+### Commits
+```
+1e2bab9  feat(LivePublic): FAB button, 2-col grid, functional favorites backend
+fc651ef  feat: MEMORY.md, no-zoom viewport, 768px layout cap (8 CSS files)
+73d8f57  fix: agent.md → agent.js reference in MEMORY.md, CLAUDE.md, GEMINI.md
+[à faire] fix(auth): Apple OAuth — use idToken.sub + email check before creation
+```
+
+### Prochaines actions
+- 📋 Committer le fix passport.js
+- 📋 Merger claude-work → main + git push origin main
+- 📋 npm run deploy (frontend GitHub Pages)
+
+> **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
