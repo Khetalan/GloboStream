@@ -15,8 +15,9 @@ router.get('/conversations', async (req, res) => {
     const user = await User.findById(userId).populate('matches.user');
 
     // Pour chaque match, récupérer le dernier message
+    // Filtrer les matchs dont l'utilisateur a été supprimé (populate → null)
     const conversations = await Promise.all(
-      user.matches.map(async (match) => {
+      user.matches.filter(match => match.user != null).map(async (match) => {
         const matchedUserId = match.user._id;
 
         // Dernier message de la conversation

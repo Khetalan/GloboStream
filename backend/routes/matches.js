@@ -10,20 +10,23 @@ router.get('/', async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('matches.user');
 
-    const matches = await Promise.all(
-      user.matches.map(async (match) => {
-        const matchedUser = await User.findById(match.user);
-        return {
-          id: match._id,
-          user: matchedUser.getPublicProfile(),
-          matchedAt: match.matchedAt
-        };
-      })
-    );
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    // Filtrer les matchs dont l'utilisateur a été supprimé (populate → null)
+    const matches = user.matches
+      .filter(match => match.user != null)
+      .map(match => ({
+        id: match._id,
+        user: match.user.getPublicProfile(),
+        matchedAt: match.matchedAt
+      }))
+      .sort((a, b) => b.matchedAt - a.matchedAt);
 
     res.json({
       success: true,
-      matches: matches.sort((a, b) => b.matchedAt - a.matchedAt)
+      matches
     });
   } catch (error) {
     console.error('Erreur récupération matchs:', error);

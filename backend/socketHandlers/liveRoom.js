@@ -21,6 +21,7 @@ function setupLiveRoomHandlers(io, socket) {
       liveRooms.set(roomId, {
         streamerId: userId,
         streamerSocketId: socket.id,
+        displayName: displayName || 'Streamer',
         mode: mode || 'public',
         title: title || 'Live',
         tags: tags || [],
@@ -62,10 +63,11 @@ function setupLiveRoomHandlers(io, socket) {
         viewerInfo: { userId, displayName }
       });
 
-      // Envoyer au viewer les infos de la room
+      // Envoyer au viewer les infos de la room (TÂCHE-005 : streamerName inclus)
       socket.emit('room-info', {
         roomId,
         streamerSocketId: room.streamerSocketId,
+        streamerName: room.displayName,
         viewerCount: room.viewers.size,
         participantCount: room.participants.size
       });
@@ -187,6 +189,45 @@ function setupLiveRoomHandlers(io, socket) {
   // ── Refuser une demande de participation ──
   socket.on('reject-join-request', ({ viewerSocketId }) => {
     io.to(viewerSocketId).emit('join-rejected');
+  });
+
+  // ── Couper/rétablir le micro d'un participant (streamer uniquement) ── TÂCHE-002
+  socket.on('streamer-toggle-mute-participant', ({ roomId, participantSocketId, mute }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room || room.streamerSocketId !== socket.id) return;
+
+      io.to(participantSocketId).emit('force-mute-toggle', { mute });
+    } catch (error) {
+      console.error('Error toggling mute participant:', error);
+    }
+  });
+
+  // ── État caméra d'un participant → relayer au streamer ── TÂCHE-003
+  socket.on('participant-cam-state', ({ roomId, isCamOff }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room) return;
+
+      io.to(room.streamerSocketId).emit('participant-cam-state', {
+        participantSocketId: socket.id,
+        isCamOff
+      });
+    } catch (error) {
+      console.error('Error relaying cam state:', error);
+    }
+  });
+
+  // ── État micro du streamer → relayer aux membres du salon ── TÂCHE-004
+  socket.on('streamer-mic-state', ({ roomId, isMuted }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room || room.streamerSocketId !== socket.id) return;
+
+      socket.to(roomId).emit('streamer-mic-state', { isMuted });
+    } catch (error) {
+      console.error('Error relaying mic state:', error);
+    }
   });
 
   // ── Déconnexion ──

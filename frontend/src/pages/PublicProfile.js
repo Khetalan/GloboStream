@@ -10,7 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import Navigation from '../components/Navigation';
 import { getPhotoUrl } from '../utils/photoUrl';
-import './PublicProfile.css';
+import './Profile.css';
 
 const PublicProfile = () => {
   const { userId } = useParams();
@@ -157,97 +157,27 @@ const PublicProfile = () => {
           )}
         </div>
 
-        {/* Informations */}
-        <div className="profile-info-section">
-          <div className="profile-header-info">
-            <div className="name-line">
-              <h1>
-                {profile.displayName || profile.firstName}, {profile.age}
-                {profile.isVerified && (
-                  <FiCheck className="verified-badge" title={t('publicProfile.verified')} />
-                )}
-                {profile.isPremium && (
-                  <FiHexagon className="premium-badge" title={t('publicProfile.premium')} />
-                )}
-              </h1>
-            </div>
-
-            {profile.location?.city && (
-              <p className="location-info">
-                <FiMapPin />
-                {profile.location.city}
-                {profile.location.country && `, ${profile.location.country}`}
-                {profile.distance && ` • ${profile.distance}km`}
-              </p>
-            )}
+        {/* Header Info */}
+        <div className="profile-header-info">
+          <div className="name-line">
+            <h1>
+              {profile.displayName || profile.firstName}, {profile.age}
+              {profile.isVerified && (
+                <FiCheck className="verified-badge" title={t('publicProfile.verified')} />
+              )}
+              {profile.isPremium && (
+                <FiHexagon className="premium-badge" title={t('publicProfile.premium')} />
+              )}
+            </h1>
           </div>
 
-          {profile.bio && (
-            <div className="info-card">
-              <h3>{t('publicProfile.about')}</h3>
-              <p>{profile.bio}</p>
-            </div>
-          )}
-
-          {profile.interests && profile.interests.length > 0 && (
-            <div className="info-card">
-              <h3>{t('publicProfile.interests')}</h3>
-              <div className="interests-grid">
-                {profile.interests.map((interest, i) => (
-                  <span key={i} className="interest-tag">
-                    {interest}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="info-card">
-            <h3>{t('publicProfile.info')}</h3>
-            <div className="info-grid">
-              {profile.occupation && (
-                <div className="info-item">
-                  <span className="info-label">{t('publicProfile.profession')}</span>
-                  <span className="info-value">{profile.occupation}</span>
-                </div>
-              )}
-              {profile.height && (
-                <div className="info-item">
-                  <span className="info-label">{t('publicProfile.height')}</span>
-                  <span className="info-value">{profile.height} cm</span>
-                </div>
-              )}
-              {profile.hasChildren && (
-                <div className="info-item">
-                  <span className="info-label">{t('publicProfile.children')}</span>
-                  <span className="info-value">
-                    {profile.hasChildren === 'oui' ? t('common.yes') :
-                     profile.hasChildren === 'non' ? t('common.no') : t('common.notSpecified')}
-                  </span>
-                </div>
-              )}
-              {profile.smoker && (
-                <div className="info-item">
-                  <span className="info-label">{t('publicProfile.smoker')}</span>
-                  <span className="info-value">
-                    {profile.smoker === 'oui' ? t('common.yes') :
-                     profile.smoker === 'non' ? t('common.no') :
-                     profile.smoker === 'rarement' ? t('publicProfile.smokerOccasional') : t('publicProfile.smokerOften')}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {profile.languages && profile.languages.length > 0 && (
-            <div className="info-card">
-              <h3>{t('publicProfile.languages')}</h3>
-              <div className="languages-list">
-                {profile.languages.map((lang, i) => (
-                  <span key={i} className="language-tag">{lang}</span>
-                ))}
-              </div>
-            </div>
+          {profile.location?.city && (
+            <p className="location-info">
+              <FiMapPin />
+              {profile.location.city}
+              {profile.location.country && `, ${profile.location.country}`}
+              {profile.distance && ` • ${profile.distance}km`}
+            </p>
           )}
         </div>
 
@@ -272,6 +202,78 @@ const PublicProfile = () => {
             </div>
           ) : null}
         </div>
+
+        {/* Bio */}
+        {profile.bio && (
+          <div className="info-card">
+            <h3>{t('publicProfile.about')}</h3>
+            <p>{profile.bio}</p>
+          </div>
+        )}
+
+        {/* Interests */}
+        {profile.interests && profile.interests.length > 0 && (
+          <div className="info-card">
+            <h3>{t('publicProfile.interests')}</h3>
+            <div className="interests-grid">
+              {profile.interests.map((interest, i) => (
+                <span key={i} className="interest-tag">
+                  {interest}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Details */}
+        <div className="info-card">
+          <h3>{t('publicProfile.info')}</h3>
+          <div className="info-grid">
+            {profile.occupation && (
+              <div className="info-item">
+                <span className="info-label">{t('publicProfile.profession')}</span>
+                <span className="info-value">{profile.occupation}</span>
+              </div>
+            )}
+            {profile.height && (
+              <div className="info-item">
+                <span className="info-label">{t('publicProfile.height')}</span>
+                <span className="info-value">{profile.height} cm</span>
+              </div>
+            )}
+            {profile.hasChildren && (
+              <div className="info-item">
+                <span className="info-label">{t('publicProfile.children')}</span>
+                <span className="info-value">
+                  {profile.hasChildren === 'oui' ? t('common.yes') :
+                   profile.hasChildren === 'non' ? t('common.no') : t('common.notSpecified')}
+                </span>
+              </div>
+            )}
+            {profile.smoker && (
+              <div className="info-item">
+                <span className="info-label">{t('publicProfile.smoker')}</span>
+                <span className="info-value">
+                  {profile.smoker === 'oui' ? t('common.yes') :
+                   profile.smoker === 'non' ? t('common.no') :
+                   profile.smoker === 'rarement' ? t('publicProfile.smokerOccasional') : t('publicProfile.smokerOften')}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Languages */}
+        {profile.languages && profile.languages.length > 0 && (
+          <div className="info-card">
+            <h3>{t('publicProfile.languages')}</h3>
+            <div className="languages-list">
+              {profile.languages.map((lang, i) => (
+                <span key={i} className="language-tag">{lang}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -345,6 +345,14 @@
 - `frontend/src/pages/Matches.js`
 - `gemini_session.md`
 
+### À signaler à Claude (URGENT)
+- **Erreur 500 Backend** :
+    - `GET /api/matches` (Page Matches) : La page n'affiche rien (sauf les onglets) car l'API plante.
+    - `GET /api/chat/conversations` (Page Chat) : Erreur 500 signalée également.
+- **Vérification générale** :
+    - Vérifier l'intégration backend de toutes les pages modifiées récemment (Matches, Chat, Profile).
+    - S'assurer que les endpoints retournent bien la structure de données attendue par le frontend.
+
 ### Fichiers modifiés
 - `frontend/src/pages/Matches.css`
 - `gemini_session.md`

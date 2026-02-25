@@ -6,11 +6,10 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
-  FiMic, FiMicOff, FiVideo, FiVideoOff
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import './LiveViewer.css';
-import './LiveStream.css'; // Import pour les styles partagés (bordures, etc)
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -30,6 +29,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [viewerCount, setViewerCount] = useState(0);
+  const [streamerName, setStreamerName] = useState('Streamer'); // État pour le nom
   const [joinRequestStatus, setJoinRequestStatus] = useState('idle'); // idle | pending | accepted | rejected
   const [isParticipant, setIsParticipant] = useState(false);
   const [localStream, setLocalStream] = useState(null);
@@ -39,6 +39,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [roomError, setRoomError] = useState(false);
   const [isUiVisible, setIsUiVisible] = useState(true);
   const [isStreamerMuted, setIsStreamerMuted] = useState(false); // Nouvel état
+  const [showStatsPanel, setShowStatsPanel] = useState(false);
+  const [activeStatsTab, setActiveStatsTab] = useState('viewers');
+  const [viewers, setViewers] = useState([]);
+  const [gifts] = useState([]);
 
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -49,6 +53,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
 
   // Connecter Socket.IO et rejoindre le salon
   useEffect(() => {
+    setStreamerName('Streamer');
     const socket = io(SOCKET_URL);
     socketRef.current = socket;
 
@@ -65,8 +70,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Infos de la room reçues
-    socket.on('room-info', ({ viewerCount: vc }) => {
+    socket.on('room-info', ({ viewerCount: vc, streamerName: sn }) => {
       setViewerCount(vc);
+      if (sn) setStreamerName(sn);
       setConnected(true);
     });
 
@@ -120,6 +126,12 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         translating: false,
         isOwn: false
       }]);
+      // Ajouter à la liste des viewers
+      setViewers(prev => [...prev, {
+        socketId: viewerSocketId,
+        name: viewerInfo.displayName,
+        joinedAt: new Date().toLocaleTimeString()
+      }]);
     });
 
     // Message chat
@@ -134,6 +146,11 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         translating: false,
         isOwn: false
       }]);
+    });
+
+    // Un viewer quitte (pour mettre à jour la liste)
+    socket.on('viewer-left', ({ viewerSocketId }) => {
+      setViewers(prev => prev.filter(v => v.socketId !== viewerSocketId));
     });
 
     // Demande de participation acceptée
@@ -438,17 +455,25 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           >
             {/* Top Bar */}
             <div className="lv-top-bar">
-              <div className="lv-live-badge">
-                <span className="lv-live-dot" />
-                <span>LIVE</span>
-                <span className="lv-viewer-count">
-                  <FiEye size={12} />
-                  {viewerCount}
-                </span>
+              <div className="lv-header-left">
+                <div className="lv-streamer-name">{streamerName}</div>
+                <div className="lv-stats-indicators">
+                  <div className="lv-live-badge" onClick={(e) => { e.stopPropagation(); setShowStatsPanel(true); }}>
+                    <span>LIVE</span>
+                  </div>
+                  <button className="lv-viewer-count" onClick={(e) => { e.stopPropagation(); setActiveStatsTab('viewers'); setShowStatsPanel(true); }}>
+                    <FiEye /> {viewerCount}
+                  </button>
+                  <button className="lv-gift-count" onClick={(e) => { e.stopPropagation(); setActiveStatsTab('gifts'); setShowStatsPanel(true); }}>
+                    <FiGift /> {gifts.length}
+                  </button>
+                </div>
               </div>
-              <button className="lv-close-btn" onClick={handleLeave}>
-                <FiX size={24} />
-              </button>
+              <div className="lv-header-right">
+                <button className="lv-close-btn" onClick={handleLeave}>
+                  <FiX size={24} />
+                </button>
+              </div>
             </div>
 
             {/* Chat */}
@@ -498,16 +523,21 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                 )}
               </div>
 
-              {/* Bouton demander à rejoindre */}
-              {!isParticipant && (
-                <button
-                  className={`lv-join-btn ${joinRequestStatus}`}
-                  onClick={handleRequestJoin}
-                  disabled={joinRequestStatus !== 'idle'}
-                >
-                  <FiUserPlus size={20} />
+              <div className="lv-actions-group">
+                {/* Bouton demander à rejoindre */}
+                {!isParticipant && (
+                  <button
+                    className={`lv-join-btn ${joinRequestStatus}`}
+                    onClick={handleRequestJoin}
+                    disabled={joinRequestStatus !== 'idle'}
+                  >
+                    <FiUserPlus size={20} />
+                  </button>
+                )}
+                <button className="lv-control-btn gift-btn">
+                  <FiGift size={20} />
                 </button>
-              )}
+              </div>
 
               {/* Contrôles participant */}
               {isParticipant && (
@@ -530,6 +560,67 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Panel Stats (Viewers/Gifts) */}
+      {showStatsPanel && (
+        <div className="lv-stats-overlay" onClick={() => setShowStatsPanel(false)} />
+      )}
+
+      <div className={`lv-stats-panel ${showStatsPanel ? 'visible' : ''}`}>
+        <div className="lv-stats-header">
+          <button
+            className={`lv-tab-btn ${activeStatsTab === 'viewers' ? 'active' : ''}`}
+            onClick={() => setActiveStatsTab('viewers')}
+          >
+            <FiEye size={14} />
+            {t('liveStream.viewers')}
+          </button>
+          <button
+            className={`lv-tab-btn ${activeStatsTab === 'gifts' ? 'active' : ''}`}
+            onClick={() => setActiveStatsTab('gifts')}
+          >
+            <FiGift size={14} />
+            {t('liveStream.gifts')}
+          </button>
+          <button className="lv-stats-close" onClick={() => setShowStatsPanel(false)}>
+            <FiX size={14} />
+          </button>
+        </div>
+
+        {activeStatsTab === 'viewers' && (
+          <div className="lv-tab-content">
+            <div className="lv-stats-total">
+              <span className="lv-stats-total-label">{t('liveStream.totalViewers')}</span>
+              <span className="lv-stats-total-value">{viewerCount}</span>
+            </div>
+            <div className="lv-stats-list">
+              {viewers.map((v, i) => (
+                <div key={i} className="lv-stats-row">
+                  <div className="lv-stats-row-left">
+                    <div className="lv-stats-avatar">{v.name.charAt(0)}</div>
+                    <div>
+                      <div className="lv-stats-name">{v.name}</div>
+                      <div className="lv-stats-badge">{v.joinedAt}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeStatsTab === 'gifts' && (
+          <div className="lv-tab-content">
+            <div className="lv-stats-total">
+              <span className="lv-stats-total-label">{t('liveStream.totalGifts')}</span>
+              <span className="lv-stats-total-value">0</span>
+            </div>
+            <div className="lv-stats-list">
+              {/* Liste des cadeaux vide pour l'instant */}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

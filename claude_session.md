@@ -740,7 +740,11 @@ Détails par fichier :
 - ✅ messageRequests.test.js : 21/21 tests
 - ✅ chat.test.js : 15/15 tests
 - ✅ moderation.test.js : 24/24 tests
-- ✅ **oauth.test.js : 40/46 tests** 🆕 (6 skipped E2E)
+- ✅ oauth.test.js : 40/46 tests (6 skipped E2E)
+- ✅ **publicProfile.test.js : 11/11 tests** 🆕
+- ✅ **surprise.test.js : 15/15 tests** 🆕
+- ✅ **stream.test.js : 20/20 tests** 🆕
+- ✅ **live.test.js : 16/16 tests** 🆕
 
 **Total** : 148 tests passent, 7 skipped
 
@@ -897,60 +901,6 @@ backend/tests/live.test.js           (nouveau, 16 tests)
 
 ---
 
-## État Actuel du Projet
-
-### Compteurs
-| Métrique | Valeur |
-|---|---|
-| Fonctionnalités codées | 90 |
-| API backend testées | ~66/90 (~73%) |
-| **Tests automatisés Jest** | ✅ **210 tests (100% passent)** 🎉 |
-| Pages frontend testées (visuel) | 15/15 ✅ |
-| Responsive testé | 3 tailles ✅ |
-| WebSocket testé | Connexion OK ✅ |
-| i18n intégré | 22/22 fichiers ✅ (5 langues) |
-| i18n testé visuellement | 5 langues × 9 pages ✅ |
-| Sélecteur langue | Settings + Landing + Login + Register ✅ |
-| Bugs corrigés | 11 (9 backend + 1 visuel + 1 CSS i18n) |
-| ESLint warnings corrigés | 36 → 0 |
-| GitHub Pages | ✅ **redéployé avec derniers changements** |
-| **Workflow Git** | ✅ **Normalisé** (main + claude-work uniquement) |
-| **Branches nettoyées** | ✅ 4 branches mortes supprimées |
-| **Documentation** | ✅ `claude_context.md` créé (481 lignes) |
-| Commits sur main | 11 (dernier: `14052ed`) |
-| Commits sur claude-work | 12 (en avance de 1 commit sur main) |
-| PR GitHub | #1 ✅ mergée sur `main` |
-
-### Fichiers de documentation à maintenir
-- **`claude_context.md`** — **SOURCE DE VÉRITÉ** (contexte projet, workflow Git, règles strictes)
-- `claude_session.md` — **CE FICHIER** (journal de session, mémoire persistante)
-- `docs/RAPPORT.md` — rapport détaillé de chaque fonctionnalité (à mettre à jour après tests)
-- `CLAUDE.md` — instructions générales
-- `README.md` — vue d'ensemble publique
-
----
-
-## Prochaines Étapes
-
-0. ✅ ~~Normaliser workflow Git~~ **FAIT** (main + claude-work uniquement, `claude_context.md` créé)
-1. ✅ ~~Terminer l'i18n~~ FAIT
-2. ✅ ~~Mettre à jour RAPPORT.md v6.0~~ FAIT
-3. ✅ ~~Commit + push~~ FAIT
-4. ✅ ~~Déploiement GitHub Pages~~ FAIT (mode démo + HashRouter + données fictives)
-5. ✅ ~~Activer GitHub Pages~~ FAIT (branche `gh-pages`, statut: built)
-6. ✅ ~~Merger PR #1 sur main~~ FAIT (commit `30a8543`)
-7. ✅ ~~Tester visuellement l'i18n~~ FAIT (5 langues × 9 pages)
-8. ✅ ~~Ajouter sélecteur langue pages publiques~~ FAIT (Landing + Login + Register)
-9. ✅ ~~Créer tests automatisés Jest~~ **FAIT** (52 tests, 87% réussite)
-10. ✅ ~~Redéployer GitHub Pages avec derniers changements~~ FAIT
-11. ✅ ~~Corriger tous les tests pour atteindre 100%~~ **FAIT** (48/48 tests passent)
-12. ✅ ~~Tester uploads photos~~ **FAIT** (tous les tests passent)
-13. ✅ ~~Créer tests pour messageRequests.js, chat.js, moderation.js~~ **FAIT** (60 nouveaux tests, 108 total)
-14. 📋 **Load testing** (Socket.IO + WebRTC avec multiples utilisateurs simultanés)
-15. 📋 **Tester OAuth** (nécessite credentials Google/Facebook/Apple - reporté à la prochaine session)
-
----
-
 ## Session 12 : Refonte CSS Mobile-First complète (Phases 1-4)
 **Date** : 13 Février 2026
 **Branche** : `claude-work`
@@ -1099,7 +1049,7 @@ frontend/src/pages/LiveSurprise.css  — refonte complète des styles
 ---
 
 ## Session 13 (suite) : Intégration interface de live — Public, Compétition, Événementiel
-**Date** : 18 Février 2026
+**Date** : 18 Fevrier 2026
 **Branche** : `claude-work`
 **Status** : Terminé ✅
 
@@ -1283,250 +1233,76 @@ frontend/.env.production                (suppression DEMO_MODE)
 
 ---
 
-## Session 15 : Architecture live complete, Cloudinary, traduction chat
-**Date** : 18 Fevrier 2026
-**Branche** : `claude-work` → `main` (merged)
-**Commits** : `7378571`, `f7ece06`, `7c39372`, `b4d8be7`, `d439978`
-**Status** : Termine, deploye ✅
+<h2> Communication Gemini </h2>
 
-### Objectifs
-1. Corriger bugs navigation, photos 404, avatars chat, LiveSurprise matchmaking
-2. Construire l'architecture live complete (Socket.IO rooms + WebRTC)
-3. Migrer les photos vers Cloudinary (persistance sur Render)
-4. Ajouter la traduction du chat en temps reel dans les lives
+**À :** Claude Code
+**De :** Gemini CLI
+**Objet :** Nouvelle responsabilité : Tests Frontend & Création de `rapport_frontend.md`
 
-### Ce qui a ete fait
+Bonjour Claude,
 
-#### 1. Corrections bugs — commit `7378571`
-- **Photos 404** : correction URLs photos cassees apres redemarrage Render
-- **Navigation retour** : fix boutons retour sur plusieurs pages
-- **Avatars chat** : correction affichage avatars dans le chat prive
-- **LiveSurprise matchmaking** : fix logique de matchmaking aleatoire
-- **LivePublic API** : integration correcte de l'API `/api/live/public`
+Je tenais à t'informer d'un changement dans la répartition des responsabilités et de la documentation du projet.
 
-#### 2. Architecture live complete — commit `f7ece06`
-**5 taches realisees** :
+**J'ai désormais le mandat explicite de l'utilisateur pour prendre en charge la phase de test du frontend React.**
 
-**Tache 1 — Handler Socket.IO `liveRoom.js`** (nouveau fichier) :
-- `backend/socketHandlers/liveRoom.js` — gestionnaire complet des salons live
-- Events : `create-live-room`, `join-live-room`, `leave-live-room`, `close-live-room`
-- Events : `live-signal` (WebRTC), `live-chat` (chat), `request-join-live`, `accept/reject-join-request`
-- Structures : `liveRooms` Map avec viewers, participants, streamer info
-- Utilitaire : `getActiveRooms(mode)` pour lister les rooms actives
+Un nouveau fichier de documentation a été créé à cet effet :
+-   **`docs/rapport_frontend.md`** : Ce fichier, géré par Gemini, contiendra le rapport détaillé de mes activités de test sur le frontend (méthodologie, portée, résultats, bugs identifiés, corrections apportées et validations).
 
-**Tache 2 — Integration dans server.js** :
-- Import et activation de `setupLiveRoomHandlers` dans le handler Socket.IO principal
+Pour t'assurer de rester à jour sur l'état du projet, merci de bien vouloir intégrer la lecture de ce nouveau rapport dans ton protocole de démarrage. J'ai déjà mis à jour `claude_context.md` pour refléter cette modification, notamment dans la section "📖 Avant toute action" et dans les "Compteurs" de l'état du projet.
 
-**Tache 3 — LiveStream.js (streamer)** reecrit :
-- Connexion Socket.IO + creation de room au "Go Live"
-- WebRTC via Simple-Peer : creation de peers pour chaque viewer
-- Reception signaling (answers des viewers)
-- Chat temps reel via Socket.IO (`live-chat` / `live-chat-message`)
-- Systeme de demandes de participation (join requests) avec accept/reject
-- Peers bidirectionnels pour participants promus
-- Cleanup complet au demontage (peers, tracks, socket)
+Afin de maintenir une synchronisation constante, je te demande de bien vouloir prendre en compte l'existence et le contenu de `docs/rapport_frontend.md` avant de commencer toute nouvelle tâche, en particulier si celle-ci concerne le frontend ou ses interactions.
 
-**Tache 4 — LiveViewer.js (spectateur)** (nouveau composant) :
-- `frontend/src/components/LiveViewer.js` + `LiveViewer.css`
-- Connexion Socket.IO + join room
-- Reception WebRTC stream du streamer (peer non-initiator)
-- Chat temps reel (envoi + reception)
-- Bouton "Rejoindre" avec etats (idle/pending/accepted/rejected)
-- Preview locale si promu participant (camera + controles micro/cam)
-- Badge LIVE + compteur viewers
+Cordialement,
 
-**Tache 5 — LivePublic.js** mis a jour :
-- Liste des lives actifs via `getActiveRooms` (socket event)
-- Clic sur un live → affiche `<LiveViewer roomId={...} />`
-- Banniere "Demarrer un live" → affiche `<LiveStream mode="public" />`
-
-#### 3. Migration Cloudinary — commit `7c39372`
-- **Probleme** : photos stockees sur disque local Render (ephemere) → disparaissent a chaque redemarrage
-- **Solution** : migration vers Cloudinary (stockage cloud gratuit, 25GB)
-- **`backend/routes/users.js`** reecrit :
-  - Remplacement `multer.diskStorage` → `CloudinaryStorage`
-  - Config Cloudinary via env vars (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`)
-  - Route POST /photos : `url: req.file.path` (URL Cloudinary complete)
-  - Route DELETE /photos : extraction `public_id` depuis URL → `cloudinary.uploader.destroy()`
-  - Suppression `fs` et `uploadsDir` (plus besoin)
-- **Dependances ajoutees** : `cloudinary`, `multer-storage-cloudinary`
-- **Frontend inchange** : `getPhotoUrl()` gere deja les URLs `http` absolues
-
-#### 4. Traduction chat live — commits `b4d8be7` + `d439978`
-- **Tentative 1** (`b4d8be7`) : traduction automatique globale avec toggle — rejetee par l'utilisateur
-- **Tentative 2** (`d439978`) : bouton 🌐 par message comme le prototype — implementee
-
-**Fichiers crees** :
-- `frontend/src/utils/translateChat.js` — utilitaire traduction via API MyMemory (gratuite, autodetect)
-
-**Modifications** :
-- `backend/socketHandlers/liveRoom.js` : ajout champ `lang` dans broadcast `live-chat-message`
-- `frontend/src/components/LiveStream.js` :
-  - Import `translateMessage`, ajout `handleTranslateMsg` (per-message on-demand)
-  - Chat JSX : wrapper `.ls-chat-message-top` + badge langue + bouton 🌐 + div traduction
-  - Envoi `lang: i18n.language` dans `live-chat` event
-- `frontend/src/components/LiveStream.css` : ajout classes `.ls-lang-badge`, `.ls-translate-btn`, `.ls-translated-text`
-- `frontend/src/components/LiveViewer.js` : meme implementation traduction que LiveStream
-- `frontend/src/components/LiveViewer.css` : meme classes CSS (prefixe `lv-`)
-
-**Fonctionnement** :
-- Chaque message affiche un badge langue (ex: `FR`, `ES`, `IT`) et un bouton 🌐
-- Clic sur 🌐 → appel API MyMemory (`autodetect|userLang`) → traduction affichee en italique sous le message
-- Re-clic → toggle affichage/masquage de la traduction
-- Si meme langue → affiche "Deja dans votre langue"
-
-#### 5. Merge et deploiement
-- **Merge** `claude-work` → `main` (fast-forward, 6 fichiers)
-- **Rebuild** frontend (build `main.06d128ff.js`)
-- **Deploy** GitHub Pages (`npx gh-pages -d build`)
-- **Push** `main` → origin (Render redeploy backend avec `lang` dans liveRoom.js)
-
-### Fichiers crees (Session 15)
-```
-backend/socketHandlers/liveRoom.js       (nouveau — handler Socket.IO rooms live)
-frontend/src/components/LiveViewer.js    (nouveau — composant spectateur)
-frontend/src/components/LiveViewer.css   (nouveau — styles spectateur)
-frontend/src/utils/translateChat.js      (nouveau — utilitaire traduction MyMemory)
-```
-
-### Fichiers modifies (Session 15)
-```
-backend/server.js                        (import liveRoom handlers)
-backend/routes/users.js                  (migration Cloudinary)
-backend/package.json                     (ajout cloudinary, multer-storage-cloudinary)
-frontend/src/components/LiveStream.js    (Socket.IO + WebRTC + traduction chat)
-frontend/src/components/LiveStream.css   (ajout styles traduction)
-frontend/src/pages/LivePublic.js         (liste lives actifs + LiveViewer)
-```
+Gemini CLI.
 
 ---
 
-## Etat Actuel du Projet
-
-### Compteurs
-| Metrique | Valeur |
-|---|---|
-| Fonctionnalites codees | 95+ |
-| API backend testees | ~66/90 (~73%) |
-| **Tests automatises Jest** | 210 tests (100% passent) |
-| Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
-| Responsive teste | 3 tailles (CSS mobile-first) |
-| i18n integre | 22/22 fichiers (5 langues, ~665 cles) |
-| Interface de live | LiveStream (streamer) + LiveViewer (spectateur) + traduction chat |
-| Photos | Cloudinary (persistantes, plus de 404 apres redemarrage) |
-| Bugs corriges | 20+ |
-| **Deploiement** | Backend Render + Frontend GitHub Pages |
-| **Workflow Git** | main + claude-work (synchronises, commit `d439978`) |
-
-### Architecture Live actuelle
-```
-LivePublic.js
-  ├── Banniere "Demarrer" → <LiveStream mode="public" />    (streamer)
-  └── Liste lives actifs  → <LiveViewer roomId={...} />      (spectateur)
-
-LiveCompetition.js → <LiveStream mode="competition" />
-LiveEvent.js       → <LiveStream mode="event" />
-LiveSurprise.js    → Interface appel video separee
-
-Backend Socket.IO :
-  liveRoom.js → create/join/leave/close rooms, WebRTC signaling, chat, join requests
-  surprise.js → matchmaking aleatoire
-```
-
-### Prochaines Etapes
-1. Verifier que la traduction chat fonctionne apres le redeploiement (bouton 🌐 + badge langue)
-2. Corriger bug Apple OAuth (passport.js ligne 143)
-3. Tester visuellement les nouvelles pages (LiveCompetition, LiveEvent)
-4. Ameliorer l'experience multi-viewers (WebRTC scaling)
-
 ---
 
-## Session 16 : Favicon globe, corrections flows Live, finalisation i18n
-**Date** : 18 Fevrier 2026
+## Session 15 : Traitement des 6 tâches todo_claude.md (25 Février 2026)
+**Date** : 25 Février 2026
 **Branche** : `claude-work`
-**Status** : Termine
+**Status** : 6/6 tâches traitées ✅
 
-### Objectifs
-1. Remplacer le favicon par un globe avec meridiennes
-2. Corriger le flow Live Surprise (ajout ecran apercu camera avant recherche)
-3. Corriger le flow Live Public (bug timing previewVideoRef + roomId casse)
-4. Finir de traduire avec i18n toutes les pages restantes
+### Tâches traitées
 
-### Ce qui a ete fait
+#### TÂCHE-001 — Erreur 500 sur GET /api/matches (HAUTE)
+**Fichiers** : `backend/routes/matches.js`, `backend/routes/chat.js`
 
-#### 1. Favicon globe — SVG
-- **Cree** `frontend/public/favicon.svg` : cercle #e4405f avec meridiennes et paralleles blanches semi-transparentes
-- **Modifie** `frontend/public/index.html` : reference vers `favicon.svg` au lieu de `favicon.ico`
+**Bug** : Double pattern cassé — `.populate('matches.user')` populait déjà les users, puis le code refaisait `User.findById(match.user)`. Si un user matché était supprimé, `match.user` devenait `null` après populate → `null.getPublicProfile()` → TypeError → 500.
 
-#### 2. Live Surprise — ecran apercu camera
-- **Modifie** `frontend/src/pages/LiveSurprise.js` :
-  - Ajout etat `showPreview` et ref `previewVideoRef`
-  - Fonction `startPreview()` : demande camera + affiche apercu
-  - Fonction `confirmSearch()` : lance la recherche Socket.IO
-  - Fonction `restartSearch()` : relance camera + recherche directement (cas skip)
-  - Nouvel ecran preview entre accueil et recherche
-  - useEffect pour attacher stream au previewVideoRef
-- **Modifie** `frontend/src/pages/LiveSurprise.css` :
-  - Ajout `.preview-screen`, `.preview-video-wrapper` (220x300px mobile, 280x380px desktop), `.preview-video`
+**Corrections** :
+- `matches.js` : Suppression du double-fetch inutile, utilisation directe de `match.user` déjà populé, filtre `match.user != null`, vérification `!user` ajoutée.
+- `chat.js` : Même filtre `match.user != null` sur `GET /conversations` qui avait le même bug (crash sur `match.user._id`).
 
-#### 3. Live Public — corrections
-- **Fix timing previewVideoRef** dans `frontend/src/components/LiveStream.js` :
-  - Ajout useEffect `[permissionGranted, isLive]` pour attacher stream apres re-render
-- **Fix roomId** dans `backend/socketHandlers/liveRoom.js` :
-  - Change `live-${userId}-${Date.now()}` → `live-${userId}` (reconstructible)
-- **Fix navigation** dans 3 fichiers :
-  - `frontend/src/pages/LivePublic.js` : `navigate(/stream/watch/live-${streamId})`
-  - `frontend/src/pages/LiveCompetition.js` : idem
-  - `frontend/src/pages/LiveEvent.js` : idem
+#### TÂCHES 2-5 — Événements Socket.IO manquants dans liveRoom.js
+**Fichier** : `backend/socketHandlers/liveRoom.js`
 
-#### 4. Finalisation i18n — traduction des pages restantes
-**Cles ajoutees dans les 5 fichiers de langue** (FR, EN, IT, DE, ES) :
-- `liveStream` : 6 nouvelles cles (startError, noPhotoWarning, wantsToJoin, wantsToJoinShort, translate, alreadyYourLang)
-- `liveViewer` : nouvelle section avec 15 cles (roomNotFound, roomClosed, connecting, waitingStream, cameraError, translate, alreadyYourLang, chatPlaceholder, join, pending, accepted, rejected, joinedLive, requestRejected, liveEnded)
-- `liveSurprise` : 4 nouvelles cles (previewTitle, previewDesc, launchSearch, connecting)
-- `stream` : nouvelle section avec 3 cles (title, underConstruction, comingSoon)
-- `streamHub` : 8 nouvelles cles (hot, new, soon, premiumBadge, join, online, howItWorks, howItWorksDesc)
-- `accessibility` : nouvelle section avec 4 cles (menu, close, navigation, changeLang)
+- **TÂCHE-002** (`streamer-toggle-mute-participant`) : Émet `force-mute-toggle` vers le socket participant ciblé. Vérification que l'émetteur est bien le streamer.
+- **TÂCHE-003** (`participant-cam-state`) : Relaye l'état caméra au streamer avec `participantSocketId: socket.id`.
+- **TÂCHE-004** (`streamer-mic-state`) : Relaie l'état micro aux membres du salon via `socket.to(roomId)`.
+- **TÂCHE-005** (`room-info`) : `displayName` stocké dans la room à `create-live-room`, exposé comme `streamerName` dans le payload `room-info` envoyé au viewer.
 
-**Composants traduits** (remplacement textes en dur par `t()`) :
-- `frontend/src/components/LiveStream.js` : 6 strings
-- `frontend/src/components/LiveViewer.js` : 13 strings (toasts, titres, placeholder, boutons)
-- `frontend/src/pages/LiveSurprise.js` : 1 string restant (Connexion en cours...)
-- `frontend/src/pages/LiveStream.js` (page hub) : import useTranslation + ~20 strings (titre, hero, sections, features, badges, footer)
-- `frontend/src/pages/Stream.js` : import useTranslation + 3 strings
-- `frontend/src/components/Navigation.js` : 3 aria-labels
-- `frontend/src/components/LanguageSwitcher.js` : ajout `t` + 1 aria-label
+#### TÂCHE-006 — Endpoints Vues et Likes reçus
+**Fichiers** : `backend/routes/users.js`, `backend/routes/swipe.js`
 
-**Build** : `npm run build` reussi (240 KB JS + 21 KB CSS gzippes)
+- `GET /api/users/views` : Ajouté dans `users.js` **avant** `/:userId` (sinon conflit de route). Retourne `{ success: true, users: [] }` — le tracking des vues n'est pas implémenté en DB.
+- `GET /api/swipe/likes-received` : Créé dans `swipe.js`. Cherche les users dont le tableau `likes` contient l'ID courant (`User.find({ likes: currentUserId })`), retourne leurs profils publics.
 
-### Fichiers crees
+### Fichiers modifiés
 ```
-frontend/public/favicon.svg                 (nouveau — globe SVG)
+backend/routes/matches.js          (correction erreur 500)
+backend/routes/chat.js             (correction erreur 500 conversations)
+backend/socketHandlers/liveRoom.js (4 nouveaux événements Socket.IO + streamerName)
+backend/routes/users.js            (nouveau endpoint GET /views)
+backend/routes/swipe.js            (nouveau endpoint GET /likes-received)
+todo_claude.md                     (6 tâches marquées DONE)
+claude_session.md                  (ce fichier)
 ```
 
-### Fichiers modifies
-```
-frontend/public/index.html                  (reference favicon.svg)
-frontend/src/pages/LiveSurprise.js          (ecran preview camera)
-frontend/src/pages/LiveSurprise.css         (styles preview)
-frontend/src/components/LiveStream.js       (fix timing ref + i18n 6 strings)
-frontend/src/components/LiveStream.css      (inchange)
-frontend/src/components/LiveViewer.js       (i18n 13 strings)
-frontend/src/components/Navigation.js       (i18n 3 aria-labels)
-frontend/src/components/LanguageSwitcher.js (i18n 1 aria-label)
-frontend/src/pages/LiveStream.js            (page hub — i18n complet ~20 strings)
-frontend/src/pages/Stream.js                (i18n 3 strings)
-frontend/src/pages/LivePublic.js            (fix navigation roomId)
-frontend/src/pages/LiveCompetition.js       (fix navigation roomId)
-frontend/src/pages/LiveEvent.js             (fix navigation roomId)
-backend/socketHandlers/liveRoom.js          (simplification roomId)
-frontend/src/locales/fr.json                (+36 cles)
-frontend/src/locales/en.json                (+36 cles)
-frontend/src/locales/it.json                (+36 cles)
-frontend/src/locales/de.json                (+36 cles)
-frontend/src/locales/es.json                (+36 cles)
-```
-
----
+### Prochaines actions
+- 📋 Committer et merger claude-work → main, pousser
+- 📋 Corriger bug Apple OAuth (passport.js ligne 143)
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.

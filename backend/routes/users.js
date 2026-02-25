@@ -63,6 +63,12 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// Obtenir les utilisateurs ayant visité son profil (TÂCHE-006)
+// Les vues ne sont pas encore suivies en base — retourne [] pour ne pas bloquer le frontend
+router.get('/views', async (req, res) => {
+  res.json({ success: true, users: [] });
+});
+
 // Obtenir un profil public par ID
 router.get('/:userId', async (req, res) => {
   try {

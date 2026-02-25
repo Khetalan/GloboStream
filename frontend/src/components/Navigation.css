@@ -126,8 +126,8 @@
    DESKTOP (768px+) : Dropdown classique, hamburger caché
    ══════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
-  .hamburger-btn { display: none; }
-  .nav-overlay   { display: none !important; }
+  /*.hamburger-btn { display: none; }
+  .nav-overlay   { display: none !important; }*/
 
   /* Rétablir le bouton desktop */
   .nav-toggle { display: flex; }

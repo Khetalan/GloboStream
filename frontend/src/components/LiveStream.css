@@ -612,36 +612,24 @@
   padding-top: calc(1rem + env(safe-area-inset-top));
 }
 
+/* Conteneur infos streamer (Nom + Badges) */
 .ls-streamer-info {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(26, 26, 26, 0.6);
-  backdrop-filter: blur(12px);
-  padding: 6px 12px 6px 6px;
-  border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.ls-streamer-info img, .ls-streamer-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .ls-streamer-avatar {
-  background: var(--ls-accent-gradient);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+  display: none; /* Masquer l'avatar/photo */
 }
 
 .ls-streamer-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding-right: 4px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  margin-left: 4px;
+  padding: 0;
 }
 
 /* Stats Indicators (Top Right) */
@@ -650,21 +638,21 @@
   gap: 8px;
 }
 
-.ls-live-badge, .ls-viewer-count {
+.ls-live-badge, .ls-viewer-count, .ls-gift-count {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 10px; /* Réduction taille */
   border-radius: 50px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.75rem; /* Réduction police */
   background: rgba(26, 26, 26, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-.ls-viewer-count {
+.ls-viewer-count, .ls-gift-count {
   cursor: pointer;
 }
 
@@ -897,6 +885,16 @@
 .ls-control-btn.off {
   background-color: rgba(255, 59, 48, 0.8);
   border-color: rgba(255, 59, 48, 0.8);
+}
+
+/* Bouton Cadeau (Style identique au Viewer) */
+.ls-control-btn.gift-btn {
+  color: #ff9500;
+  background-color: rgba(255, 149, 0, 0.15);
+  border-color: rgba(255, 149, 0, 0.3);
+}
+.ls-control-btn.gift-btn:hover {
+  background-color: rgba(255, 149, 0, 0.3);
 }
 
 .ls-control-btn.stop-stream {

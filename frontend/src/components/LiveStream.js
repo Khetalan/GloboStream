@@ -707,20 +707,17 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             {/* Barre du haut */}
             <div className="ls-top-bar">
               <div className="ls-streamer-info">
-                {streamerPhoto ? (
-                  <img src={streamerPhoto} alt={streamerName} />
-                ) : (
-                  <div className="ls-streamer-avatar">{streamerName.charAt(0)}</div>
-                )}
                 <span className="ls-streamer-name">{streamerName}</span>
-              </div>
-
-              <div className="ls-stats-indicators">
-                <button className="ls-viewer-count" onClick={(e) => { e.stopPropagation(); setShowStatsPanel(true); }}>
-                  <FiEye /> {formatNumber(viewerCount)}
-                </button>
-                <div className="ls-live-badge">
-                  <span>LIVE</span>
+                <div className="ls-stats-indicators">
+                  <div className="ls-live-badge">
+                    <span>LIVE</span>
+                  </div>
+                  <button className="ls-viewer-count" onClick={(e) => { e.stopPropagation(); setShowStatsPanel(true); }}>
+                    <FiEye /> {formatNumber(viewerCount)}
+                  </button>
+                  <button className="ls-gift-count" onClick={(e) => { e.stopPropagation(); setActiveStatsTab('gifts'); setShowStatsPanel(true); }}>
+                    <FiGift /> {formatNumber(giftCount)}
+                  </button>
                 </div>
               </div>
             </div>

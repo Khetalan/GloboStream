@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import { 
-  FiArrowLeft, FiHeart, FiEdit2, FiCamera, FiX, FiCheck, 
+  FiArrowLeft, FiHeart, FiEdit2, FiCamera, FiX, FiCheck, FiCalendar,
   FiMapPin, FiStar, FiAward
 } from 'react-icons/fi';
 import LocationPicker from '../components/LocationPicker';
@@ -30,6 +30,15 @@ const Profile = () => {
   const [formData, setFormData] = useState({});
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const { t } = useTranslation();
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString(t('common.locale', { ns: 'common', defaultValue: 'fr-FR' }), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   const isOwnProfile = !userId || userId === currentUser?.id;
 
@@ -349,7 +358,15 @@ const Profile = () => {
                 rows={4}
               />
             ) : (
-              <p>{profile?.bio || t('profile.noBio')}</p>
+              <>
+                <p>{profile?.bio || t('profile.noBio')}</p>
+                {profile?.createdAt && (
+                  <div className="creation-date">
+                    <FiCalendar />
+                    <span>{t('profile.joinedAt', { date: formatDate(profile.createdAt) })}</span>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -384,42 +401,36 @@ const Profile = () => {
                   <span>{profile?.height ? `${profile.height} cm` : t('common.notProvided')}</span>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Location with Country */}
-          <div className="form-group">
-            <label>
-              <FiMapPin />
-              {t('profile.location')}
-            </label>
-            {isEditing ? (
-              <LocationPicker
-                city={formData.location?.city || ''}
-                country={formData.location?.country || ''}
-                coordinates={formData.location?.coordinates || [0, 0]}
-                onChange={(location) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    location: {
-                      type: 'Point',
-                      coordinates: location.coordinates,
-                      city: location.city,
-                      country: location.country
-                    }
-                  }));
-                }}
-              />
-            ) : (
-              <div className="info-display">
-                <FiMapPin />
-                <span>
-                  {profile?.location?.city && profile?.location?.country
-                    ? `${profile.location.city}, ${profile.location.country}`
-                    : profile?.location?.city || t('common.notProvided')}
-                </span>
+              {/* Location moved here */}
+              <div className="info-item location-item">
+                <label>{t('profile.location')}</label>
+                {isEditing ? (
+                  <LocationPicker
+                    city={formData.location?.city || ''}
+                    country={formData.location?.country || ''}
+                    coordinates={formData.location?.coordinates || [0, 0]}
+                    onChange={(location) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        location: {
+                          type: 'Point',
+                          coordinates: location.coordinates,
+                          city: location.city,
+                          country: location.country
+                        }
+                      }));
+                    }}
+                  />
+                ) : (
+                  <span>
+                    {profile?.location?.city && profile?.location?.country
+                      ? `${profile.location.city}, ${profile.location.country}`
+                      : profile?.location?.city || t('common.notProvided')}
+                  </span>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Languages with Checkboxes */}

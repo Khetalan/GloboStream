@@ -161,7 +161,8 @@ GloboStream/
 ├── docs/                        # Documentation projet
 │   ├── MVP.md                  # Checklist fonctionnalités MVP
 │   ├── POST_MVP.md             # Fonctionnalités futures
-│   └── RAPPORT.md              # Rapport détaillé (90 fonctionnalités)
+│   ├── RAPPORT.md              # Rapport détaillé (90 fonctionnalités)
+│   └── rapport_frontend.md     # Rapport détaillé des tests frontend (par Gemini)
 │
 ├── .claude/                     # Dossier Claude Code (ignoré)
 ├── README.md                    # Vue d'ensemble projet
@@ -274,7 +275,8 @@ git push origin claude-work
 
 1. **Lire `claude_context.md`** (ce fichier) — OBLIGATOIRE
 2. **Lire `claude_session.md`** pour connaître l'historique récent
-3. **Lire `docs/RAPPORT.md`** pour l'état des fonctionnalités
+3. **Lire `docs/RAPPORT.md`** pour l'état des fonctionnalités backend
+4. **Lire `docs/rapport_frontend.md`** pour l'état des tests frontend (par Gemini)
 
 ### 🎯 Modifier uniquement ce qui est demandé
 
@@ -415,7 +417,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 | Tests automatisés Jest | 210 tests (100% passent) |
 | API backend testées | ~66/90 (~73%) |
 | Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
-| Pages frontend testées | 15/15 ✅ |
+| Pages frontend testées | 15/15 ✅ (voir `docs/rapport_frontend.md` par Gemini) |
 | Responsive testé | 3 tailles ✅ (CSS mobile-first) |
 | i18n intégré | 29/29 fichiers ✅ (5 langues, ~700 clés) |
 | Interface de live | LiveStream (streamer) + LiveViewer (spectateur) + traduction chat |
