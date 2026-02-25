@@ -9,7 +9,7 @@ Lire ces fichiers dans cet ordre EXACT :
 
 | # | Fichier | Quoi chercher | Priorite |
 |---|---------|---------------|----------|
-| 1 | `MEMORY.md` | Decisions architecture, regles UI, historique cle, résumé agent.md | **P1 — MEMOIRE PERSISTANTE** |
+| 1 | `MEMORY.md` | Decisions architecture, regles UI, historique cle, résumé agent.js | **P1 — MEMOIRE PERSISTANTE** |
 | 2 | `claude_context.md` | Architecture, regles Git, conventions, zones sensibles | **P1 — SOURCE DE VERITE** |
 | 3 | `claude_session.md` | Derniere session, etat actuel, prochaines etapes | **P1 — MEMOIRE SESSION** |
 | 4 | `CLAUDE.md` (ce fichier) | Instructions generales, statut projet | **P1 — INSTRUCTIONS** |
@@ -242,8 +242,8 @@ npm run build        # build production
 
 | Fichier | Contenu | Priorite |
 |---------|---------|----------|
-| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.md | P1 |
-| `agent.md` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
+| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.js | P1 |
+| `agent.js` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
 | `claude_context.md` | **SOURCE DE VERITE** — Architecture, regles, conventions | P1 |
 | `claude_session.md` | **MEMOIRE SESSION** — Journal de session, etat actuel | P1 |
 | `gemini_session.md` | **MEMOIRE FRONTEND** — Journal Gemini, fichiers modifies | P1 |

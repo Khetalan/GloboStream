@@ -7,9 +7,9 @@
 
 ---
 
-## agent.md — Orchestrateur IA du projet
+## agent.js — Orchestrateur IA du projet
 
-**Emplacement** : `GloboStream/agent.md` (racine du projet)
+**Emplacement** : `GloboStream/agent.js` (racine du projet)
 
 **Nature** : Script Node.js CLI (`node agent.js <commande>`) qui délègue les tâches
 au bon modèle IA selon la nature de la tâche.
@@ -86,7 +86,7 @@ node agent.js list   # liste les fichiers MD gérés
 | Fichier | Rôle |
 |---------|------|
 | `MEMORY.md` | **CE FICHIER** — mémoire persistante, lire en P1 |
-| `agent.md` | Script orchestrateur IA — lire pour comprendre les outils disponibles |
+| `agent.js` | Script orchestrateur IA — lire pour comprendre les outils disponibles |
 | `CLAUDE.md` | Instructions Claude — protocole démarrage |
 | `GEMINI.md` | Instructions Gemini — protocole démarrage |
 | `claude_context.md` | Source de vérité architecture |

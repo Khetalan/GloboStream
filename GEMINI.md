@@ -9,7 +9,7 @@ Lire ces fichiers dans cet ordre EXACT :
 
 | # | Fichier | Quoi chercher | Priorite |
 |---|---------|---------------|----------|
-| 1 | `MEMORY.md` | Decisions archi, regles UI/UX, historique cle, résumé agent.md | **P1 — MEMOIRE PERSISTANTE** |
+| 1 | `MEMORY.md` | Decisions archi, regles UI/UX, historique cle, résumé agent.js | **P1 — MEMOIRE PERSISTANTE** |
 | 2 | `gemini_context.md` | Ton contexte complet : perimetre, API, design, conventions | **P1 — TA REFERENCE** |
 | 3 | `claude_context.md` | Source de verite globale du projet — prevaut sur tout | **P1 — SOURCE DE VERITE** |
 | 4 | `gemini_session.md` | Derniere session Gemini, fichiers modifies, en cours | **P1 — MEMOIRE FRONTEND** |
@@ -466,8 +466,8 @@ chaque fichier touche avec la date et une description courte.
 
 | Fichier | Contenu | Priorite |
 |---------|---------|----------|
-| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.md | P1 |
-| `agent.md` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
+| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.js | P1 |
+| `agent.js` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
 | `gemini_context.md` | **TA REFERENCE** — Perimetre, API, design, conventions | P1 |
 | `claude_context.md` | **SOURCE DE VERITE** — Architecture globale, prevaut sur tout | P1 |
 | `gemini_session.md` | **MEMOIRE FRONTEND** — Journal Gemini, fichiers modifies | P1 |
