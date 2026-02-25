@@ -66,13 +66,9 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
-@media (min-width: 768px) {
-  body { font-size: 0.95rem; }
-}
 
-@media (min-width: 1024px) {
-  body { font-size: 1rem; }
-}
+
+
 
 /* Background animé */
 body::before {
@@ -108,17 +104,9 @@ h1 { font-size: 1.8rem; }
 h2 { font-size: 1.4rem; }
 h3 { font-size: 1.2rem; }
 
-@media (min-width: 768px) {
-  h1 { font-size: 2.5rem; }
-  h2 { font-size: 2rem; }
-  h3 { font-size: 1.5rem; }
-}
 
-@media (min-width: 1024px) {
-  h1 { font-size: 3.5rem; }
-  h2 { font-size: 2.5rem; }
-  h3 { font-size: 2rem; }
-}
+
+
 
 button {
   font-family: var(--font-body);
@@ -209,13 +197,9 @@ a {
   padding: 0 16px; /* Mobile : 16px */
 }
 
-@media (min-width: 768px) {
-  .container { padding: 0 24px; }
-}
 
-@media (min-width: 1024px) {
-  .container { padding: 0 40px; }
-}
+
+
 
 .card {
   background: var(--bg-card);
@@ -225,9 +209,7 @@ a {
   transition: var(--transition);
 }
 
-@media (min-width: 768px) {
-  .card { padding: 24px; border-radius: var(--radius); }
-}
+
 
 .card:hover {
   border-color: var(--border-light);
@@ -249,9 +231,7 @@ a {
   gap: 8px;
 }
 
-@media (min-width: 768px) {
-  .btn { padding: 14px 32px; font-size: 16px; }
-}
+
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);

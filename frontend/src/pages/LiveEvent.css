@@ -234,22 +234,4 @@
 }
 
 /* ── 768px+ ───────────────────────────────────────────────── */
-@media (min-width: 768px) {
-  .live-event-header {
-    padding: 16px 24px;
-  }
 
-  .live-event-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .live-event-start-screen h2 {
-    font-size: 2.25rem;
-  }
-
-  .live-event-start-btn {
-    max-width: 320px;
-    padding: 20px 48px;
-    font-size: 1.35rem;
-  }
-}

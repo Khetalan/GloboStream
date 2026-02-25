@@ -317,9 +317,3 @@
 }
 
 /* --- Responsive --- */
-@media (min-width: 768px) {
-  .lspr-streamer-video-container {
-    width: 150px;
-    height: 220px;
-  }
-}

@@ -170,31 +170,4 @@
 }
 
 /* ── 768px+ ───────────────────────────────────────────────── */
-@media (min-width: 768px) {
-  .location-picker {
-    gap: 16px;
-  }
 
-  .location-row {
-    grid-template-columns: 2fr 1fr;
-    gap: 16px;
-  }
-
-  .city-input {
-    padding: 12px 40px 12px 16px;
-  }
-
-  .suggestions-dropdown {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    top: calc(100% + 4px);
-    max-height: 300px;
-    z-index: 100;
-  }
-
-  .geolocate-btn {
-    width: auto;
-  }
-}

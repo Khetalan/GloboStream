@@ -16,14 +16,7 @@
 }
 
 /* Centrage Mobile First sur Desktop */
-@media (min-width: 768px) {
-  .lv-container {
-    max-width: 480px; /* Largeur tablette max */
-    margin: 0 auto;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-  }
-}
+
 
 /* ── Écrans erreur / chargement ───────────────────────────── */
 .lv-error-screen,
@@ -676,9 +669,4 @@
   }
 }
 
-@media (min-width: 481px) {
-  .lv-local-preview {
-    width: 120px;
-    height: 170px;
-  }
-}
+

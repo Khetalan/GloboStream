@@ -125,40 +125,7 @@
 /* ══════════════════════════════════════════════════════════
    DESKTOP (768px+) : Dropdown classique, hamburger caché
    ══════════════════════════════════════════════════════════ */
-@media (min-width: 768px) {
-  /* Rétablir le bouton desktop */
-  .nav-toggle { display: flex; }
 
-  /* Panneau = dropdown positionné en absolu */
-  .nav-panel {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 280px;
-    height: auto;
-    max-height: 80vh;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-8px);
-    overflow-y: auto;
-    visibility: hidden;
-  }
-
-  .nav-panel.open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-    right: 0;
-    visibility: visible;
-  }
-
-  /* Cacher le bouton fermer sur desktop */
-  .nav-panel-close { display: none; }
-}
 
 /* ══════════════════════════════════════════════════════════
    Bouton toggle desktop (avatar + nom + chevron)

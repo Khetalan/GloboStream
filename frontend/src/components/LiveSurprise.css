@@ -14,14 +14,7 @@
 }
 
 /* Centrage Mobile First sur Desktop */
-@media (min-width: 768px) {
-  .lspr-container {
-    max-width: 480px; /* Largeur tablette max */
-    margin: 0 auto;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-  }
-}
+
 
 /* --- Start Screen --- */
 .lspr-start-screen {
@@ -328,9 +321,3 @@
 }
 
 /* --- Responsive --- */
-@media (min-width: 768px) {
-  .lspr-streamer-video-container {
-    width: 150px;
-    height: 220px;
-  }
-}
