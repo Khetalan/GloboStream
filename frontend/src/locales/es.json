@@ -277,7 +277,9 @@
     "tabLikesGiven": "Likes dados",
     "tabMessagesSent": "Mensajes enviados",
     "noLikesGiven": "Todavía no has dado like a nadie.",
-    "noMessagesSent": "Todavía no has enviado ningún mensaje."
+    "noMessagesSent": "Todavía no has enviado ningún mensaje.",
+    "pendingPostit": "Mensaje enviado",
+    "rejectedPostit": "Solicitud rechazada"
   },
   "chat": {
     "title": "Mensajes",

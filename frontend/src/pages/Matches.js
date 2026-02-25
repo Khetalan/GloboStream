@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { FiMessageCircle, FiUser, FiX, FiHeart, FiEye } from 'react-icons/fi';
+import { FiMessageCircle, FiUser, FiX, FiHeart, FiMail } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import Navigation from '../components/Navigation';
 import './Matches.css';
@@ -40,19 +40,19 @@ const Matches = () => {
           endpoint = '/api/swipe/likes-given';
           break;
         case 'messagesSent':
-          endpoint = '/api/chat/sent';
+          endpoint = '/api/message-requests/sent';
           break;
         default:
           endpoint = '/api/matches';
       }
 
       const response = await axios.get(endpoint, { headers });
-      // Adaptation selon la structure de réponse
       if (activeTab === 'matches') {
-        // /api/matches retourne { matches: [...] }
         setData(response.data.matches || []);
+      } else if (activeTab === 'messagesSent') {
+        // Exclure les demandes acceptées (devenues des matchs)
+        setData((response.data.requests || []).filter(r => r.status !== 'accepted'));
       } else {
-        // Les autres endpoints retourneront probablement un tableau direct ou { users: [...] }
         setData(response.data.users || response.data || []);
       }
     } catch (error) {
@@ -155,36 +155,66 @@ const Matches = () => {
         ) : (
           <div className="matches-grid">
             {data.map((item) => {
-              const user = item.user || item; // Gérer structure {match: {...}} ou {user: {...}}
+              // Pour messagesSent, item = { _id, recipient, message, status }
+              // Pour les autres onglets, item = profile ou { user: profile, matchedAt }
+              const user = activeTab === 'messagesSent'
+                ? (item.recipient || item)
+                : (item.user || item);
               const photoUrl = user.photos?.find(p => p.isPrimary)?.url || user.photos?.[0]?.url || '/default-avatar.png';
-              
+
               return (
                 <motion.div
-                  key={user.id || user._id}
+                  key={activeTab === 'messagesSent' ? item._id : (user.id || user._id)}
                   className="match-card"
-                  layoutId={`card-${user.id || user._id}`}
+                  layoutId={`card-${activeTab === 'messagesSent' ? item._id : (user.id || user._id)}`}
                   onClick={() => handleOpenProfile(user)}
                   whileHover={{ y: -5 }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                 >
-                  <div 
-                    className="match-image" 
+                  <div
+                    className="match-image"
                     style={{ backgroundImage: `url(${photoUrl})` }}
                   >
-                    {/* Badge si c'est un match */}
+                    {/* Badge match */}
                     {activeTab === 'matches' && (
                       <div className="match-badge">
                         <FiHeart className="filled-heart" />
                       </div>
                     )}
+
+                    {/* Post-it demande de message (pending) */}
+                    {activeTab === 'messagesSent' && (
+                      <motion.div
+                        className="match-postit"
+                        initial={{ scale: 0, rotate: -15 }}
+                        animate={{ scale: 1, rotate: -8 }}
+                        transition={{ type: 'spring', stiffness: 200 }}
+                      >
+                        <FiMail />
+                        <span>{t('matches.pendingPostit')}</span>
+                      </motion.div>
+                    )}
+
+                    {/* Post-it "Demande refusée" superposé */}
+                    {activeTab === 'messagesSent' && item.status === 'rejected' && (
+                      <motion.div
+                        className="match-postit rejected"
+                        initial={{ scale: 0, rotate: 10 }}
+                        animate={{ scale: 1, rotate: 5 }}
+                        transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+                      >
+                        <FiX />
+                        <span>{t('matches.rejectedPostit')}</span>
+                      </motion.div>
+                    )}
                   </div>
-                  
+
                   <div className="match-info">
                     <h3>{user.displayName || user.firstName}, {user.age}</h3>
                     <p>{user.location?.city || t('matches.unknownCity')}</p>
-                    
-                    {(activeTab === 'matches' || activeTab === 'messagesSent') && (
+
+                    {activeTab === 'matches' && (
                       <button
                         className="quick-chat-btn"
                         onClick={(e) => handleStartChat(user.id || user._id, e)}

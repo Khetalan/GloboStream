@@ -102,12 +102,12 @@ router.get('/sent', async (req, res) => {
     const requests = await MessageRequest.find({
       sender: req.user._id
     })
-    .populate('recipient', 'displayName firstName photos')
+    .populate('recipient', 'displayName firstName photos birthDate location bio isVerified isPremium isLive')
     .sort({ createdAt: -1 });
 
-    res.json({ 
+    res.json({
       success: true,
-      requests 
+      requests
     });
 
   } catch (error) {

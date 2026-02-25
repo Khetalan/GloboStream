@@ -156,6 +156,63 @@
   font-size: 1.2rem;
 }
 
+/* --- Post-it demande de message (rotation gérée par Framer Motion) --- */
+.match-postit {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  padding: 8px 12px;
+  border-radius: 4px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.25),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: #333;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 90px;
+  line-height: 1.2;
+}
+
+.match-postit::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 12px;
+  background: rgba(200, 200, 200, 0.3);
+  border-radius: 2px;
+}
+
+.match-postit svg {
+  font-size: 12px;
+  flex-shrink: 0;
+  color: #333;
+}
+
+/* Post-it "Demande refusée" — superposé légèrement décalé */
+.match-postit.rejected {
+  top: 20px;
+  right: 4px;
+  background: linear-gradient(135deg, #FF6B6B, #FF4040);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.match-postit.rejected svg {
+  color: #fff;
+}
+
 .match-info {
   padding: 12px;
 }
