@@ -5,13 +5,14 @@
 **A chaque nouvelle session ou reprise de conversation, Claude Code DOIT executer ce protocole AVANT toute action :**
 
 ### Etape 1 — Lecture obligatoire (P1)
-Lire ces 3 fichiers dans cet ordre EXACT :
+Lire ces fichiers dans cet ordre EXACT :
 
 | # | Fichier | Quoi chercher | Priorite |
 |---|---------|---------------|----------|
-| 1 | `claude_context.md` | Architecture, regles Git, conventions, zones sensibles | **P1 — SOURCE DE VERITE** |
-| 2 | `claude_session.md` | Derniere session, etat actuel, prochaines etapes | **P1 — MEMOIRE** |
-| 3 | `CLAUDE.md` (ce fichier) | Instructions generales, statut projet | **P1 — INSTRUCTIONS** |
+| 1 | `MEMORY.md` | Decisions architecture, regles UI, historique cle, résumé agent.js | **P1 — MEMOIRE PERSISTANTE** |
+| 2 | `claude_context.md` | Architecture, regles Git, conventions, zones sensibles | **P1 — SOURCE DE VERITE** |
+| 3 | `claude_session.md` | Derniere session, etat actuel, prochaines etapes | **P1 — MEMOIRE SESSION** |
+| 4 | `CLAUDE.md` (ce fichier) | Instructions generales, statut projet | **P1 — INSTRUCTIONS** |
 
 ### Etape 2 — Lecture selon la tache (P2)
 Lire SI la tache concerne des fonctionnalites ou des tests :
@@ -241,8 +242,10 @@ npm run build        # build production
 
 | Fichier | Contenu | Priorite |
 |---------|---------|----------|
+| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.js | P1 |
+| `agent.js` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
 | `claude_context.md` | **SOURCE DE VERITE** — Architecture, regles, conventions | P1 |
-| `claude_session.md` | **MEMOIRE** — Journal de session, etat actuel | P1 |
+| `claude_session.md` | **MEMOIRE SESSION** — Journal de session, etat actuel | P1 |
 | `gemini_session.md` | **MEMOIRE FRONTEND** — Journal Gemini, fichiers modifies | P1 |
 | `todo_claude.md` | **TACHES ENTRANTES** — Taches de Gemini pour Claude | P1 |
 | `todo_gemini.md` | **TACHES SORTANTES** — Taches de Claude pour Gemini | P1 |

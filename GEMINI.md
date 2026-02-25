@@ -9,12 +9,13 @@ Lire ces fichiers dans cet ordre EXACT :
 
 | # | Fichier | Quoi chercher | Priorite |
 |---|---------|---------------|----------|
-| 1 | `gemini_context.md` | Ton contexte complet : perimetre, API, design, conventions | **P1 — TA REFERENCE** |
-| 2 | `claude_context.md` | Source de verite globale du projet — prevaut sur tout | **P1 — SOURCE DE VERITE** |
-| 3 | `gemini_session.md` | Derniere session Gemini, fichiers modifies, en cours | **P1 — MEMOIRE FRONTEND** |
-| 4 | `claude_session.md` | Etat global du projet, derniere session Claude | **P1 — MEMOIRE GLOBALE** |
-| 5 | `todo_gemini.md` | Taches que Claude te delegue — traiter EN PRIORITE | **P1 — TACHES ENTRANTES** |
-| 6 | `GEMINI.md` (ce fichier) | Instructions generales | **P1 — INSTRUCTIONS** |
+| 1 | `MEMORY.md` | Decisions archi, regles UI/UX, historique cle, résumé agent.js | **P1 — MEMOIRE PERSISTANTE** |
+| 2 | `gemini_context.md` | Ton contexte complet : perimetre, API, design, conventions | **P1 — TA REFERENCE** |
+| 3 | `claude_context.md` | Source de verite globale du projet — prevaut sur tout | **P1 — SOURCE DE VERITE** |
+| 4 | `gemini_session.md` | Derniere session Gemini, fichiers modifies, en cours | **P1 — MEMOIRE FRONTEND** |
+| 5 | `claude_session.md` | Etat global du projet, derniere session Claude | **P1 — MEMOIRE GLOBALE** |
+| 6 | `todo_gemini.md` | Taches que Claude te delegue — traiter EN PRIORITE | **P1 — TACHES ENTRANTES** |
+| 7 | `GEMINI.md` (ce fichier) | Instructions generales | **P1 — INSTRUCTIONS** |
 
 ### Etape 2 — Lecture selon la tache (P2)
 
@@ -211,10 +212,13 @@ border-radius: 8px / 12px / 20px / 50%;
 transition: all 0.2s ease;   /* hover rapide */
 transition: all 0.3s ease;   /* animations */
 
-/* CSS TOUJOURS mobile-first */
+/* CSS TOUJOURS mobile-first — PAS DE MODE DESKTOP */
+/* La taille tablette (768px) est le MAXIMUM — aucun breakpoint au-dessus */
 .classe { /* mobile par defaut */ }
-@media (min-width: 768px)  { /* tablette */ }
-@media (min-width: 1024px) { /* desktop  */ }
+@media (min-width: 768px) { /* tablette = maximum */ }
+
+/* INTERDIT : @media (min-width: 1024px), @media (min-width: 1200px), etc. */
+/* INTERDIT : max-width superieur a 768px sur les conteneurs */
 ```
 
 ### Effets modernes autorises
@@ -462,6 +466,8 @@ chaque fichier touche avec la date et une description courte.
 
 | Fichier | Contenu | Priorite |
 |---------|---------|----------|
+| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.js | P1 |
+| `agent.js` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
 | `gemini_context.md` | **TA REFERENCE** — Perimetre, API, design, conventions | P1 |
 | `claude_context.md` | **SOURCE DE VERITE** — Architecture globale, prevaut sur tout | P1 |
 | `gemini_session.md` | **MEMOIRE FRONTEND** — Journal Gemini, fichiers modifies | P1 |

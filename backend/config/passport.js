@@ -136,7 +136,11 @@ module.exports = (passport) => {
     },
     async (req, accessToken, refreshToken, idToken, profile, done) => {
       try {
-        let user = await User.findOne({ appleId: profile.id });
+        // Apple envoie l'ID dans idToken.sub (profile.id est undefined avec passport-apple)
+        const appleId = idToken?.sub || profile?.id;
+        if (!appleId) return done(new Error('Apple ID manquant dans le token'), null);
+
+        let user = await User.findOne({ appleId });
 
         if (user) {
           user.lastActive = Date.now();
@@ -144,12 +148,30 @@ module.exports = (passport) => {
           return done(null, user);
         }
 
+        // Apple n'envoie email/nom que lors de la 1ère connexion (dans req.body.user)
+        const parsedUser = req.body?.user ? JSON.parse(req.body.user) : null;
+        const email = idToken?.email || profile?.email;
+        const firstName = parsedUser?.name?.firstName || profile?.name?.firstName || 'User';
+        const lastName = parsedUser?.name?.lastName || profile?.name?.lastName || '';
+
+        // Vérifier si un compte existe déjà avec cet email (comme Google/Facebook)
+        if (email) {
+          user = await User.findOne({ email });
+          if (user) {
+            user.appleId = appleId;
+            user.linkedAccounts.apple = true;
+            user.lastActive = Date.now();
+            await user.save();
+            return done(null, user);
+          }
+        }
+
         user = new User({
-          appleId: profile.id,
-          email: profile.email,
-          firstName: profile.name?.firstName || 'User',
-          lastName: profile.name?.lastName || '',
-          displayName: profile.name?.firstName || 'User',
+          appleId,
+          email,
+          firstName,
+          lastName,
+          displayName: firstName,
           linkedAccounts: { apple: true },
           birthDate: new Date(2000, 0, 1),
           gender: 'autre'
