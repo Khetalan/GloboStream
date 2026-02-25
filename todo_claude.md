@@ -64,4 +64,16 @@
 
 ## Tâches terminées
 
-*(Aucune tâche terminée pour le moment)*
+### TÂCHE-007 — Compteur en ligne temps réel (StreamHub)
+- **Statut**   : DONE
+- **Ajoutée**  : 25/02/2026
+- **Priorité** : NORMALE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`, `backend/routes/stream.js`, `frontend/src/pages/StreamHub.js`
+- **Résultat** : `getStreamStats()` + `broadcastStreamStats(io)` + `GET /api/stream/stats` + Socket.IO client dans StreamHub.
+
+### TÂCHE-008 — Bugfixes WebRTC (Streamer/Viewer ne se voyaient pas)
+- **Statut**   : DONE
+- **Ajoutée**  : 26/02/2026
+- **Priorité** : HAUTE
+- **Fichiers** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveViewer.js`
+- **Résultat** : Suppression `trickle:false`, ajout `PEER_CONFIG` STUN, race condition `join-live-room` corrigée, double leave et double disconnect corrigés.

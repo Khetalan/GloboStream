@@ -1306,3 +1306,79 @@ claude_session.md                  (ce fichier)
 - 📋 Corriger bug Apple OAuth (passport.js ligne 143)
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
+
+---
+
+## Session 16 : UX Matches + WebRTC Fix + Stream Stats (25-26 Février 2026)
+**Date** : 25-26 Février 2026
+**Branche** : `claude-work`
+**Status** : Complété ✅ — Déployé en production
+
+### Ce qui a été fait
+
+#### 1. Page Matches — Header, Tabs, Nouveaux onglets
+- **Header sticky** : Ajout du `matches-header-bar` avec logo FiHeart + `<Navigation />`, identique aux autres pages. Tabs rendues sticky sous le header (`top: 68px`).
+- **5 onglets** : Matches, Likes reçus, Vues, Likes donnés, Messages envoyés. Tous `flex-wrap: wrap; justify-content: center` pour s'adapter à toutes les tailles d'écran.
+- **Backend** : `GET /api/swipe/likes-given`, `GET /api/message-requests/sent` (populate recipient complet).
+- **Onglet "Messages envoyés"** : Affiche les message-requests pending/rejected. Post-it jaune (pending), post-it rouge superposé (rejected). Accepted → invisibles (devenus matches).
+- **Bordure cartes** : 2px gradient sombre sur `.match-card`.
+- **i18n** : Clés ajoutées en 5 langues (fr/en/es/de/it).
+
+#### 2. Suppression CSS Desktop (toutes les @media min-width)
+- Script Node.js avec algorithme brace-counting pour supprimer tous les blocs `@media (min-width:...)`.
+- 25 fichiers CSS concernés, ~1917 lignes supprimées.
+- Site définitivement mobile-first.
+
+#### 3. Stream Hub — Compteurs temps réel
+- **liveRoom.js** : `getStreamStats()` (compte streamer+viewers+participants par mode), `broadcastStreamStats(io)` appelé sur chaque event socket (create/join/leave/close/disconnect).
+- **stream.js** : `GET /api/stream/stats` → retourne les stats instantanées via `getStreamStats()`.
+- **StreamHub.js** : Fetch REST initial + Socket.IO `stream-stats-updated` en temps réel. Total global calculé par `reduce`.
+
+#### 4. Bugfixes WebRTC — Connexion Streamer ↔ Viewer
+**Problème** : Les viewers ne voyaient pas le streamer et inversement.
+
+**Bugs corrigés (LiveStream.js + LiveViewer.js)** :
+- Suppression de `trickle: false` (ICE trickle activé = connexion plus rapide et fiable)
+- Ajout de `PEER_CONFIG` avec 2 serveurs STUN Google explicites (`stun.l.google.com:19302`, `stun1`)
+- `join-live-room` déplacé dans `socket.on('connect', ...)` (évite race condition)
+- `hasLeftRef` pour éviter le double emit `leave-live-room`
+- `peerRef.current = null` dans `peer.on('error')` pour permettre la recréation
+- Suppression du double `socket.disconnect()` dans LiveStream cleanup useEffect
+
+### Commits (claude-work)
+```
+7a87d06  fix: Matches page - add full header bar with logo + sticky tabs
+0389594  feat: add Likes donnés + Messages envoyés tabs on Matches page
+39e5b50  style: 2px gradient dark border on match cards
+09bca11  feat: Messages envoyés tab — message requests with post-it overlays
+cf03cf0  fix: tabs auto-size to content on all screen sizes
+9ec1e6e  style: remove all desktop @media (min-width:...) from entire CSS codebase
+368c8af  feat(stream): compteur en ligne temps réel dans StreamHub
+b904807  fix(webrtc): corrige les bugs de connexion streamer/viewer
+```
+
+### Fichiers modifiés (principaux)
+```
+frontend/src/pages/Matches.js
+frontend/src/pages/Matches.css
+frontend/src/pages/StreamHub.js
+frontend/src/components/LiveStream.js
+frontend/src/components/LiveViewer.js
+backend/routes/stream.js
+backend/routes/swipe.js
+backend/routes/messageRequests.js
+backend/socketHandlers/liveRoom.js
+25 fichiers CSS (suppression media queries desktop)
+```
+
+### Déploiement
+- **Backend** : Push main → Render redéploie automatiquement
+- **Frontend** : `npm run deploy` → GitHub Pages `https://khetalan.github.io/GloboStream/`
+
+### Notes pour prochaines sessions
+- ⚠️ WebRTC cross-réseau (4G ↔ WiFi) : STUN seul ne suffit pas → prévoir TURN server (Coturn sur Docker)
+  - IP publique actuelle : `90.66.173.232` / IP locale : `192.168.1.54`
+  - Docker Desktop non installé → option en attente
+- ⚠️ Bug Apple OAuth signalé (passport.js ligne 143) — non traité
+
+> **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
