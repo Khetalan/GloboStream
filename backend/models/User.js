@@ -63,6 +63,11 @@ const userSchema = new mongoose.Schema({
   // Social
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  // Vues profil — 100 dernières entrées, dédupliquées par viewer
+  profileViews: [{
+    viewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    viewedAt: { type: Date, default: Date.now }
+  }],
   matches: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     matchedAt: { type: Date, default: Date.now }

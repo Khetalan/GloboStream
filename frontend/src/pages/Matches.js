@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { FiMessageCircle, FiUser, FiX, FiHeart, FiEye } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import Navigation from '../components/Navigation';
 import './Matches.css';
 
 const Matches = () => {
@@ -94,7 +95,8 @@ const Matches = () => {
 
   return (
     <div className="matches-page">
-      {/* En-tête avec Onglets */}
+      <Navigation />
+      {/* Onglets sticky */}
       <div className="matches-tabs-container">
         <div className="matches-tabs">
           <button 

@@ -49,6 +49,23 @@ router.get('/:userId', authMiddleware, async (req, res) => {
     const hasLiked = currentUser.likes.includes(user._id);
     const isMatch = currentUser.matches.some(m => m.user.toString() === user._id.toString());
 
+    // Enregistrer la vue (fire & forget — ne bloque pas la réponse)
+    // Ne pas enregistrer si l'utilisateur consulte son propre profil
+    if (req.user._id.toString() !== user._id.toString()) {
+      User.findByIdAndUpdate(user._id, {
+        $pull: { profileViews: { viewer: req.user._id } }
+      }).then(() => {
+        User.findByIdAndUpdate(user._id, {
+          $push: {
+            profileViews: {
+              $each: [{ viewer: req.user._id, viewedAt: new Date() }],
+              $slice: -100
+            }
+          }
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+
     res.json({
       success: true,
       profile: {

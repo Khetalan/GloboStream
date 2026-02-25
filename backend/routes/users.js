@@ -63,10 +63,25 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// Obtenir les utilisateurs ayant visité son profil (TÂCHE-006)
-// Les vues ne sont pas encore suivies en base — retourne [] pour ne pas bloquer le frontend
+// Obtenir les utilisateurs ayant visité son profil
 router.get('/views', async (req, res) => {
-  res.json({ success: true, users: [] });
+  try {
+    const user = await User.findById(req.user._id)
+      .populate('profileViews.viewer', 'displayName firstName photos location birthDate gender isVerified isPremium isLive lastActive bio interests occupation height hasChildren smoker lookingFor');
+
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    // Trier du plus récent au plus ancien, ignorer les viewers supprimés
+    const viewers = user.profileViews
+      .filter(v => v.viewer != null)
+      .sort((a, b) => b.viewedAt - a.viewedAt)
+      .map(v => v.viewer.getPublicProfile());
+
+    res.json({ success: true, users: viewers });
+  } catch (error) {
+    console.error('Erreur vues profil:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des vues' });
+  }
 });
 
 // Obtenir un profil public par ID
