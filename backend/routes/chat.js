@@ -63,6 +63,27 @@ router.get('/conversations', async (req, res) => {
   }
 });
 
+// Obtenir les profils des utilisateurs à qui l'utilisateur a envoyé des messages
+router.get('/sent', async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Récupérer les IDs distincts des destinataires des messages envoyés
+    const recipientIds = await Message.find({ sender: userId }).distinct('recipient');
+
+    const users = await User.find({
+      _id: { $in: recipientIds },
+      isActive: true
+    });
+
+    const profiles = users.map(u => u.getPublicProfile());
+    res.json({ success: true, users: profiles });
+  } catch (error) {
+    console.error('Erreur messages envoyés:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des messages envoyés' });
+  }
+});
+
 // Récupérer les messages d'une conversation
 router.get('/:userId', async (req, res) => {
   try {

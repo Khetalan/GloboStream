@@ -273,7 +273,11 @@
     "premium": "💎 Premium",
     "unknownCity": "Unbekannte Stadt",
     "premiumRequired": "Premium-Version erforderlich 💎",
-    "loadError": "Fehler beim Laden"
+    "loadError": "Fehler beim Laden",
+    "tabLikesGiven": "Gegebene Likes",
+    "tabMessagesSent": "Gesendete Nachrichten",
+    "noLikesGiven": "Du hast noch niemanden geliked.",
+    "noMessagesSent": "Du hast noch keine Nachrichten gesendet."
   },
   "chat": {
     "title": "Nachrichten",

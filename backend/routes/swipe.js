@@ -301,6 +301,26 @@ router.post('/superlike/:userId', async (req, res) => {
   }
 });
 
+// Obtenir les utilisateurs que vous avez likés
+router.get('/likes-given', async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user._id);
+    if (!currentUser) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    const likedUsers = await User.find({
+      _id: { $in: currentUser.likes },
+      isActive: true,
+      isBanned: false
+    });
+
+    const profiles = likedUsers.map(user => user.getPublicProfile());
+    res.json({ success: true, users: profiles });
+  } catch (error) {
+    console.error('Erreur likes donnés:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des likes donnés' });
+  }
+});
+
 // Obtenir les utilisateurs qui ont liké votre profil (TÂCHE-006)
 router.get('/likes-received', async (req, res) => {
   try {

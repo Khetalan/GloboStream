@@ -13,7 +13,7 @@ const Matches = () => {
   const navigate = useNavigate();
   
   // États
-  const [activeTab, setActiveTab] = useState('matches'); // matches, likes, views
+  const [activeTab, setActiveTab] = useState('matches'); // matches, likes, views, likesGiven, messagesSent
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null); // Pour la modale
@@ -31,10 +31,16 @@ const Matches = () => {
           endpoint = '/api/matches';
           break;
         case 'likes':
-          endpoint = '/api/swipe/likes-received'; 
+          endpoint = '/api/swipe/likes-received';
           break;
         case 'views':
           endpoint = '/api/users/views';
+          break;
+        case 'likesGiven':
+          endpoint = '/api/swipe/likes-given';
+          break;
+        case 'messagesSent':
+          endpoint = '/api/chat/sent';
           break;
         default:
           endpoint = '/api/matches';
@@ -85,6 +91,8 @@ const Matches = () => {
     let message = t('matches.noMatches');
     if (activeTab === 'likes') message = t('matches.noLikes');
     if (activeTab === 'views') message = t('matches.noViews');
+    if (activeTab === 'likesGiven') message = t('matches.noLikesGiven');
+    if (activeTab === 'messagesSent') message = t('matches.noMessagesSent');
 
     return (
       <div className="no-matches">
@@ -117,11 +125,23 @@ const Matches = () => {
           >
             {t('matches.tabLikes')}
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'views' ? 'active' : ''}`}
             onClick={() => setActiveTab('views')}
           >
             {t('matches.tabViews')}
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'likesGiven' ? 'active' : ''}`}
+            onClick={() => setActiveTab('likesGiven')}
+          >
+            {t('matches.tabLikesGiven')}
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'messagesSent' ? 'active' : ''}`}
+            onClick={() => setActiveTab('messagesSent')}
+          >
+            {t('matches.tabMessagesSent')}
           </button>
         </div>
       </div>
@@ -164,8 +184,8 @@ const Matches = () => {
                     <h3>{user.displayName || user.firstName}, {user.age}</h3>
                     <p>{user.location?.city || t('matches.unknownCity')}</p>
                     
-                    {activeTab === 'matches' && (
-                      <button 
+                    {(activeTab === 'matches' || activeTab === 'messagesSent') && (
+                      <button
                         className="quick-chat-btn"
                         onClick={(e) => handleStartChat(user.id || user._id, e)}
                       >

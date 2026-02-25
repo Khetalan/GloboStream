@@ -271,7 +271,11 @@
     "viewProfile": "Voir le profil",
     "unknownCity": "Ville inconnue",
     "premiumRequired": "Version premium requise 💎",
-    "loadError": "Erreur lors du chargement"
+    "loadError": "Erreur lors du chargement",
+    "tabLikesGiven": "Likes donnés",
+    "tabMessagesSent": "Messages envoyés",
+    "noLikesGiven": "Vous n'avez encore liké personne.",
+    "noMessagesSent": "Vous n'avez encore envoyé aucun message."
   },
   "chat": {
     "title": "Messages",
