@@ -48,7 +48,6 @@
   padding: 4px;
   border-radius: 12px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Firefox */
 }
@@ -61,18 +60,15 @@
   background: transparent;
   border: none;
   color: var(--color-text-secondary);
-  padding: 10px 12px;
+  padding: 10px 14px;
   font-size: 0.8rem;
   font-weight: 600;
   border-radius: 8px;
-  flex-shrink: 0;
+  /* Largeur naturelle (contenu) sur mobile — scroll horizontal */
+  flex: 0 0 auto;
   white-space: nowrap;
-  scroll-snap-align: start;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .tab-btn.active {
@@ -105,7 +101,9 @@
   }
 
   .tab-btn {
-    flex: 1;
+    /* Grandit depuis la taille du contenu — proportionnel au texte */
+    flex: 1 1 auto;
+    min-width: fit-content;
     font-size: 0.9rem;
     text-align: center;
   }
