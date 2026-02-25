@@ -12,9 +12,11 @@ router.use(authMiddleware);
 // GET /api/live/public - Obtenir tous les lives publics
 router.get('/public', async (req, res) => {
   try {
-    const { filter, userLat, userLon } = req.query;
+    const { filter, userLat, userLon, mode } = req.query;
 
-    const { mode } = req.query;
+    // Récupérer les favoris de l'utilisateur courant
+    const currentUser = await User.findById(req.user._id).select('favoriteStreamers');
+    const favoriteSet = new Set((currentUser?.favoriteStreamers || []).map(id => id.toString()));
 
     // Trouver tous les utilisateurs en live, filtrer par mode si spécifié
     let query = { isLive: true };
@@ -32,14 +34,14 @@ router.get('/public', async (req, res) => {
 
       if (userLat && userLon && user.location?.coordinates) {
         const [userLon2, userLat2] = user.location.coordinates;
-        
+
         // Formule Haversine
         const R = 6371; // Rayon Terre en km
         const dLat = (userLat2 - parseFloat(userLat)) * Math.PI / 180;
         const dLon = (userLon2 - parseFloat(userLon)) * Math.PI / 180;
-        const a = 
+        const a =
           Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(parseFloat(userLat) * Math.PI / 180) * 
+          Math.cos(parseFloat(userLat) * Math.PI / 180) *
           Math.cos(userLat2 * Math.PI / 180) *
           Math.sin(dLon/2) * Math.sin(dLon/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
@@ -61,7 +63,7 @@ router.get('/public', async (req, res) => {
         duration: Math.floor(Math.random() * 3600), // Simulé en secondes
         tags: ['Rencontres', 'Discussion'],
         distance: distance,
-        isFavorite: false, // TODO: Vérifier favoris utilisateur
+        isFavorite: favoriteSet.has(user._id.toString()),
         startedAt: new Date()
       };
     });
@@ -110,19 +112,24 @@ router.get('/public', async (req, res) => {
   }
 });
 
-// POST /api/live/favorite/:streamId - Ajouter/retirer des favoris
-router.post('/favorite/:streamId', authMiddleware, async (req, res) => {
+// POST /api/live/favorite/:streamerId - Ajouter/retirer un streamer des favoris
+router.post('/favorite/:streamerId', authMiddleware, async (req, res) => {
   try {
     const userId = req.user._id;
-    const streamId = req.params.streamId;
+    const streamerId = req.params.streamerId;
 
-    // TODO: Implémenter système de favoris
-    // Pour l'instant, juste retourner succès
+    const user = await User.findById(userId).select('favoriteStreamers');
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
-    res.json({
-      success: true,
-      message: 'Favori modifié'
-    });
+    const isFavorite = user.favoriteStreamers.some(id => id.toString() === streamerId);
+
+    if (isFavorite) {
+      await User.findByIdAndUpdate(userId, { $pull: { favoriteStreamers: streamerId } });
+    } else {
+      await User.findByIdAndUpdate(userId, { $addToSet: { favoriteStreamers: streamerId } });
+    }
+
+    res.json({ success: true, isFavorite: !isFavorite });
 
   } catch (error) {
     console.error('Error toggling favorite:', error);

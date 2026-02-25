@@ -87,6 +87,7 @@ const userSchema = new mongoose.Schema({
   isLive: { type: Boolean, default: false },
   liveMode: { type: String, enum: ['public', 'competition', 'event', null], default: null },
   liveStreamId: String,
+  favoriteStreamers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   
   // Statut
   isVerified: { type: Boolean, default: false },

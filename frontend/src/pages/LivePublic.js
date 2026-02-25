@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import {
   FiArrowLeft, FiSearch, FiTrendingUp, FiMapPin, FiClock,
-  FiHeart, FiEye, FiPlay, FiX, FiGlobe
+  FiHeart, FiEye, FiPlay, FiX
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import LiveStream from '../components/LiveStream';
@@ -91,20 +91,28 @@ const LivePublic = () => {
 
   const handleToggleFavorite = async (streamId) => {
     try {
+      const currentStream = liveStreams.find(s => s._id === streamId);
+      const wasAlreadyFavorite = currentStream?.isFavorite;
+
       await axios.post(`/api/live/favorite/${streamId}`);
-      
-      setLiveStreams(prev => prev.map(stream => 
-        stream._id === streamId 
+
+      setLiveStreams(prev => prev.map(stream =>
+        stream._id === streamId
           ? { ...stream, isFavorite: !stream.isFavorite }
           : stream
       ));
-      
+
       toast.success(
-        liveStreams.find(s => s._id === streamId)?.isFavorite
+        wasAlreadyFavorite
           ? t('livePublic.removedFavorite')
           : t('livePublic.addedFavorite')
       );
-      
+
+      // Si on est dans l'onglet favoris et qu'on retire, recharger la liste
+      if (activeTab === 'favorites') {
+        loadLiveStreams();
+      }
+
     } catch (error) {
       console.error('Error toggling favorite:', error);
       toast.error(t('livePublic.favoriteError'));
@@ -143,20 +151,11 @@ const LivePublic = () => {
         </div>
       </div>
 
-      {/* Bouton Démarrer un live */}
-      <div className="start-live-banner">
-        <div className="start-live-info">
-          <FiGlobe size={20} />
-          <div>
-            <strong>{t('livePublic.startYourLive')}</strong>
-            <span>{t('livePublic.startYourLiveDesc')}</span>
-          </div>
-        </div>
-        <button className="start-live-btn" onClick={() => setIsStreaming(true)}>
-          <FiPlay />
-          <span>{t('livePublic.startBtn')}</span>
-        </button>
-      </div>
+      {/* Bouton flottant Démarrer un live */}
+      <button className="start-live-fab" onClick={() => setIsStreaming(true)}>
+        <FiPlay />
+        <span>{t('livePublic.startBtn')}</span>
+      </button>
 
       {showSearch && (
         <div className="search-bar">
