@@ -34,7 +34,7 @@
 
 .page-content {
   padding: 100px 20px 40px;
-  max-width: 1200px;
+  max-width: 768px;
   margin: 0 auto;
   text-align: center;
 }
@@ -75,7 +75,7 @@
 
 .home-content {
   padding: 100px 20px 40px;
-  max-width: 1200px;
+  max-width: 768px;
   margin: 0 auto;
 }
 

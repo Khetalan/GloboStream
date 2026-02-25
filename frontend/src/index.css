@@ -3,9 +3,9 @@
    Breakpoints :
      Base  : 0px+     (375px minimum ciblé — smartphones)
      sm    : 480px+   (grand mobile)
-     md    : 768px+   (tablette)
-     lg    : 1024px+  (desktop)
-     xl    : 1280px+  (grand desktop)
+     md    : 768px+   (tablette = MAXIMUM — pas de mode desktop)
+   Règle : max-width conteneurs = 768px. Aucun breakpoint > 768px.
+   Zoom désactivé : user-scalable=no dans index.html
    ============================================================ */
 
 :root {
@@ -192,7 +192,7 @@ a {
 
 /* Utilitaires */
 .container {
-  max-width: 1200px;
+  max-width: 768px;
   margin: 0 auto;
   padding: 0 16px; /* Mobile : 16px */
 }
