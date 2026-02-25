@@ -4,10 +4,39 @@
   background-color: var(--color-bg);
 }
 
+/* --- Header bar sticky (logo + navigation) --- */
+.matches-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 101;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+
+.matches-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.matches-logo .logo-icon {
+  color: var(--color-primary);
+  font-size: 24px;
+}
+
 /* --- Tabs --- */
 .matches-tabs-container {
   position: sticky;
-  top: 60px; /* Hauteur du header */
+  top: 68px; /* Hauteur du header */
   z-index: 10;
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(10px);

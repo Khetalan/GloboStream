@@ -95,7 +95,13 @@ const Matches = () => {
 
   return (
     <div className="matches-page">
-      <Navigation />
+      <div className="matches-header-bar">
+        <div className="matches-logo">
+          <FiHeart className="logo-icon" />
+          <span>Globostream</span>
+        </div>
+        <Navigation />
+      </div>
       {/* Onglets sticky */}
       <div className="matches-tabs-container">
         <div className="matches-tabs">
