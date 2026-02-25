@@ -35,6 +35,7 @@ function setupLiveRoomHandlers(io, socket) {
       socket.liveRole = 'streamer';
 
       socket.emit('room-created', { roomId });
+      broadcastStreamStats(io);
 
       console.log(`Room created: ${roomId} by ${userId} (mode: ${mode})`);
     } catch (error) {
@@ -72,6 +73,7 @@ function setupLiveRoomHandlers(io, socket) {
         participantCount: room.participants.size
       });
 
+      broadcastStreamStats(io);
       console.log(`Viewer ${userId} joined room ${roomId}. Viewers: ${room.viewers.size}`);
     } catch (error) {
       console.error('Error joining room:', error);
@@ -110,6 +112,7 @@ function setupLiveRoomHandlers(io, socket) {
       }
 
       liveRooms.delete(roomId);
+      broadcastStreamStats(io);
       console.log(`Room closed: ${roomId}`);
     } catch (error) {
       console.error('Error closing room:', error);
@@ -242,6 +245,7 @@ function setupLiveRoomHandlers(io, socket) {
       // Le streamer s'est déconnecté — fermer la room
       io.to(roomId).emit('room-closed');
       liveRooms.delete(roomId);
+      broadcastStreamStats(io);
       console.log(`Room ${roomId} closed (streamer disconnected)`);
     } else {
       handleLeaveRoom(io, socket, roomId);
@@ -275,9 +279,29 @@ function handleLeaveRoom(io, socket, roomId) {
         participantCount: room.participants.size
       });
     }
+
+    broadcastStreamStats(io);
   } catch (error) {
     console.error('Error leaving room:', error);
   }
+}
+
+// Calculer le nombre de personnes par mode de stream
+function getStreamStats() {
+  const stats = { surprise: 0, public: 0, competition: 0, event: 0 };
+  for (const room of liveRooms.values()) {
+    const mode = room.mode;
+    if (Object.prototype.hasOwnProperty.call(stats, mode)) {
+      // streamer (1) + viewers + participants
+      stats[mode] += 1 + room.viewers.size + room.participants.size;
+    }
+  }
+  return stats;
+}
+
+// Diffuser les stats à tous les clients connectés
+function broadcastStreamStats(io) {
+  io.emit('stream-stats-updated', getStreamStats());
 }
 
 // Utilitaire : obtenir les rooms actives par mode
@@ -300,4 +324,4 @@ function getActiveRooms(mode) {
   return rooms;
 }
 
-module.exports = { setupLiveRoomHandlers, getActiveRooms, liveRooms };
+module.exports = { setupLiveRoomHandlers, getActiveRooms, getStreamStats, liveRooms };

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const { getStreamStats } = require('../socketHandlers/liveRoom');
 
 router.use(authMiddleware);
 
@@ -155,6 +156,16 @@ router.get('/public', async (req, res) => {
   } catch (error) {
     console.error('Erreur récupération streams publics:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des streams' });
+  }
+});
+
+// GET /api/stream/stats — Nombre de personnes en live par mode (temps réel)
+router.get('/stats', (req, res) => {
+  try {
+    res.json({ success: true, stats: getStreamStats() });
+  } catch (error) {
+    console.error('Erreur récupération stream stats:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des stats' });
   }
 });
 

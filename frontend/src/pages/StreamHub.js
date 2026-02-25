@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FiVideo, FiShuffle, FiGlobe, FiCalendar, FiArrowLeft, FiUsers, FiClock } from 'react-icons/fi';
 import { BsFillTrophyFill } from "react-icons/bs";
+import { io } from 'socket.io-client';
+import axios from 'axios';
 import Navigation from '../components/Navigation';
 import './StreamHub.css';
+
+const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const StreamHub = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const socketRef = useRef(null);
   const [liveStats, setLiveStats] = useState({
     surprise: 0,
     public: 0,
@@ -17,18 +22,24 @@ const StreamHub = () => {
   });
 
   useEffect(() => {
-    loadLiveStats();
-  }, []);
+    // Fetch initial stats via REST
+    const token = localStorage.getItem('token');
+    axios.get('/api/stream/stats', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => {
+      if (res.data?.stats) setLiveStats(res.data.stats);
+    }).catch(() => {});
 
-  const loadLiveStats = async () => {
-    // TODO: Appel API pour stats réelles
-    setLiveStats({
-      surprise: 0,
-      public: 0,
-      competition: 0,
-      event: 0
+    // Socket.IO — mises à jour temps réel
+    socketRef.current = io(SOCKET_URL, { transports: ['websocket'] });
+    socketRef.current.on('stream-stats-updated', (stats) => {
+      setLiveStats(stats);
     });
-  };
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+    };
+  }, []);
 
   const sections = [
     {
