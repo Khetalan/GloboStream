@@ -116,7 +116,27 @@ router.get('/sent', async (req, res) => {
   }
 });
 
-// Vérifier si une demande a été envoyée à un profil
+// Vérifier si une demande a déjà été envoyée à un profil (tout statut)
+// TÂCHE-015 — utilisé par la modale profil dans Matches
+router.get('/sent-to/:userId', async (req, res) => {
+  try {
+    const request = await MessageRequest.findOne({
+      sender:    req.user._id,
+      recipient: req.params.userId
+    }).sort({ createdAt: -1 }); // la plus récente si plusieurs
+
+    res.json({
+      success:     true,
+      alreadySent: !!request,
+      status:      request ? request.status : null
+    });
+  } catch (error) {
+    console.error('Erreur vérification sent-to:', error);
+    res.status(500).json({ error: 'Erreur lors de la vérification' });
+  }
+});
+
+// Vérifier si une demande a été envoyée à un profil (pending uniquement)
 router.get('/check/:recipientId', async (req, res) => {
   try {
     const request = await MessageRequest.findOne({

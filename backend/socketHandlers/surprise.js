@@ -40,13 +40,20 @@ function setupSurpriseHandlers(io, socket) {
         socketId:    socket.id
       };
 
+      // TÂCHE-016 — pays par défaut = pays d'origine de l'utilisateur
+      const defaultFilters = { ...filters };
+      if (!defaultFilters.country && user.location?.country) {
+        defaultFilters.country = user.location.country;
+      }
+
       surpriseQueue.set(userId, {
         socketId:      socket.id,
         userInfo:      userInfo,
         timestamp:     Date.now(),
         timerDuration: 3,
         isSearching:   false,
-        filters:       filters  // { country, ageMin, ageMax } — utilisé par findPartner (TÂCHE-016)
+        filters:       defaultFilters, // { country, ageMin, ageMax }
+        fallbackTimer: null            // TÂCHE-016 : timer fallback 15s sans filtre pays
       });
 
       // TÂCHE-009 — diffuser le nouveau compteur
@@ -61,7 +68,9 @@ function setupSurpriseHandlers(io, socket) {
 
   // ── Quitter la file d'attente volontairement ──
   socket.on('leave-surprise-queue', ({ userId }) => {
-    if (surpriseQueue.has(userId)) {
+    const entry = surpriseQueue.get(userId);
+    if (entry) {
+      if (entry.fallbackTimer) clearTimeout(entry.fallbackTimer); // TÂCHE-016
       surpriseQueue.delete(userId);
       broadcastSurpriseCount(io);
       console.log(`[Surprise] User ${userId} a quitté la file.`);
@@ -85,7 +94,19 @@ function setupSurpriseHandlers(io, socket) {
       if (partnerId) {
         createPair(io, userId, partnerId);
       } else {
-        console.log(`[Surprise] Aucun partenaire pour ${userId}, en attente...`);
+        // TÂCHE-016 — si aucun partenaire du même pays, fallback sans filtre après 15s
+        if (queueEntry.fallbackTimer) clearTimeout(queueEntry.fallbackTimer);
+        queueEntry.fallbackTimer = setTimeout(() => {
+          const entry = surpriseQueue.get(userId);
+          if (!entry || !entry.isSearching) return;
+          const fallbackId = findPartner(userId, {}); // sans filtre pays
+          if (fallbackId) {
+            console.log(`[Surprise] Fallback 15s — partenaire trouvé pour ${userId} (pays différent)`);
+            createPair(io, userId, fallbackId);
+          }
+        }, 15000);
+        surpriseQueue.set(userId, queueEntry);
+        console.log(`[Surprise] Aucun partenaire (${queueEntry.filters.country || 'tous pays'}) pour ${userId}, fallback dans 15s...`);
       }
 
       broadcastSurpriseCount(io);
@@ -196,6 +217,7 @@ function setupSurpriseHandlers(io, socket) {
     // Retirer de la file si présent
     for (const [userId, entry] of surpriseQueue.entries()) {
       if (entry.socketId === socket.id) {
+        if (entry.fallbackTimer) clearTimeout(entry.fallbackTimer); // TÂCHE-016
         surpriseQueue.delete(userId);
         break;
       }
@@ -219,6 +241,10 @@ function createPair(io, userId1, userId2) {
   const user2 = surpriseQueue.get(userId2);
 
   if (!user1 || !user2) return;
+
+  // TÂCHE-016 — annuler les timers fallback avant de retirer de la file
+  if (user1.fallbackTimer) clearTimeout(user1.fallbackTimer);
+  if (user2.fallbackTimer) clearTimeout(user2.fallbackTimer);
 
   surpriseQueue.delete(userId1);
   surpriseQueue.delete(userId2);
@@ -249,7 +275,9 @@ function cleanupPair(socketId) {
   if (partnerSocketId) activePairs.delete(partnerSocketId);
 }
 
-// ── Trouver un partenaire compatible dans la file ── TÂCHE-016 (préparation filtrage pays)
+// ── Trouver un partenaire compatible dans la file ── TÂCHE-016
+// filters.country : filtre pays (par défaut = pays d'origine de l'utilisateur)
+// Appelé sans filtre (filters = {}) pour le fallback après 15s
 function findPartner(userId, filters = {}) {
   for (const [candidateId, entry] of surpriseQueue.entries()) {
     if (candidateId === userId) continue;

@@ -74,24 +74,30 @@
 ---
 
 ### TÂCHE-015 — Matches : Endpoint vérification message déjà envoyé
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Phase 2)
 - **Priorité** : NORMALE
 - **Fichiers concernés** : `backend/routes/messageRequests.js`
 - **Description** : Créer `GET /api/message-requests/sent-to/:userId` → vérifie si l'utilisateur courant a déjà envoyé une MessageRequest au `userId` ciblé. Retourne `{ alreadySent: true/false, status: 'pending'|'accepted'|'rejected'|null }`. Placer la route AVANT les routes avec paramètre générique pour éviter les conflits.
 - **Contexte** : Test-01 — le bouton "Message" dans la modale de profil (Matches) doit être désactivé si une demande a déjà été envoyée.
-- **Résultat** : (à remplir par Claude)
+- **Résultat** : Route `GET /sent-to/:userId` ajoutée avant `/check/:recipientId`. Cherche toute MessageRequest (tout statut) entre l'utilisateur courant et le destinataire cible. Retourne `{ success, alreadySent, status }` — status = null si aucune demande.
 
 ---
 
 ### TÂCHE-016 — Live Surprise : Filtrage par pays d'origine (par défaut)
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Phase 2)
 - **Priorité** : NORMALE
 - **Fichiers concernés** : `backend/socketHandlers/surprise.js`
 - **Description** : Dans la logique de matchmaking de la queue Surprise, prioriser le matching avec un utilisateur du même `country` (champ User). Si aucun utilisateur compatible n'est disponible après un délai raisonnable (ex: 15s), élargir à tous les utilisateurs en attente. Prévoir un champ `filters` dans le payload d'entrée en queue pour les extensions futures (âge, etc.).
 - **Contexte** : Test-01 — filtrage demandé, pays d'origine par défaut.
-- **Résultat** : (à remplir par Claude)
+- **Résultat** :
+  - `join-surprise-queue` : si `filters.country` absent, utilise `user.location?.country` comme filtre par défaut.
+  - `start-search` : si aucun partenaire compatible trouvé, programme un `setTimeout` 15s qui appelle `findPartner(userId, {})` (sans filtre pays = fallback mondial).
+  - `createPair`, `leave-surprise-queue`, `disconnect` : `clearTimeout(entry.fallbackTimer)` pour éviter les memory leaks.
+  - `findPartner` : logique de filtre pays déjà présente, maintenant activée automatiquement via les filtres par défaut.
 
 ---
 
