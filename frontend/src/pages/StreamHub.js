@@ -155,14 +155,6 @@ const StreamHub = () => {
           ))}
         </div>
 
-        {/* Bouton fixe Démarrer un live — TÂCHE-012 */}
-        <button
-          className="btn-start-live-fixed"
-          onClick={() => navigate('/stream/surprise')}
-        >
-          <FiVideo size={22} />
-          {t('streamHub.startLive')}
-        </button>
 
         <div className="info-banner">
           <FiClock />
