@@ -723,6 +723,10 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
               className="ls-local-video"
               style={{ display: isCamOff ? 'none' : 'block' }}
             />
+            {/* Watermark protection contre la capture */}
+            {!isCamOff && user?._id && (
+              <div className="ls-watermark">{String(user._id).slice(-8)}</div>
+            )}
             {isCamOff && (
               <div className="ls-video-placeholder cam-off">
                 {streamerPhoto ? (

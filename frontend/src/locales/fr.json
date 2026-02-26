@@ -762,5 +762,16 @@
     "romania": "Roumanie",
     "hungary": "Hongrie",
     "bulgaria": "Bulgarie"
+  },
+  "legal": {
+    "title": "Informations légales",
+    "tabCgu": "CGU",
+    "tabPrivacy": "Confidentialité",
+    "tabMentions": "Mentions légales",
+    "back": "Retour",
+    "settingsSection": "Informations légales",
+    "cguLink": "Conditions d'utilisation (CGU)",
+    "privacyLink": "Politique de confidentialité",
+    "mentionsLink": "Mentions légales"
   }
 }

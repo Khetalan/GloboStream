@@ -1,0 +1,134 @@
+/* ── Overlay ──────────────────────────────────────────────── */
+.consent-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.consent-card {
+  background: var(--bg-card, #1a1a1a);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 32px 24px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ── Logo ─────────────────────────────────────────────────── */
+.consent-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary, #e4405f), #ff6b9d);
+  color: white;
+  margin-bottom: 16px;
+}
+
+/* ── Textes ───────────────────────────────────────────────── */
+.consent-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+  margin: 0 0 8px;
+}
+
+.consent-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary, rgba(255,255,255,0.6));
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+/* ── Points de consentement ───────────────────────────────── */
+.consent-points {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  text-align: left;
+}
+
+.consent-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  font-size: 0.88rem;
+  color: var(--text-secondary, rgba(255,255,255,0.6));
+  line-height: 1.4;
+}
+
+.consent-points li:last-child {
+  border-bottom: none;
+}
+
+.consent-points li svg {
+  color: #22C55E;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.consent-points li strong {
+  color: var(--text-primary, #fff);
+}
+
+.consent-points li a {
+  color: var(--primary, #e4405f);
+  text-decoration: none;
+}
+
+.consent-points li a:hover {
+  text-decoration: underline;
+}
+
+/* ── Lien documents ───────────────────────────────────────── */
+.consent-link-hint {
+  font-size: 0.82rem;
+  margin: 0 0 20px;
+}
+
+.consent-link-hint a {
+  color: var(--text-secondary, rgba(255,255,255,0.5));
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.consent-link-hint a:hover {
+  color: var(--primary, #e4405f);
+}
+
+/* ── Bouton ───────────────────────────────────────────────── */
+.consent-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, var(--primary, #e4405f), #ff6b9d);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 20px rgba(228, 64, 95, 0.4);
+}
+
+.consent-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(228, 64, 95, 0.55);
+}
+
+.consent-btn:active {
+  transform: translateY(0);
+}
