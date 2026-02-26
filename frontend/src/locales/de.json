@@ -279,7 +279,17 @@
     "noLikesGiven": "Du hast noch niemanden geliked.",
     "noMessagesSent": "Du hast noch keine Nachrichten gesendet.",
     "pendingPostit": "Nachricht gesendet",
-    "rejectedPostit": "Anfrage abgelehnt"
+    "rejectedPostit": "Anfrage abgelehnt",
+    "likeProfile": "Liken",
+    "messageRequest": "Nachricht",
+    "sentPostit": "Gesendet ✓",
+    "messagePlaceholder": "Schreib deine Nachricht...",
+    "sendRequest": "Senden",
+    "cancelBtn": "Abbrechen",
+    "likeSuccess": "Profil geliked!",
+    "likeError": "Fehler beim Liken",
+    "messageSent": "Nachricht gesendet!",
+    "messageError": "Fehler beim Senden"
   },
   "chat": {
     "title": "Nachrichten",

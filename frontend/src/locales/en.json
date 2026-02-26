@@ -279,7 +279,17 @@
     "noLikesGiven": "You haven't liked anyone yet.",
     "noMessagesSent": "You haven't sent any messages yet.",
     "pendingPostit": "Message sent",
-    "rejectedPostit": "Request declined"
+    "rejectedPostit": "Request declined",
+    "likeProfile": "Like",
+    "messageRequest": "Message",
+    "sentPostit": "Sent ✓",
+    "messagePlaceholder": "Write your message...",
+    "sendRequest": "Send",
+    "cancelBtn": "Cancel",
+    "likeSuccess": "Profile liked!",
+    "likeError": "Error liking profile",
+    "messageSent": "Message sent!",
+    "messageError": "Error sending message"
   },
   "chat": {
     "title": "Messages",

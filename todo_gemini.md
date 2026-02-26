@@ -50,18 +50,22 @@
 ---
 
 ### TÂCHE-004 — Matches : Boutons Like + Message dans la modale profil
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible)
 - **Priorité** : HAUTE
 - **Dépend de** : TÂCHE-015 dans todo_claude.md (endpoint `GET /api/message-requests/sent-to/:userId`) — **DONE ✓ débloquée**
-- **Fichiers concernés** : `frontend/src/pages/Matches.js`, `frontend/src/pages/Matches.css`
+- **Fichiers concernés** : `frontend/src/pages/Matches.js`, `frontend/src/pages/Matches.css`, `frontend/src/locales/*.json`
 - **Description** :
   - Remplacer le bouton "Discuter" par 2 boutons distincts : ♥ **Like** et ✉ **Message**
   - Supprimer le bouton "Next" (inutile dans ce contexte : le profil vient des onglets Vues/Likes reçus)
   - Au chargement de la modale, appeler `GET /api/message-requests/sent-to/:userId` pour vérifier si une demande a déjà été envoyée
   - Si déjà envoyée → bouton **Message** désactivé (`disabled`) + animation post-it jaune avec texte "Envoyé ✓" (reprendre le style post-it des sessions précédentes)
 - **Contexte** : Test-01 — le bouton "Discuter" ne fonctionnait pas et un seul bouton ne suffit pas.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** :
+  - `Matches.js` : 5 états ajoutés (`modalMessageStatus`, `modalLiking`, `modalShowMessageForm`, `modalMessageText`, `modalSendingMessage`). `useEffect` sur `selectedProfile` → `GET /api/message-requests/sent-to/:userId` → setModalMessageStatus. `handleModalLike` → `POST /api/swipe/like/:userId`. `handleModalSendMessage` → `POST /api/message-requests/send/:userId`. `handleCloseModal` réinitialise tous les états. JSX modale : ♥ Like (rouge) + ✉ Message (désactivé si déjà envoyé) + formulaire inline textarea (toggle) + bouton "Voir profil" pleine largeur.
+  - `Matches.css` : `.modal-action-btn.like` (gradient rouge), `.modal-action-btn:disabled` (opacity 0.5), `.modal-message-btn-wrap` (relative pour post-it), `.modal-postit-sent` (post-it jaune positionné absolument au-dessus du bouton), `.modal-message-form` + `.modal-message-textarea` + `.modal-form-btns` (formulaire d'envoi), `.modal-view-profile` (bouton pleine largeur).
+  - `locales/fr|en|de|es|it.json` : 10 nouvelles clés ajoutées dans la section `matches`.
 
 ---
 

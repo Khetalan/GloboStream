@@ -18,6 +18,13 @@ const Matches = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null); // Pour la modale
 
+  // États modale — boutons Like + Message
+  const [modalMessageStatus, setModalMessageStatus] = useState(null); // null | 'pending' | 'accepted' | 'rejected'
+  const [modalLiking, setModalLiking] = useState(false);
+  const [modalShowMessageForm, setModalShowMessageForm] = useState(false);
+  const [modalMessageText, setModalMessageText] = useState('');
+  const [modalSendingMessage, setModalSendingMessage] = useState(false);
+
   // Fonction de récupération des données selon l'onglet
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -84,6 +91,59 @@ const Matches = () => {
   // Fermeture modale
   const handleCloseModal = () => {
     setSelectedProfile(null);
+    setModalMessageStatus(null);
+    setModalShowMessageForm(false);
+    setModalMessageText('');
+  };
+
+  // Vérifier si une demande de message a déjà été envoyée au profil ouvert
+  useEffect(() => {
+    if (!selectedProfile) return;
+    const userId = selectedProfile.id || selectedProfile._id;
+    const token = localStorage.getItem('token');
+    axios.get(`/api/message-requests/sent-to/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => {
+      setModalMessageStatus(res.data.alreadySent ? res.data.status : null);
+    }).catch(() => setModalMessageStatus(null));
+  }, [selectedProfile]);
+
+  // Like le profil ouvert dans la modale
+  const handleModalLike = async (userId) => {
+    if (modalLiking) return;
+    setModalLiking(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`/api/swipe/like/${userId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(t('matches.likeSuccess'));
+    } catch (error) {
+      toast.error(t('matches.likeError'));
+    } finally {
+      setModalLiking(false);
+    }
+  };
+
+  // Envoyer une demande de message au profil ouvert dans la modale
+  const handleModalSendMessage = async (userId) => {
+    if (!modalMessageText.trim() || modalSendingMessage) return;
+    setModalSendingMessage(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`/api/message-requests/send/${userId}`,
+        { message: modalMessageText.trim() },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setModalMessageStatus('pending');
+      setModalShowMessageForm(false);
+      setModalMessageText('');
+      toast.success(t('matches.messageSent'));
+    } catch (error) {
+      toast.error(error.response?.data?.error || t('matches.messageError'));
+    } finally {
+      setModalSendingMessage(false);
+    }
   };
 
   // Rendu du contenu vide
@@ -320,16 +380,67 @@ const Matches = () => {
                   </div>
                 )}
 
+                {/* Boutons Like + Message */}
                 <div className="modal-actions">
                   <button
-                    className="modal-action-btn primary"
-                    onClick={() => {
-                      handleStartChat(selectedProfile.id || selectedProfile._id);
-                      handleCloseModal();
-                    }}
+                    className="modal-action-btn like"
+                    onClick={() => handleModalLike(selectedProfile.id || selectedProfile._id)}
+                    disabled={modalLiking}
                   >
-                    <FiMessageCircle /> {t('matches.startChat')}
+                    <FiHeart /> {t('matches.likeProfile')}
                   </button>
+                  <div className="modal-message-btn-wrap">
+                    <button
+                      className="modal-action-btn primary"
+                      onClick={() => modalMessageStatus === null && setModalShowMessageForm(f => !f)}
+                      disabled={modalMessageStatus !== null}
+                    >
+                      <FiMail /> {t('matches.messageRequest')}
+                    </button>
+                    {modalMessageStatus !== null && (
+                      <motion.div
+                        className="modal-postit-sent"
+                        initial={{ scale: 0, rotate: -10 }}
+                        animate={{ scale: 1, rotate: -5 }}
+                        transition={{ type: 'spring', stiffness: 200 }}
+                      >
+                        <FiMail /><span>{t('matches.sentPostit')}</span>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Formulaire d'envoi de message (affiché au clic sur Message) */}
+                {modalShowMessageForm && (
+                  <div className="modal-message-form">
+                    <textarea
+                      className="modal-message-textarea"
+                      placeholder={t('matches.messagePlaceholder')}
+                      value={modalMessageText}
+                      onChange={(e) => setModalMessageText(e.target.value)}
+                      maxLength={500}
+                      rows={3}
+                    />
+                    <div className="modal-form-btns">
+                      <button
+                        className="modal-action-btn secondary"
+                        onClick={() => { setModalShowMessageForm(false); setModalMessageText(''); }}
+                      >
+                        {t('matches.cancelBtn')}
+                      </button>
+                      <button
+                        className="modal-action-btn primary"
+                        onClick={() => handleModalSendMessage(selectedProfile.id || selectedProfile._id)}
+                        disabled={!modalMessageText.trim() || modalSendingMessage}
+                      >
+                        {modalSendingMessage ? '…' : t('matches.sendRequest')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Voir le profil complet */}
+                <div className="modal-view-profile">
                   <button
                     className="modal-action-btn secondary"
                     onClick={() => navigate(`/profile/${selectedProfile.id || selectedProfile._id}`)}
