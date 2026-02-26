@@ -482,6 +482,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           className="lv-remote-video"
         />
 
+        {remoteStream && user?._id && (
+          <div className="lv-watermark">{String(user._id).slice(-8)}</div>
+        )}
+
         {!remoteStream && (
           <div className="lv-waiting-overlay">
             <div className="lv-loading-spinner" />

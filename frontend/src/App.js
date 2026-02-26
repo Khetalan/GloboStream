@@ -20,6 +20,9 @@ import ModerationPanel from './pages/ModerationPanel';
 import PublicProfile from './pages/PublicProfile';
 import Settings from './pages/Settings';
 
+// Pages légales
+import Legal from './pages/Legal';
+
 // Pages Stream
 import StreamHub from './pages/StreamHub';
 import LiveSurprise from './pages/LiveSurprise';
@@ -27,6 +30,8 @@ import LivePublic from './pages/LivePublic';
 import LiveCompetition from './pages/LiveCompetition';
 import LiveEvent from './pages/LiveEvent';
 import LiveViewerPage from './pages/LiveViewerPage';
+
+import ConsentModal from './components/ConsentModal';
 
 // Route protégée
 const PrivateRoute = ({ children }) => {
@@ -39,6 +44,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ConsentModal />
         <Toaster
           position="top-center"
           containerStyle={{
@@ -172,6 +178,9 @@ function App() {
               <LiveViewerPage />
             </PrivateRoute>
           } />
+
+          {/* Page légale (accessible sans être connecté) */}
+          <Route path="/legal" element={<Legal />} />
 
           {/* Redirection par défaut */}
           <Route path="*" element={<Navigate to="/home" />} />

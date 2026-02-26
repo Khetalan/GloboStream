@@ -391,6 +391,28 @@ const Settings = () => {
           </div>
         </div>
 
+        {/* Section Informations Légales */}
+        <div className="settings-section">
+          <div className="section-header">
+            <FiShield className="section-icon" />
+            <h2>{t('legal.settingsSection')}</h2>
+          </div>
+          <div className="settings-list">
+            <button className="setting-link-btn" onClick={() => navigate('/legal?tab=cgu')}>
+              <span>{t('legal.cguLink')}</span>
+              <FiArrowLeft style={{ transform: 'rotate(180deg)' }} size={16} />
+            </button>
+            <button className="setting-link-btn" onClick={() => navigate('/legal?tab=privacy')}>
+              <span>{t('legal.privacyLink')}</span>
+              <FiArrowLeft style={{ transform: 'rotate(180deg)' }} size={16} />
+            </button>
+            <button className="setting-link-btn" onClick={() => navigate('/legal?tab=mentions')}>
+              <span>{t('legal.mentionsLink')}</span>
+              <FiArrowLeft style={{ transform: 'rotate(180deg)' }} size={16} />
+            </button>
+          </div>
+        </div>
+
         {/* Section Danger Zone */}
         <div className="settings-section danger-section">
           <div className="section-header">

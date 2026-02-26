@@ -337,6 +337,20 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+/* Watermark protection anti-capture */
+.ls-watermark {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 9px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+  letter-spacing: 0.5px;
+}
+
 .ls-video-placeholder {
   width: 100%;
   height: 100%;

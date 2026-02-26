@@ -121,6 +121,33 @@
   gap: 12px;
 }
 
+/* Bouton lien légal */
+.setting-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.setting-link-btn:hover {
+  background: var(--border);
+}
+
+.setting-link-btn svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
 .setting-toggle {
   display: flex;
   flex-direction: column;
