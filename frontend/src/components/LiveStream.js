@@ -8,7 +8,7 @@ import Peer from 'simple-peer';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiUsers,
-  FiX, FiEye, FiSend, FiPlay, FiArrowLeft, FiVolumeX,
+  FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
   FiUserPlus, FiCheck, FiSlash
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
