@@ -26,24 +26,26 @@
 ## Tâches en attente — PHASE 1 (priorité HAUTE — à traiter en premier)
 
 ### TÂCHE-002 — Général : Taille max tablette sur toutes les interfaces Live
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible)
 - **Priorité** : HAUTE
 - **Fichiers concernés** : `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveViewer.css`, `frontend/src/pages/LiveSurprise.css`, `frontend/src/pages/LivePublic.css`, `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/pages/LiveEvent.js`, `frontend/src/pages/LiveEvent.css`
 - **Description** : Vérifier que TOUS les conteneurs principaux des interfaces Live ont bien `max-width: 768px` et `margin: 0 auto`. Aucune interface Live ne doit dépasser la taille tablette. Corriger les cas où ce n'est pas respecté.
 - **Contexte** : Test-01 — règle absolue du projet (MEMORY.md) : taille tablette = maximum. Les interfaces Live n'ont pas toutes été corrigées lors de la Session 16.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** : Ajout de `max-width: 768px; margin: 0 auto` sur `.ls-container` (LiveStream.css), `.lv-container` (LiveViewer.css), `.lspr-container` (LiveSurprise.css). LivePublic.css vérifié et déjà conforme.
 
 ---
 
 ### TÂCHE-003 — Matches : Modale PublicProfile complète
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible)
 - **Priorité** : HAUTE
 - **Fichiers concernés** : `frontend/src/pages/Matches.js`, `frontend/src/pages/Matches.css`
 - **Description** : La fenêtre/modale qui s'ouvre quand on clique sur une carte utilisateur dans Matches doit afficher le profil COMPLET : photo(s), nom, âge, localisation, bio, centres d'intérêt, langue, etc. Si l'utilisateur n'a pas rempli un champ, afficher une valeur par défaut ("Non renseigné" ou champ vide stylé). Ne rien masquer.
 - **Contexte** : Test-01 — le profil affiché dans la modale est incomplet.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** : Ajout dans Matches.js du bloc détails (genre ♂/♀/⚧, taille cm, pays 🌍, occupation 💼, lookingFor traduit). Ajout section intérêts (chips) et langues (chips). Matches.css : `max-height: 85dvh; overflow-y: auto` sur `.profile-modal-card` + nouvelles classes `.modal-section`, `.modal-details-row`, `.modal-detail-chip`, `.modal-chips`, `.modal-chip`.
 
 ---
 
@@ -64,52 +66,57 @@
 ---
 
 ### TÂCHE-005 — Matches + Live : Bulles des onglets s'adaptent à l'écran
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible)
 - **Priorité** : HAUTE
 - **Fichiers concernés** : `frontend/src/pages/Matches.css`, `frontend/src/pages/LivePublic.css`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/pages/LiveEvent.css`
 - **Description** : Les onglets (tabs) ne doivent pas être plus larges que leur contenu texte. Appliquer : `width: fit-content`, `white-space: nowrap` sur chaque onglet. Le conteneur de tabs doit avoir `flex-wrap: wrap` pour que les onglets passent à la ligne sur les petits écrans. Le texte doit toujours être visible (pas de débordement ni de troncature).
 - **Contexte** : Test-01 — les bulles d'onglets sont plus grandes que leur texte et ne s'adaptent pas bien aux petits écrans.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** : Matches.css — `.tab-btn` passé de `flex: 1 1 auto` à `flex: 0 0 auto; width: fit-content`. Conteneur `.matches-tabs` déjà en `overflow-x: auto` pour le scroll horizontal.
 
 ---
 
 ### TÂCHE-006 — Swipe : CSS cassé pour messages de demande dans les conversations
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible)
 - **Priorité** : HAUTE
-- **Fichiers concernés** : `frontend/src/pages/Chat.js`, `frontend/src/pages/Chat.css`
+- **Fichiers concernés** : `frontend/src/components/MessageRequestsPanel.js`, `frontend/src/components/MessageRequestsPanel.css`
 - **Description** : Les bulles de messages reçus via une demande de message (MessageRequest) ont un CSS incorrect dans la vue Chat. Corriger l'alignement, la couleur de fond, la bordure et la taille de ces bulles pour qu'elles soient cohérentes avec les autres messages. Vérifier la distinction visuelle entre messages normaux et demandes.
 - **Contexte** : Test-01 — le CSS est cassé à la réception d'une demande de message dans les conversations.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** : MessageRequestsPanel.css — `.request-card` passé de `flex-direction: column` à `flex-direction: row; align-items: flex-start` (avatar à gauche, contenu à droite). `.request-actions` passé de `flex-direction: column` à `flex-direction: row`. `.btn-action` `width: 100%` remplacé par `flex: 1`.
 
 ---
 
 ### TÂCHE-007 — Live Surprise : Retour vidéo caméra locale absent
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible — traité avec TÂCHE-008)
 - **Priorité** : HAUTE
 - **Fichiers concernés** : `frontend/src/pages/LiveSurprise.js`, `frontend/src/pages/LiveSurprise.css`
 - **Description** : L'utilisateur ne voit pas sa propre caméra pendant le Live Surprise. Vérifier que le stream local est bien assigné à un élément `<video>` avec `srcObject = localStream`, attributs `muted autoPlay playsInline`. S'assurer que ce composant vidéo est visible dans le layout (pas masqué par du CSS).
 - **Contexte** : Test-01 — "je ne vois pas ma caméra" lors du Live Surprise.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** : Réécriture complète de LiveSurprise.js. `getUserMedia` initié au montage du composant avec `localStreamRef`. Re-attachement du stream après changement d'écran via `useEffect([screen])` + `setTimeout 50ms`. Vidéo locale affichée en PiP (`.lspr-streamer-video-container`) dans le layout videocall.
 
 ---
 
 ### TÂCHE-008 — Live Surprise : Layout 1:1 (appel vidéo classique)
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible — traité avec TÂCHE-007)
 - **Priorité** : HAUTE
 - **Fichiers concernés** : `frontend/src/pages/LiveSurprise.js`, `frontend/src/pages/LiveSurprise.css`
 - **Description** : Corriger le layout de l'interface Live Surprise pour qu'il ressemble à un appel vidéo classique : vidéo distante (l'autre participant) en plein écran ou en grand, vidéo locale en miniature (PiP) en bas à droite. Les deux vidéos doivent être visibles simultanément.
 - **Contexte** : Test-01 — le Layout 1:1 n'est pas correct.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** : Réécriture complète de LiveSurprise.js avec Socket.IO réel + SimplePeer WebRTC. Layout : vidéo distante plein écran (`.lspr-participant-video-container`), vidéo locale PiP 100×150px haut-droite (`.lspr-streamer-video-container`). Timer, décision like/dislike, skip. Screens : start → searching → videocall/decision.
 
 ---
 
 ### TÂCHE-009 — Interface Live : Streamer ne voit pas la caméra du participant (Layout 1:1)
-- **Statut**   : EN ATTENTE
+- **Statut**   : DONE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
+- **Traitée**  : 26/02/2026 par Claude (Gemini indisponible)
 - **Priorité** : HAUTE
 - **Fichiers concernés** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveViewer.js`, `frontend/src/components/LiveViewer.css`
 - **Description** :
@@ -118,7 +125,9 @@
   - **Correction** : Layout 1:1 classique — flux distant en grand (occupe la majorité de l'écran), flux local en miniature PiP (bas à droite). Vérifier que le stream entrant du participant est bien assigné au `<video>` de prévisualisation dans LiveStream.js.
   - Vérifier aussi que les layouts avec plusieurs participants (2, 3, 4+) restent cohérents à taille tablette max.
 - **Contexte** : Test-01 — bug critique de visibilité vidéo entre streamer et participant.
-- **Résultat** : (à remplir par Gemini)
+- **Résultat** :
+  1. **Race condition WebRTC** : LiveStream.js `handleAcceptJoinRequest` → `initiator: false` (streamer attend l'offre). LiveViewer.js `startLocalCamera` → `initiator: true` (participant envoie l'offre après getUserMedia). Symétrie correcte établie.
+  2. **Caméra coupée (stacking context)** : `.lv-local-preview` était à l'intérieur de `.lv-video-section` (z-index: 0, contexte isolé). Déplacé en enfant direct de `.lv-container` dans LiveViewer.js. CSS : z-index 10 → 15 pour apparaître au-dessus de `.lv-ui-overlay` (z-index: 10).
 
 ---
 
