@@ -161,8 +161,7 @@ GloboStream/
 ├── docs/                        # Documentation projet
 │   ├── MVP.md                  # Checklist fonctionnalités MVP
 │   ├── POST_MVP.md             # Fonctionnalités futures
-│   ├── RAPPORT.md              # Rapport détaillé (90 fonctionnalités)
-│   └── rapport_frontend.md     # Rapport détaillé des tests frontend (par Gemini)
+│   └── RAPPORT.md              # Rapport détaillé (90 fonctionnalités)
 │
 ├── .claude/                     # Dossier Claude Code (ignoré)
 ├── README.md                    # Vue d'ensemble projet
@@ -275,8 +274,7 @@ git push origin claude-work
 
 1. **Lire `claude_context.md`** (ce fichier) — OBLIGATOIRE
 2. **Lire `claude_session.md`** pour connaître l'historique récent
-3. **Lire `docs/RAPPORT.md`** pour l'état des fonctionnalités backend
-4. **Lire `docs/rapport_frontend.md`** pour l'état des tests frontend (par Gemini)
+3. **Lire `docs/RAPPORT.md`** pour l'état des fonctionnalités et des tests
 
 ### 🎯 Modifier uniquement ce qui est demandé
 
@@ -494,6 +492,6 @@ APPLE_CLIENT_SECRET=...
 
 ---
 
-**Version** : 1.2
-**Dernière mise à jour** : 18 Février 2026
-**Statut** : ✅ Déployé (Render + GitHub Pages) — Système démo supprimé, flux caméra réel, CSS mobile-first
+**Version** : 1.3
+**Dernière mise à jour** : 26 Février 2026
+**Statut** : ✅ Déployé (Render + GitHub Pages) — Gemini retiré, Claude seul responsable backend + frontend

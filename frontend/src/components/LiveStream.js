@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios'; // Ajouté pour récupérer les photos de profil
+import axios from 'axios';
 import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import Peer from 'simple-peer';
@@ -11,6 +12,7 @@ import {
   FiUserPlus, FiCheck, FiSlash
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
+import { getPhotoUrl } from '../utils/photoUrl';
 import './LiveStream.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -28,6 +30,7 @@ const PEER_CONFIG = {
  * Flow : montage → getUserMedia → preview → "Go Live" → crée salon Socket.IO → WebRTC peers
  */
 const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }) => {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
   // États flow
@@ -61,7 +64,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const roomIdRef = useRef(null);
   const viewerPeersRef = useRef(new Map()); // socketId → Peer (send-only)
   const participantPeersRef = useRef(new Map()); // socketId → { peer, stream }
-  // participantVideosRef removed — unused
+  const viewersInfoRef = useRef(new Map()); // displayName → { userId, photoUrl }
 
   // Demander la permission caméra au montage (preview)
   useEffect(() => {
@@ -145,6 +148,34 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       setIsLive(true);
     });
 
+    // Sync temps réel de la liste spectateurs (TÂCHE-015)
+    socket.on('viewers-updated', ({ viewerCount: vc, viewers: viewersList }) => {
+      setViewerCount(vc);
+      setViewers(viewersList.map(v => ({
+        socketId: v.socketId,
+        userId: v.userId,
+        name: v.displayName,
+        photoUrl: v.photoUrl || null,
+        joinedAt: new Date().toLocaleTimeString()
+      })));
+      // Mettre à jour la map nom → { userId, photoUrl }
+      viewersList.forEach(v => {
+        viewersInfoRef.current.set(v.displayName, { userId: v.userId, photoUrl: v.photoUrl });
+      });
+    });
+
+    // Message "X a quitté le live" (TÂCHE-018)
+    socket.on('live-user-left', ({ displayName }) => {
+      setMessages(prev => [...prev, {
+        id: `sys-left-${displayName}-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.userLeft', { name: displayName }),
+        isSystem: true,
+        isOwn: false,
+        photoUrl: null
+      }]);
+    });
+
     // Un nouveau viewer rejoint
     socket.on('viewer-joined', ({ viewerSocketId, viewerInfo }) => {
       console.log('Viewer joined:', viewerInfo.displayName);
@@ -152,9 +183,18 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       setViewerCount(prev => prev + 1);
       setViewers(prev => [...prev, {
         socketId: viewerSocketId,
+        userId: viewerInfo.userId || null,
         name: viewerInfo.displayName,
+        photoUrl: viewerInfo.photoUrl || null,
         joinedAt: new Date().toLocaleTimeString()
       }]);
+      // Stocker pour le chat
+      if (viewerInfo.userId) {
+        viewersInfoRef.current.set(viewerInfo.displayName, {
+          userId: viewerInfo.userId,
+          photoUrl: viewerInfo.photoUrl || null
+        });
+      }
 
       // Ajouter un message système pour l'entrée du spectateur
       setMessages(prev => [...prev, {
@@ -227,8 +267,11 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       }
     });
 
-    // Message chat reçu
+    // Message chat reçu — TÂCHE-017 : photoUrl
     socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+      const info = viewersInfoRef.current.get(username);
+      const photoUrl = info?.photoUrl || null;
+      const userId = info?.userId || null;
       setMessages(prev => [...prev, {
         id: `msg-${timestamp}-${Math.random()}`,
         username,
@@ -237,7 +280,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         translatedText: null,
         showTranslation: false,
         translating: false,
-        isOwn: false
+        isOwn: false,
+        photoUrl,
+        userId
       }]);
     });
 
@@ -728,32 +773,43 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
               </div>
             </div>
 
-            {/* Chat */}
+            {/* Chat — TÂCHE-017 : photo spectateur */}
             <div className="ls-chat-section" ref={chatRef}>
               {messages.map((msg) => (
                 <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''} ${msg.isOwn ? 'own' : ''}`}>
-                  <div className="ls-chat-body">
-                    <span className="ls-chat-username">{msg.username} :</span>
-                    <span className="ls-chat-text">{msg.text}</span>
-                    <div className="ls-chat-icons">
-                      {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
-                      {!msg.isSystem && (
-                        <button
-                          className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                          onClick={() => handleTranslateMsg(msg.id)}
-                          title={t('liveStream.translate')}
-                        >
-                          🌐
-                        </button>
+                  {!msg.isSystem && (
+                    <div className="ls-chat-avatar">
+                      {msg.photoUrl ? (
+                        <img src={getPhotoUrl(msg.photoUrl)} alt={msg.username} />
+                      ) : (
+                        <div className="ls-chat-avatar-initials">{(msg.username || '?').charAt(0).toUpperCase()}</div>
                       )}
                     </div>
+                  )}
+                  <div className="ls-chat-content">
+                    <div className="ls-chat-body">
+                      <span className="ls-chat-username">{msg.username} :</span>
+                      <span className="ls-chat-text">{msg.text}</span>
+                      <div className="ls-chat-icons">
+                        {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
+                        {!msg.isSystem && (
+                          <button
+                            className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                            onClick={() => handleTranslateMsg(msg.id)}
+                            title={t('liveStream.translate')}
+                          >
+                            🌐
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {msg.showTranslation && msg.translatedText && (
+                      <div className="ls-translated-text">🌐 {msg.translatedText}</div>
+                    )}
+                    {msg.showTranslation && !msg.translatedText && !msg.translating && (
+                      <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
+                    )}
                   </div>
-                  {msg.showTranslation && msg.translatedText && (
-                    <div className="ls-translated-text">🌐 {msg.translatedText}</div>
-                  )}
-                  {msg.showTranslation && !msg.translatedText && !msg.translating && (
-                    <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
-                  )}
                 </div>
               ))}
             </div>
@@ -835,9 +891,17 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             </div>
             <div className="ls-stats-list">
               {viewers.map((v, i) => (
-                <div key={i} className="ls-stats-row">
+                <div
+                  key={i}
+                  className={`ls-stats-row ${v.userId ? 'clickable' : ''}`}
+                  onClick={() => v.userId && navigate(`/profile/${v.userId}`)}
+                >
                   <div className="ls-stats-row-left">
-                    <div className="ls-stats-avatar">{v.name.charAt(0)}</div>
+                    {v.photoUrl ? (
+                      <img src={getPhotoUrl(v.photoUrl)} alt={v.name} className="ls-stats-avatar-img" />
+                    ) : (
+                      <div className="ls-stats-avatar">{v.name.charAt(0)}</div>
+                    )}
                     <div>
                       <div className="ls-stats-name">{v.name}</div>
                       <div className="ls-stats-badge">{v.joinedAt}</div>

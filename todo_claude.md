@@ -146,3 +146,97 @@ Aucune tâche backend en attente actuellement.
   - `createPair`, `leave-surprise-queue`, `disconnect` : `clearTimeout(entry.timeoutTimer)` pour éviter les memory leaks.
   - `findPartner` : logique de filtre pays activée automatiquement via les filtres par défaut.
   - **Event frontend attendu** : `surprise-search-timeout` → afficher bouton "Élargir la recherche mondiale" → re-émettre `start-search` avec `filters = {}`.
+
+---
+
+## Tâches transférées depuis Gemini (26/02/2026)
+
+Ces tâches ont été transférées depuis `todo_gemini.md` le 26/02/2026 quand Gemini a été retiré du projet. Claude prend maintenant en charge le frontend complètement.
+
+### TÂCHE-010 — Live Surprise : Bouton "Message" remplace "Next" + ouvre panel
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
+- **Résultat** : Bouton FiMessageCircle ajouté dans la bottom bar (entre cam et skip). Click → panel slide-up (AnimatePresence) avec textarea 300 chars, compteur, bouton Envoyer → POST /api/message-requests/send/:userId. Confirmation verte 2s puis fermeture auto. Clés i18n : liveSurprise.sendMessage, messageTo, messagePlaceholder, send, sending, messageSent.
+
+### TÂCHE-011 — Live Surprise : Compteur de participants affiché dans l'UI
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
+- **Résultat** : Écoute de l'event surprise-user-count { count }. Badge "🔴 X en ligne" affiché en haut (position absolute, centré) sur les écrans start et searching. Se met à jour en temps réel.
+
+### TÂCHE-012 — StreamHub : Bouton "Démarrer" centré + plus gros
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/pages/StreamHub.js, frontend/src/pages/StreamHub.css
+- **Résultat** : Bouton `.btn-start-live-fixed` ajouté (position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 200). Padding 16px 32px, font 1.05rem, border-radius 50px. Navigue vers /stream/surprise.
+
+### TÂCHE-013 — StreamHub : Bulles des catégories = Nb Streamers + Nb Spectateurs
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/pages/StreamHub.js, frontend/src/pages/StreamHub.css
+- **Résultat** : liveStats initialisé avec `{ streamers:0, viewers:0, total:0 }` par catégorie. footer affiche "X streamers · Y spectateurs" si actifs, sinon "Personne en ligne". Clés i18n streamers/viewers/noOne ajoutées dans 5 langues.
+
+### TÂCHE-014 — Live Publique : Carte Streamer redesign
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/pages/LivePublic.js, frontend/src/pages/LivePublic.css
+- **Résultat** : StreamCard redesigné — avatar 36px→52px. Affiche uniquement Nom/âge et viewers/timer sous format compact (.stream-meta). Viewers masqués si 0. Tags et distance retirés du rendu. Calcul âge depuis birthDate.
+
+### TÂCHE-015 — Interface Live : Badge spectateurs en temps réel
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/components/LiveStream.js, LiveStream.css, LiveViewer.js, LiveViewer.css
+- **Résultat** : Listener `viewers-updated { viewerCount, viewers }` ajouté dans les deux composants. Sync viewerCount + liste viewers en temps réel.
+
+### TÂCHE-016 — Interface Live : Clic sur nom spectateur → profil public
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/components/LiveStream.js, LiveViewer.js
+- **Résultat** : useNavigate ajouté dans les deux composants. Viewer rows dans le panel stats cliquables → navigate(`/profile/${v.userId}`). Classe `.clickable` avec hover. Affichage photo viewer dans le panel si photoUrl disponible.
+
+### TÂCHE-017 — Interface Live : Photo du spectateur dans le chat
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/components/LiveStream.js, LiveStream.css, LiveViewer.js, LiveViewer.css
+- **Résultat** : `viewersInfoRef` Map (displayName → { userId, photoUrl }) mise à jour via viewers-updated/viewer-joined. Chat messages incluent photoUrl + userId. Avatar 28px dans chaque message non-système. CSS `.ls-chat-avatar`, `.ls-chat-content` ajoutés.
+
+### TÂCHE-018 — Interface Live : Message "X a quitté le live"
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : NORMALE
+- **Fichiers** : frontend/src/components/LiveStream.js, LiveViewer.js
+- **Résultat** : Listener `live-user-left { displayName }` dans les deux composants. Message système ajouté dans le chat. Clé i18n `liveStream.userLeft` ajoutée dans 5 langues.
+
+### TÂCHE-019 — Live Surprise : UI de filtrage
+- **Statut**   : DONE
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : BASSE
+- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
+- **Résultat** : Bouton "Filtres" toggle sur écran start → AnimatePresence panel (pays + âge min/max). handleStart passe les filtres actifs à join-surprise-queue et start-search. Listener `surprise-search-timeout` → banner avec bouton "Élargir la recherche mondiale" → re-émet sans filtres. Clés i18n complètes dans 5 langues.
+
+### TÂCHE-020 — Live Surprise : Boutons de contrôle (micro + caméra)
+- **Statut**   : DONE (déjà implémenté)
+- **Transférée** : 26/02/2026 depuis todo_gemini.md
+- **Traitée**  : 26/02/2026 par Claude
+- **Priorité** : BASSE
+- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
+- **Résultat** : toggleMic et toggleCam déjà présents dans LiveSurprise.js. Boutons FiMic/FiMicOff et FiVideo/FiVideoOff dans la bottom bar avec classe `off` si désactivé.

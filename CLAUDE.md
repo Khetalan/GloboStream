@@ -19,18 +19,19 @@ Lire SI la tache concerne des fonctionnalites ou des tests :
 
 | # | Fichier | Quand le lire |
 |---|---------|---------------|
-| 4 | `docs/RAPPORT.md` | Avant de travailler sur une feature ou un test |
+| 5 | `docs/RAPPORT.md` | Avant de travailler sur une feature ou un test |
+| 6 | `todo_claude.md` | Au demarrage — traiter les taches EN ATTENTE en priorite |
 
 ### Etape 3 — Reference (P3)
 Consulter SI besoin d'informations complementaires :
 
 | # | Fichier | Contenu |
 |---|---------|---------|
-| 5 | `README.md` | Vue d'ensemble publique du projet |
-| 6 | `ROADMAP.md` | Roadmap par phases |
-| 7 | `ROADMAP_COMPLETE.md` | Details techniques de chaque phase |
-| 8 | `docs/MVP.md` | Checklist fonctionnalites MVP |
-| 9 | `docs/POST_MVP.md` | Fonctionnalites futures |
+| 7 | `README.md` | Vue d'ensemble publique du projet |
+| 8 | `ROADMAP.md` | Roadmap par phases |
+| 9 | `ROADMAP_COMPLETE.md` | Details techniques de chaque phase |
+| 10 | `docs/MVP.md` | Checklist fonctionnalites MVP |
+| 11 | `docs/POST_MVP.md` | Fonctionnalites futures |
 
 ### Etape 4 — Confirmation
 Apres lecture, confirmer a l'utilisateur :
@@ -39,115 +40,38 @@ Apres lecture, confirmer a l'utilisateur :
 - Que le protocole de demarrage a ete execute
 
 ### Prompt de demarrage rapide
-> L'utilisateur peut coller ce prompt pour forcer le protocole :
->
 > **"Lis les fichiers obligatoires (claude_context.md, claude_session.md, CLAUDE.md) et donne-moi le point de situation avant de commencer."**
-
----
-
-## AVERTISSEMENT — Code Gemini potentiellement incomplet
-
-**Gemini CLI peut s'interrompre en pleine tache** quand son quota de tokens est
-epuise (limite quotidienne ou par minute atteinte). Cela peut arriver en cours
-de generation d'un composant React, d'un fichier CSS, ou entre deux fichiers
-d'une meme tache frontend.
-
-### Ce que tu dois faire avant de toucher au frontend
-
-1. **Ne jamais supposer que le code frontend est complet** — verifier l'etat
-   reel des fichiers sur le disque avant de construire dessus ou d'integrer
-   un composant dans le backend
-
-2. **Verifier systematiquement les fichiers frontend recemment modifies** par
-   Gemini avant de les utiliser comme reference ou base de travail
-
-3. **Signaler immediatement** si tu detectes une incoherence entre ce que
-   decrit `claude_session.md` et ce qui existe reellement dans le code frontend
-
-4. **Ne jamais supposer qu'un import React fonctionne** si le composant associe
-   a ete genere par Gemini sans confirmation de build reussi
-
-### Signes d'un fichier Gemini interrompu a detecter
-
-- Composant React sans `export default` en fin de fichier
-- Fichier CSS qui se termine sans `}` fermant
-- Cles i18n ajoutees dans `fr.json` mais absentes des 4 autres langues
-- Page creee mais route manquante dans `App.js`
-- Import declare en haut du fichier mais composant non utilise dans le JSX
-- `npm run build` qui echoue sur un fichier recemment modifie par Gemini
-
-### Protocole de verification avant integration
-
-Si tu dois integrer ou utiliser un composant recemment cree par Gemini :
-1. Lire le fichier concerne
-2. Verifier qu'il est syntaxiquement complet
-3. Si doute : demander a l'utilisateur de lancer `npm run build` pour confirmer
-4. Ne jamais supposer qu'un fichier est stable sans build reussi
 
 ---
 
 ## Instructions
 
 - **Toujours repondre en francais.** L'utilisateur est francophone.
+- Claude est responsable du **backend ET du frontend** (Gemini n'est plus utilise).
 - Consulter `docs/RAPPORT.md` pour connaitre l'etat des fonctionnalites et des tests avant de travailler sur une feature.
 - Mettre a jour `docs/RAPPORT.md` apres chaque fonctionnalite testee ou corrigee.
 - Aucune fonctionnalite n'est consideree comme terminee tant qu'elle n'a pas ete testee.
-- **OBLIGATOIRE** : Mettre a jour `claude_session.md` a la fin de chaque session et/ou etape. Ce fichier sert de memoire persistante entre les sessions Claude Code. Y noter : ce qui a ete fait, les bugs trouves/corriges, l'etat actuel, et les prochaines etapes.
-- **OBLIGATOIRE** : Lire `todo_claude.md` au demarrage et traiter les taches EN ATTENTE en priorite avant toute autre action.
-- **OBLIGATOIRE** : Ecrire dans `todo_gemini.md` quand une tache frontend doit etre deleguee a Gemini.
+- **OBLIGATOIRE** : Mettre a jour `claude_session.md` a la fin de chaque session et/ou etape.
+- **OBLIGATOIRE** : Lire `todo_claude.md` au demarrage et traiter les taches EN ATTENTE en priorite.
 
 ---
 
-## Systeme de Delegation Bidirectionnelle
+## Perimetre de Claude — Backend ET Frontend
 
-### Quand deleguer a Gemini — ecrire dans todo_gemini.md
+Claude prend en charge l'integralite du projet :
 
-Delegue a Gemini quand la tache concerne le frontend ou du code bas niveau
-que Gemini peut gerer (traductions, helpers, scripts simples).
+| Zone | Action |
+|------|--------|
+| `backend/` | Lecture + Modification (routes, models, middleware, sockets) |
+| `frontend/src/` | Lecture + Modification (pages, composants, CSS, i18n) |
+| Fichiers MD racine | Lecture + Modification |
 
-Ajoute une entree dans `todo_gemini.md` avec ce format exact :
+### Regle de decision — modele a utiliser
 
-```
-### TACHE-XXX — [TITRE COURT]
-- **Statut**   : EN ATTENTE
-- **Ajoutee**  : JJ/MM/AAAA par Claude
-- **Priorite** : HAUTE | NORMALE | BASSE
-- **Fichiers concernes** : chemin/fichier.js
-- **Description** : [Ce dont tu as besoin]
-- **Contexte** : [Pourquoi tu delegues]
-- **Resultat** : (a remplir par Gemini)
-```
-
-Puis signale a l'utilisateur : "J'ai ajoute la tache XXX dans todo_gemini.md pour Gemini."
-
-### Quand traiter todo_claude.md
-
-A chaque demarrage, lire `todo_claude.md`. Si des taches sont EN ATTENTE :
-1. Les traiter en priorite avant toute autre demande
-2. Marquer chaque tache traitee comme DONE
-3. Remplir le champ "Resultat" avec ce qui a ete fait
-4. Signaler a l'utilisateur les taches traitees
-
-### Perimetre de Gemini — lecture totale, ecriture frontend uniquement
-
-Gemini peut LIRE tout le projet (backend inclus) pour comprendre le contexte.
-Gemini ne peut MODIFIER que le frontend.
-
-| Gemini peut lire | Gemini peut modifier |
-|------------------|----------------------|
-| Tout le projet | `frontend/src/` uniquement |
-| backend/ (routes, models, config) | Fichiers MD racine |
-| Tous les fichiers MD | (rien dans backend/) |
-
-### Regle de decision — Claude ou Gemini ?
-
-```
-Besoin de LIRE du code backend ?          → Gemini le fait directement
-Besoin de MODIFIER du frontend ?          → Gemini
-Besoin de MODIFIER du backend ?           → Claude
-Detection d'un bug backend par Gemini ?   → todo_claude.md, Claude corrige
-En cas de doute sur qui fait quoi ?       → Claude prend en charge
-```
+Via `agent.js` (node agent.js <commande>) :
+- **Haiku** → Fichiers MD, i18n, taches simples ($0.000001/req)
+- **Sonnet** → Code backend courant, CSS, composants React simples ($0.01/req)
+- **Opus** → Code complexe, WebRTC, refactor, pages multi-fichiers ($0.05/req)
 
 ---
 
@@ -159,9 +83,6 @@ En cas de doute sur qui fait quoi ?       → Claude prend en charge
 - **i18n complet** : 5 langues (FR, EN, IT, DE, ES) — 22/22 fichiers integres
 - **20+ bugs corriges** + 36 warnings ESLint elimines
 - **Architecture live complete** : LiveStream (streamer) + LiveViewer (spectateur) + Socket.IO rooms + WebRTC
-- **Traduction chat live** : bouton 🌐 par message, API MyMemory (autodetect)
-- **Photos Cloudinary** : stockage persistant (plus de 404 apres redemarrage Render)
-- **CSS mobile-first** : refonte complete (22 fichiers)
 
 ---
 
@@ -169,7 +90,6 @@ En cas de doute sur qui fait quoi ?       → Claude prend en charge
 
 - **Backend** : Node.js 18+, Express 4, MongoDB (Mongoose), Socket.IO, JWT + Passport.js (Google/Facebook/Apple OAuth)
 - **Frontend** : React 18, React Router v6, Socket.IO Client, Simple-Peer (WebRTC), Framer Motion, Axios
-- **Base de donnees** : MongoDB Atlas avec Mongoose ODM
 
 ---
 
@@ -188,10 +108,10 @@ backend/
 frontend/
   src/
     App.js           # Router & routes
-    pages/           # 17+ pages (dont LiveCompetition, LiveEvent)
+    pages/           # 17+ pages
     components/      # Composants reutilisables (dont LiveStream)
     contexts/        # AuthContext.js
-    index.js
+    locales/         # fr.json en.json it.json de.json es.json
 
 docs/
   MVP.md             # Fonctionnalites MVP (checklist)
@@ -212,6 +132,15 @@ npm run dev          # nodemon server.js
 cd frontend && npm install
 npm start            # react-scripts start (port 3000)
 npm run build        # build production
+
+# Agent IA (depuis la racine)
+node agent.js help
+node agent.js read claude_session.md
+node agent.js code "tache backend" simple
+node agent.js css "description" frontend/src/components/Navigation.js
+node agent.js react "description" frontend/src/pages/Home.js
+node agent.js page "description" complex
+node agent.js i18n "description" frontend/src/pages/NomPage.js
 ```
 
 ---
@@ -242,15 +171,12 @@ npm run build        # build production
 
 | Fichier | Contenu | Priorite |
 |---------|---------|----------|
-| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles UI/UX, résumé agent.js | P1 |
-| `agent.js` | **ORCHESTRATEUR IA** — Script CLI delegant les taches aux bons modeles IA | P1 |
+| `MEMORY.md` | **MEMOIRE PERSISTANTE** — Decisions archi, regles, résumé agent.js | P1 |
+| `agent.js` | **ORCHESTRATEUR IA** — Script CLI Claude-only (Haiku/Sonnet/Opus) | P1 |
 | `claude_context.md` | **SOURCE DE VERITE** — Architecture, regles, conventions | P1 |
 | `claude_session.md` | **MEMOIRE SESSION** — Journal de session, etat actuel | P1 |
-| `gemini_session.md` | **MEMOIRE FRONTEND** — Journal Gemini, fichiers modifies | P1 |
-| `todo_claude.md` | **TACHES ENTRANTES** — Taches de Gemini pour Claude | P1 |
-| `todo_gemini.md` | **TACHES SORTANTES** — Taches de Claude pour Gemini | P1 |
+| `todo_claude.md` | **TACHES** — Backend ET frontend a traiter | P1 |
 | `CLAUDE.md` | **INSTRUCTIONS** — Ce fichier, protocole demarrage | P1 |
-| `GEMINI.md` | **INSTRUCTIONS GEMINI** — Perimetre frontend, regles Gemini | P1 |
 | `docs/RAPPORT.md` | **RAPPORT** — Suivi fonctionnalites et tests | P2 |
 | `README.md` | Vue d'ensemble du projet | P3 |
 | `ROADMAP.md` | Roadmap par phases | P3 |

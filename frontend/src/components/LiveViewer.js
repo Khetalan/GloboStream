@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import io from 'socket.io-client';
 import Peer from 'simple-peer';
@@ -9,6 +10,7 @@ import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
+import { getPhotoUrl } from '../utils/photoUrl';
 import './LiveViewer.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -31,6 +33,7 @@ const PEER_CONFIG = {
  * - user : utilisateur courant
  */
 const LiveViewer = ({ roomId, onLeave, user }) => {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
   const [remoteStream, setRemoteStream] = useState(null);
@@ -59,6 +62,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const localStreamRef = useRef(null);
   const chatRef = useRef(null);
   const hasLeftRef = useRef(false);
+  const viewersInfoRef = useRef(new Map()); // displayName → { userId, photoUrl }
 
   // Connecter Socket.IO et rejoindre le salon
   useEffect(() => {
@@ -80,10 +84,49 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Infos de la room reçues
-    socket.on('room-info', ({ viewerCount: vc, streamerName: sn }) => {
+    socket.on('room-info', ({ viewerCount: vc, streamerName: sn, viewers: initialViewers }) => {
       setViewerCount(vc);
       if (sn) setStreamerName(sn);
+      if (initialViewers) {
+        setViewers(initialViewers.map(v => ({
+          socketId: v.socketId,
+          userId: v.userId,
+          name: v.displayName,
+          photoUrl: v.photoUrl || null,
+          joinedAt: new Date().toLocaleTimeString()
+        })));
+        initialViewers.forEach(v => {
+          viewersInfoRef.current.set(v.displayName, { userId: v.userId, photoUrl: v.photoUrl });
+        });
+      }
       setConnected(true);
+    });
+
+    // Sync temps réel spectateurs — TÂCHE-015
+    socket.on('viewers-updated', ({ viewerCount: vc, viewers: viewersList }) => {
+      setViewerCount(vc);
+      setViewers(viewersList.map(v => ({
+        socketId: v.socketId,
+        userId: v.userId,
+        name: v.displayName,
+        photoUrl: v.photoUrl || null,
+        joinedAt: new Date().toLocaleTimeString()
+      })));
+      viewersList.forEach(v => {
+        viewersInfoRef.current.set(v.displayName, { userId: v.userId, photoUrl: v.photoUrl });
+      });
+    });
+
+    // Message "X a quitté le live" — TÂCHE-018
+    socket.on('live-user-left', ({ displayName }) => {
+      setMessages(prev => [...prev, {
+        id: `sys-left-${displayName}-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.userLeft', { name: displayName }),
+        isSystem: true,
+        isOwn: false,
+        photoUrl: null
+      }]);
     });
 
     // Erreur (room introuvable)
@@ -123,30 +166,35 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       }
     });
 
-    // Un nouveau viewer rejoint (pour l'affichage du chat des messages système)
+    // Un nouveau viewer rejoint
     socket.on('viewer-joined', ({ viewerSocketId, viewerInfo }) => {
       setMessages(prev => [...prev, {
         id: `sys-join-${viewerSocketId}-${Date.now()}`,
         username: 'System',
         text: t('liveStream.viewerJoined', { name: viewerInfo.displayName }),
         isSystem: true,
-        isJoinEvent: true, // Nouveau flag
+        isJoinEvent: true,
         lang: null,
         translatedText: null,
         showTranslation: false,
         translating: false,
-        isOwn: false
+        isOwn: false,
+        photoUrl: null
       }]);
-      // Ajouter à la liste des viewers
-      setViewers(prev => [...prev, {
-        socketId: viewerSocketId,
-        name: viewerInfo.displayName,
-        joinedAt: new Date().toLocaleTimeString()
-      }]);
+      // Stocker pour le chat
+      if (viewerInfo.userId) {
+        viewersInfoRef.current.set(viewerInfo.displayName, {
+          userId: viewerInfo.userId,
+          photoUrl: viewerInfo.photoUrl || null
+        });
+      }
     });
 
-    // Message chat
+    // Message chat — TÂCHE-017 : photoUrl
     socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+      const info = viewersInfoRef.current.get(username);
+      const photoUrl = info?.photoUrl || null;
+      const userId = info?.userId || null;
       setMessages(prev => [...prev, {
         id: `msg-${timestamp}-${Math.random()}`,
         username,
@@ -155,7 +203,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         translatedText: null,
         showTranslation: false,
         translating: false,
-        isOwn: false
+        isOwn: false,
+        photoUrl,
+        userId
       }]);
     });
 
@@ -493,32 +543,43 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
               </div>
             </div>
 
-            {/* Chat */}
+            {/* Chat — TÂCHE-017 : photo spectateur */}
             <div className="lv-chat-section" ref={chatRef}>
               {messages.map((msg) => (
                 <div key={msg.id} className={`lv-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''}`}>
-                  <div className="lv-chat-body">
-                    <span className="lv-chat-username">{msg.username} :</span>
-                    <span className="lv-chat-text">{msg.text}</span>
-                    <div className="lv-chat-icons">
-                      {msg.lang && <span className="lv-lang-badge">{msg.lang.toUpperCase()}</span>}
-                      {!msg.isSystem && (
-                        <button
-                          className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
-                          onClick={() => handleTranslateMsg(msg.id)}
-                          title={t('liveViewer.translate')}
-                        >
-                          🌐
-                        </button>
+                  {!msg.isSystem && (
+                    <div className="lv-chat-avatar">
+                      {msg.photoUrl ? (
+                        <img src={getPhotoUrl(msg.photoUrl)} alt={msg.username} />
+                      ) : (
+                        <div className="lv-chat-avatar-initials">{(msg.username || '?').charAt(0).toUpperCase()}</div>
                       )}
                     </div>
+                  )}
+                  <div className="lv-chat-content">
+                    <div className="lv-chat-body">
+                      <span className="lv-chat-username">{msg.username} :</span>
+                      <span className="lv-chat-text">{msg.text}</span>
+                      <div className="lv-chat-icons">
+                        {msg.lang && <span className="lv-lang-badge">{msg.lang.toUpperCase()}</span>}
+                        {!msg.isSystem && (
+                          <button
+                            className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
+                            onClick={() => handleTranslateMsg(msg.id)}
+                            title={t('liveViewer.translate')}
+                          >
+                            🌐
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {msg.showTranslation && msg.translatedText && (
+                      <div className="lv-translated-text">🌐 {msg.translatedText}</div>
+                    )}
+                    {msg.showTranslation && !msg.translatedText && !msg.translating && (
+                      <div className="lv-translated-text">✓ {t('liveViewer.alreadyYourLang')}</div>
+                    )}
                   </div>
-                  {msg.showTranslation && msg.translatedText && (
-                    <div className="lv-translated-text">🌐 {msg.translatedText}</div>
-                  )}
-                  {msg.showTranslation && !msg.translatedText && !msg.translating && (
-                    <div className="lv-translated-text">✓ {t('liveViewer.alreadyYourLang')}</div>
-                  )}
                 </div>
               ))}
             </div>
@@ -612,9 +673,17 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
             </div>
             <div className="lv-stats-list">
               {viewers.map((v, i) => (
-                <div key={i} className="lv-stats-row">
+                <div
+                  key={i}
+                  className={`lv-stats-row ${v.userId ? 'clickable' : ''}`}
+                  onClick={() => v.userId && navigate(`/profile/${v.userId}`)}
+                >
                   <div className="lv-stats-row-left">
-                    <div className="lv-stats-avatar">{v.name.charAt(0)}</div>
+                    {v.photoUrl ? (
+                      <img src={getPhotoUrl(v.photoUrl)} alt={v.name} className="lv-stats-avatar-img" />
+                    ) : (
+                      <div className="lv-stats-avatar">{v.name.charAt(0)}</div>
+                    )}
                     <div>
                       <div className="lv-stats-name">{v.name}</div>
                       <div className="lv-stats-badge">{v.joinedAt}</div>
