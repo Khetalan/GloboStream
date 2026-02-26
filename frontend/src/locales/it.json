@@ -363,8 +363,8 @@
     "competitionFeature2": "Classifiche dal vivo",
     "competitionFeature3": "Premi e ricompense",
     "competitionFeature4": "Voto del pubblico",
-    "eventTitle": "Live Evento",
-    "eventDesc": "Eventi speciali e serate a tema",
+    "eventTitle": "Tematiche",
+    "eventDesc": "Live attorno a un tema comune",
     "eventFeature1": "Serate a tema",
     "eventFeature2": "Speed dating collettivo",
     "eventFeature3": "Eventi esclusivi",
@@ -678,7 +678,7 @@
   },
   "app": {
     "competition": "Live Competizione",
-    "event": "Live Evento",
+    "event": "Tematiche",
     "comingSoon": "Prossimamente"
   },
   "languages": {

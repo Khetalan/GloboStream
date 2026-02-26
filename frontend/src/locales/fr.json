@@ -361,8 +361,8 @@
     "competitionFeature2": "Classements live",
     "competitionFeature3": "Prix et récompenses",
     "competitionFeature4": "Votes du public",
-    "eventTitle": "Live Événementiel",
-    "eventDesc": "Événements spéciaux et soirées thématiques",
+    "eventTitle": "Thématiques",
+    "eventDesc": "Lives autour d'un thème commun",
     "eventFeature1": "Soirées à thème",
     "eventFeature2": "Speed dating collectif",
     "eventFeature3": "Événements exclusifs",
@@ -676,7 +676,7 @@
   },
   "app": {
     "competition": "Live de Compétition",
-    "event": "Live Événementiel",
+    "event": "Thématiques",
     "comingSoon": "Bientôt disponible"
   },
   "languages": {

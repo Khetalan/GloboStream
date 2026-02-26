@@ -363,8 +363,8 @@
     "competitionFeature2": "Live rankings",
     "competitionFeature3": "Prizes and rewards",
     "competitionFeature4": "Audience voting",
-    "eventTitle": "Event Live",
-    "eventDesc": "Special events and themed parties",
+    "eventTitle": "Thematics",
+    "eventDesc": "Lives around a shared theme",
     "eventFeature1": "Themed parties",
     "eventFeature2": "Group speed dating",
     "eventFeature3": "Exclusive events",
@@ -678,7 +678,7 @@
   },
   "app": {
     "competition": "Competition Live",
-    "event": "Event Live",
+    "event": "Thematics",
     "comingSoon": "Coming soon"
   },
   "languages": {
