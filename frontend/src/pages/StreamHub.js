@@ -75,22 +75,6 @@ const StreamHub = () => {
       stats: liveStats.public
     },
     {
-      id: 'competition',
-      title: t('streamHub.competitionTitle'),
-      icon: BsFillTrophyFill,
-      description: t('streamHub.competitionDesc'),
-      gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)',
-      features: [
-        t('streamHub.competitionFeature1'),
-        t('streamHub.competitionFeature2'),
-        t('streamHub.competitionFeature3'),
-        t('streamHub.competitionFeature4')
-      ],
-      path: '/stream/competition',
-      badge: t('streamHub.soon'),
-      stats: liveStats.competition
-    },
-    {
       id: 'event',
       title: t('streamHub.eventTitle'),
       icon: FiCalendar,
@@ -105,6 +89,22 @@ const StreamHub = () => {
       path: '/stream/event',
       badge: t('streamHub.premiumBadge'),
       stats: liveStats.event
+    },
+    {
+      id: 'competition',
+      title: t('streamHub.competitionTitle'),
+      icon: BsFillTrophyFill,
+      description: t('streamHub.competitionDesc'),
+      gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+      features: [
+        t('streamHub.competitionFeature1'),
+        t('streamHub.competitionFeature2'),
+        t('streamHub.competitionFeature3'),
+        t('streamHub.competitionFeature4')
+      ],
+      path: '/stream/competition',
+      badge: t('streamHub.soon'),
+      stats: liveStats.competition
     }
   ];
 
