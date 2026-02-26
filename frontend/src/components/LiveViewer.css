@@ -7,12 +7,13 @@
   display: flex;
   flex-direction: column;
   height: 100dvh;
-  max-width: 100%;
+  max-width: 768px;
   width: 100%;
+  margin: 0 auto;
   overflow: hidden;
   position: relative;
   background-color: #0a0a0a;
-  color: #fff; 
+  color: #fff;
 }
 
 /* Centrage Mobile First sur Desktop */
@@ -203,6 +204,8 @@
 }
 
 /* ── Preview locale (participant) ─────────────────────────── */
+/* Doit être un enfant direct de .lv-container (hors .lv-video-section)  */
+/* pour que z-index: 15 s'applique dans le bon contexte d'empilement.    */
 .lv-local-preview {
   position: absolute;
   bottom: 12px;
@@ -211,11 +214,11 @@
   height: 140px;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Bordure subtile pour glassmorphism */
-  z-index: 10;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Ombre plus prononcée */
-  -webkit-backdrop-filter: blur(5px); /* Glassmorphism pour compatibilité */
-  backdrop-filter: blur(5px); /* Glassmorphism */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 15;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
 }
 
 .lv-local-video {

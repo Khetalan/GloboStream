@@ -261,13 +261,67 @@ const Matches = () => {
               </div>
 
               <div className="modal-body">
+
+                {/* Détails : genre, taille, pays, occupation */}
                 <div className="modal-section">
-                  <h4>{t('profile.about')}</h4>
-                  <p>{selectedProfile.bio || t('profile.noBio')}</p>
+                  <div className="modal-details-row">
+                    {selectedProfile.gender && (
+                      <span className="modal-detail-chip">
+                        {selectedProfile.gender === 'homme' ? '♂' : selectedProfile.gender === 'femme' ? '♀' : '⚧'} {selectedProfile.gender}
+                      </span>
+                    )}
+                    {selectedProfile.height && (
+                      <span className="modal-detail-chip">📏 {selectedProfile.height} cm</span>
+                    )}
+                    {selectedProfile.location?.country && (
+                      <span className="modal-detail-chip">🌍 {selectedProfile.location.country}</span>
+                    )}
+                    {selectedProfile.occupation && (
+                      <span className="modal-detail-chip">💼 {selectedProfile.occupation}</span>
+                    )}
+                    {selectedProfile.lookingFor && (
+                      <span className="modal-detail-chip">
+                        {selectedProfile.lookingFor === 'relation-serieuse' ? '💍 Relation sérieuse'
+                          : selectedProfile.lookingFor === 'rencontre-casual' ? '😊 Rencontres'
+                          : selectedProfile.lookingFor === 'amitie' ? '🤝 Amitié'
+                          : '🤷 Pas encore sûr'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
+                {/* Bio */}
+                <div className="modal-section">
+                  <h4>{t('profile.about')}</h4>
+                  <p className="modal-bio">{selectedProfile.bio || t('profile.noBio')}</p>
+                </div>
+
+                {/* Centres d'intérêt */}
+                {selectedProfile.interests?.length > 0 && (
+                  <div className="modal-section">
+                    <h4>{t('profile.interests') || 'Centres d\'intérêt'}</h4>
+                    <div className="modal-chips">
+                      {selectedProfile.interests.map((interest, i) => (
+                        <span key={i} className="modal-chip">{interest}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Langues */}
+                {selectedProfile.languages?.length > 0 && (
+                  <div className="modal-section">
+                    <h4>{t('profile.languages') || 'Langues'}</h4>
+                    <div className="modal-chips">
+                      {selectedProfile.languages.map((lang, i) => (
+                        <span key={i} className="modal-chip">🗣 {lang}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="modal-actions">
-                  <button 
+                  <button
                     className="modal-action-btn primary"
                     onClick={() => {
                       handleStartChat(selectedProfile.id || selectedProfile._id);
@@ -276,7 +330,7 @@ const Matches = () => {
                   >
                     <FiMessageCircle /> {t('matches.startChat')}
                   </button>
-                  <button 
+                  <button
                     className="modal-action-btn secondary"
                     onClick={() => navigate(`/profile/${selectedProfile.id || selectedProfile._id}`)}
                   >

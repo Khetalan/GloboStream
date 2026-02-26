@@ -253,9 +253,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         peerRef.current = null;
       }
 
-      // Créer un nouveau peer bidirectionnel (envoyer + recevoir)
+      // Créer un nouveau peer bidirectionnel — participant est l'initiateur
+      // (caméra prête ici, on peut envoyer l'offre immédiatement au streamer)
       const peer = new Peer({
-        initiator: false,
+        initiator: true,
         config: PEER_CONFIG,
         stream: stream
       });
@@ -445,19 +446,20 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           </div>
         )}
 
-        {/* Preview locale si participant */}
-        {isParticipant && localStream && (
-          <div className="lv-local-preview">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="lv-local-video"
-            />
-          </div>
-        )}
       </div>
+
+      {/* Preview locale si participant — en dehors de lv-video-section pour z-index correct */}
+      {isParticipant && localStream && (
+        <div className="lv-local-preview">
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+            className="lv-local-video"
+          />
+        </div>
+      )}
 
       <AnimatePresence>
         {isUiVisible && (

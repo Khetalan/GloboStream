@@ -457,11 +457,12 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     }
 
     // Créer un peer bidirectionnel avec le participant
+    // Le participant sera l'initiateur (après getUserMedia) — streamer attend son offre
     const stream = localStreamRef.current;
     if (!stream) return;
 
     const peer = new Peer({
-      initiator: true,
+      initiator: false,
       config: PEER_CONFIG,
       stream: stream
     });

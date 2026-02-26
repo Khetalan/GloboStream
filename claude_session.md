@@ -1388,8 +1388,8 @@ backend/socketHandlers/liveRoom.js
 ## Session 17 : LivePublic FAB + MEMORY.md + Apple OAuth fix (25 Février 2026)
 **Date** : 25 Février 2026
 **Branche** : `claude-work`
-**Commits** : `1e2bab9`, `fc651ef`, `73d8f57` + commit passport.js (à faire)
-**Status** : En cours → déploiement final
+**Commits** : `1e2bab9`, `fc651ef`, `73d8f57`, `6ac5c40` → mergé dans `main` (`252dc40`)
+**Status** : Terminé ✅ — Déployé en production
 
 ### Ce qui a été fait
 
@@ -1450,12 +1450,15 @@ backend/socketHandlers/liveRoom.js
 1e2bab9  feat(LivePublic): FAB button, 2-col grid, functional favorites backend
 fc651ef  feat: MEMORY.md, no-zoom viewport, 768px layout cap (8 CSS files)
 73d8f57  fix: agent.md → agent.js reference in MEMORY.md, CLAUDE.md, GEMINI.md
-[à faire] fix(auth): Apple OAuth — use idToken.sub + email check before creation
+6ac5c40  fix(auth): Apple OAuth — use idToken.sub + email check before creation
+252dc40  Merge claude-work → main (Session 17 complet)
 ```
 
+### Déploiement
+- **Backend** : Push `main` → Render redéploie automatiquement ✅
+- **Frontend** : `npm run deploy` → GitHub Pages [https://khetalan.github.io/GloboStream/](https://khetalan.github.io/GloboStream/) ✅ Published
+
 ### Prochaines actions
-- 📋 Committer le fix passport.js
-- 📋 Merger claude-work → main + git push origin main
-- 📋 npm run deploy (frontend GitHub Pages)
+- 📋 Aucune tâche en attente — projet à jour
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
