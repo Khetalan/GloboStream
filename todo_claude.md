@@ -7,7 +7,12 @@
 
 ## Tâches en attente
 
-Aucune tâche backend en attente actuellement.
+### TÂCHE-021 — LiveCompetition + LiveEvent : Bouton Démarrer centré (style Live Publique)
+- **Statut**   : EN ATTENTE (pages pas encore créées)
+- **Ajoutée**  : 26/02/2026
+- **Priorité** : BASSE
+- **Fichiers concernés** : `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveEvent.js` (à créer)
+- **Description** : Quand les pages LiveCompetition et LiveEvent seront créées, leur ajouter un bouton "Démarrer" avec le même style que le FAB de LivePublic (centré, position fixed, bottom 80px, padding 16px/32px, font 1.05rem, border-radius 50px). Utiliser la couleur propre à chaque mode (pas le rouge #e4405f). Ne pas mettre de bouton fixe dans le StreamHub.
 
 ---
 
