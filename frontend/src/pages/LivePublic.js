@@ -252,6 +252,14 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
   const { t } = useTranslation();
   const primaryPhoto = stream.streamer.photos?.find(p => p.isPrimary) || stream.streamer.photos?.[0];
 
+  // Calcul de l'âge si birthDate disponible
+  const age = stream.streamer.birthDate
+    ? Math.floor((Date.now() - new Date(stream.streamer.birthDate)) / 31557600000)
+    : null;
+
+  const displayName = stream.streamer.displayName || stream.streamer.firstName || '?';
+  const nameAge = age ? `${displayName}, ${age}` : displayName;
+
   return (
     <div className="stream-card" onClick={() => onJoin(stream._id)}>
       {/* Thumbnail avec preview live */}
@@ -259,24 +267,26 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
         {stream.thumbnail ? (
           <img src={getPhotoUrl(stream.thumbnail)} alt={stream.title} />
         ) : primaryPhoto ? (
-          <img src={getPhotoUrl(primaryPhoto.url)} alt={stream.streamer.displayName} />
+          <img src={getPhotoUrl(primaryPhoto.url)} alt={displayName} />
         ) : (
           <div className="placeholder-thumbnail">
             <FiPlay size={60} />
           </div>
         )}
-        
+
         {/* Badge LIVE */}
         <div className="live-badge">
           <span className="live-dot"></span>
           {t('livePublic.live')}
         </div>
 
-        {/* Nombre de spectateurs */}
-        <div className="viewers-count">
-          <FiEye />
-          <span>{stream.viewersCount || 0}</span>
-        </div>
+        {/* Spectateurs — masqué si 0 */}
+        {stream.viewersCount > 0 && (
+          <div className="viewers-count">
+            <FiEye />
+            <span>{stream.viewersCount}</span>
+          </div>
+        )}
 
         {/* Durée du live */}
         {stream.duration && (
@@ -286,30 +296,41 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
         )}
       </div>
 
-      {/* Informations */}
+      {/* Informations compactes : photo agrandie + nom/âge/viewers/timer */}
       <div className="stream-info">
         <div className="streamer-row">
           <div className="streamer-avatar">
             {primaryPhoto ? (
-              <img src={getPhotoUrl(primaryPhoto.url)} alt={stream.streamer.displayName} />
+              <img src={getPhotoUrl(primaryPhoto.url)} alt={displayName} />
             ) : (
               <div className="avatar-placeholder">
-                {(stream.streamer.displayName || stream.streamer.firstName || '?').charAt(0)}
+                {displayName.charAt(0)}
               </div>
             )}
           </div>
 
           <div className="streamer-details">
-            <h3 className="stream-title">{stream.title || t('livePublic.untitled')}</h3>
             <p className="streamer-name">
-              {stream.streamer.displayName || stream.streamer.firstName}
+              {nameAge}
               {stream.streamer.isVerified && (
                 <span className="verified-badge">✓</span>
               )}
             </p>
+            <div className="stream-meta">
+              {stream.viewersCount > 0 && (
+                <span className="meta-viewers">
+                  <FiEye size={11} /> {stream.viewersCount}
+                </span>
+              )}
+              {stream.duration && (
+                <span className="meta-timer">
+                  {formatDuration(stream.duration)}
+                </span>
+              )}
+            </div>
           </div>
 
-          <button 
+          <button
             className={`favorite-btn ${stream.isFavorite ? 'active' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -319,23 +340,6 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
             <FiHeart />
           </button>
         </div>
-
-        {/* Tags */}
-        {stream.tags && stream.tags.length > 0 && (
-          <div className="stream-tags">
-            {stream.tags.slice(0, 3).map((tag, index) => (
-              <span key={index} className="stream-tag">{tag}</span>
-            ))}
-          </div>
-        )}
-
-        {/* Distance */}
-        {stream.distance && (
-          <div className="stream-distance">
-            <FiMapPin />
-            <span>{stream.distance < 1 ? t('livePublic.lessThan1km') : `${Math.round(stream.distance)} ${t('common.km')}`}</span>
-          </div>
-        )}
       </div>
     </div>
   );

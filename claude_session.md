@@ -1388,8 +1388,8 @@ backend/socketHandlers/liveRoom.js
 ## Session 17 : LivePublic FAB + MEMORY.md + Apple OAuth fix (25 Février 2026)
 **Date** : 25 Février 2026
 **Branche** : `claude-work`
-**Commits** : `1e2bab9`, `fc651ef`, `73d8f57` + commit passport.js (à faire)
-**Status** : En cours → déploiement final
+**Commits** : `1e2bab9`, `fc651ef`, `73d8f57`, `6ac5c40` → mergé dans `main` (`252dc40`)
+**Status** : Terminé ✅ — Déployé en production
 
 ### Ce qui a été fait
 
@@ -1450,12 +1450,86 @@ backend/socketHandlers/liveRoom.js
 1e2bab9  feat(LivePublic): FAB button, 2-col grid, functional favorites backend
 fc651ef  feat: MEMORY.md, no-zoom viewport, 768px layout cap (8 CSS files)
 73d8f57  fix: agent.md → agent.js reference in MEMORY.md, CLAUDE.md, GEMINI.md
-[à faire] fix(auth): Apple OAuth — use idToken.sub + email check before creation
+6ac5c40  fix(auth): Apple OAuth — use idToken.sub + email check before creation
+252dc40  Merge claude-work → main (Session 17 complet)
 ```
 
+### Déploiement
+- **Backend** : Push `main` → Render redéploie automatiquement ✅
+- **Frontend** : `npm run deploy` → GitHub Pages [https://khetalan.github.io/GloboStream/](https://khetalan.github.io/GloboStream/) ✅ Published
+
 ### Prochaines actions
-- 📋 Committer le fix passport.js
-- 📋 Merger claude-work → main + git push origin main
-- 📋 npm run deploy (frontend GitHub Pages)
+- 📋 Aucune tâche en attente — projet à jour
+
+---
+
+## Session 19 : Frontend complet — TÂCHE-010 à TÂCHE-020 (toutes terminées)
+**Date** : 26 Février 2026
+**Branche** : `claude-work`
+**Status** : Toutes les tâches frontend ex-Gemini complétées ✅
+
+### Contexte
+- Gemini retiré du projet, Claude prend en charge tout le frontend
+- 11 tâches transférées de `todo_gemini.md` vers `todo_claude.md`
+- agent.js réécrit en v3.0 (Claude-only : Haiku/Sonnet/Opus)
+
+### Tâches accomplies
+
+#### TÂCHE-010 — Live Surprise : Bouton Message + panel envoi
+- FiMessageCircle dans la bottom bar → slide-up panel avec textarea 300 chars
+- `POST /api/message-requests/send/:userId` via axios, confirmation verte 2s
+
+#### TÂCHE-011 — Live Surprise : Compteur participants en ligne
+- Listener `surprise-user-count { count }` → badge "🔴 X en ligne" sur écrans start et searching
+
+#### TÂCHE-012 — StreamHub : Bouton Démarrer centré + plus gros
+- `.btn-start-live-fixed` : position fixed, bottom 80px, centré, padding 16px 32px, border-radius 50px
+
+#### TÂCHE-013 — StreamHub : Streamers + Spectateurs par catégorie
+- Backend déjà prêt (format détaillé `{ streamers, viewers, total }`)
+- Frontend adapté : "X streamers · Y spectateurs" dans le footer des cartes
+
+#### TÂCHE-014 — Live Publique : Carte Streamer redesign
+- StreamCard : avatar 36px → 52px, tags/distance supprimés, viewers cachés si 0, âge calculé depuis birthDate
+
+#### TÂCHE-015 — Interface Live : Badge spectateurs temps réel
+- Listener `viewers-updated` dans LiveStream.js et LiveViewer.js
+- Sync viewerCount + liste viewers avec photoUrl et userId
+
+#### TÂCHE-016 — Interface Live : Clic spectateur → profil
+- useNavigate ajouté dans LiveStream et LiveViewer
+- Rows dans le panel stats cliquables → `/profile/:userId`
+
+#### TÂCHE-017 — Interface Live : Photo spectateur dans chat
+- `viewersInfoRef` Map (displayName → { userId, photoUrl })
+- Avatar 28px (`.ls-chat-avatar` / `.lv-chat-avatar`) dans chaque message non-système
+
+#### TÂCHE-018 — Interface Live : Message "X a quitté le live"
+- Listener `live-user-left { displayName }` → message système dans les deux composants
+- Clé i18n `liveStream.userLeft` dans 5 langues
+
+#### TÂCHE-019 — Live Surprise : Panel filtres + timeout
+- Bouton "Filtres" toggle → AnimatePresence panel (pays + âge min/max)
+- `handleStart` passe les filtres à `join-surprise-queue` et `start-search`
+- Listener `surprise-search-timeout` → banner "Élargir la recherche mondiale"
+- Clés i18n dans 5 langues
+
+#### TÂCHE-020 — Live Surprise : Toggle micro + caméra
+- Déjà implémenté dans la session précédente (toggleMic/toggleCam dans la bottom bar)
+
+### Fichiers modifiés
+- `frontend/src/pages/StreamHub.js` + `StreamHub.css`
+- `frontend/src/pages/LivePublic.js` + `LivePublic.css`
+- `frontend/src/pages/LiveSurprise.js` + `LiveSurprise.css`
+- `frontend/src/components/LiveStream.js` + `LiveStream.css`
+- `frontend/src/components/LiveViewer.js` + `LiveViewer.css`
+- `frontend/src/locales/fr.json` + `en.json` + `it.json` + `de.json` + `es.json`
+- `todo_claude.md` (TÂCHE-012 à 020 marquées DONE)
+
+### Prochaines actions
+- 📋 Commit sur `claude-work`
+- 📋 Tester les modifications (build + naviguer dans les pages)
+- 📋 Mettre à jour `docs/RAPPORT.md`
+- 📋 Merger `claude-work → main` si validé
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.

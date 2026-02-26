@@ -59,8 +59,9 @@
   font-size: 0.8rem;
   font-weight: 600;
   border-radius: 8px;
-  flex: 1 1 auto;        /* grandit depuis la taille du contenu */
-  min-width: fit-content; /* jamais plus petit que le texte */
+  flex: 0 0 auto;         /* ne grandit pas au-delà du contenu */
+  width: fit-content;     /* taille = contenu texte uniquement */
+  min-width: fit-content;
   white-space: nowrap;
   text-align: center;
   cursor: pointer;
@@ -240,9 +241,11 @@
 .profile-modal-card {
   width: 100%;
   max-width: 360px;
+  max-height: 85dvh;
   background: var(--color-card);
   border-radius: 24px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
@@ -300,11 +303,58 @@
   padding: 20px;
 }
 
+.modal-section {
+  margin-bottom: 16px;
+}
+
 .modal-section h4 {
   color: var(--color-text-secondary);
   font-size: 0.8rem;
   text-transform: uppercase;
   margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.modal-bio {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Chips pour détails (genre, taille, pays…) */
+.modal-details-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.modal-detail-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+/* Chips pour intérêts et langues */
+.modal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.modal-chip {
+  background: rgba(228, 64, 95, 0.1);
+  border: 1px solid rgba(228, 64, 95, 0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: var(--color-primary);
+  white-space: nowrap;
 }
 
 .modal-actions {
@@ -334,6 +384,104 @@
 .modal-action-btn.secondary {
   background: rgba(255,255,255,0.1);
   color: white;
+}
+
+/* Bouton Like (rouge/rose) */
+.modal-action-btn.like {
+  background: linear-gradient(135deg, #e4405f, #c1294a);
+  color: white;
+}
+
+.modal-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Conteneur du bouton Message + post-it */
+.modal-message-btn-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.modal-message-btn-wrap .modal-action-btn {
+  width: 100%;
+}
+
+/* Post-it "Envoyé ✓" dans la modale */
+.modal-postit-sent {
+  position: absolute;
+  top: -18px;
+  right: -6px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  padding: 5px 10px;
+  border-radius: 4px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3), inset 0 -2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #333;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.modal-postit-sent svg {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* Formulaire inline d'envoi de message */
+.modal-message-form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-message-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: var(--color-text);
+  font-size: 0.88rem;
+  padding: 10px 12px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.modal-message-textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.modal-message-textarea::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
+.modal-form-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-form-btns .modal-action-btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.85rem;
+}
+
+/* Bouton Voir profil (pleine largeur en bas de modale) */
+.modal-view-profile {
+  margin-top: 8px;
+}
+
+.modal-view-profile .modal-action-btn {
+  width: 100%;
 }
 
 .no-matches {

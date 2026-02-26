@@ -69,7 +69,8 @@
 /* ── Request Card ─────────────────────────────────────────── */
 .request-card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-start;
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid var(--border);
@@ -205,13 +206,13 @@
 /* ── Actions ──────────────────────────────────────────────── */
 .request-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
   margin-top: 4px;
 }
 
 .btn-action {
-  width: 100%;
+  flex: 1;
   min-height: 44px;
   padding: 10px 16px;
   border-radius: var(--radius-sm);

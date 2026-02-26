@@ -15,10 +15,10 @@ const StreamHub = () => {
   const { t } = useTranslation();
   const socketRef = useRef(null);
   const [liveStats, setLiveStats] = useState({
-    surprise: 0,
-    public: 0,
-    competition: 0,
-    event: 0
+    surprise:    { streamers: 0, viewers: 0, total: 0 },
+    public:      { streamers: 0, viewers: 0, total: 0 },
+    competition: { streamers: 0, viewers: 0, total: 0 },
+    event:       { streamers: 0, viewers: 0, total: 0 }
   });
 
   useEffect(() => {
@@ -56,7 +56,7 @@ const StreamHub = () => {
       ],
       path: '/stream/surprise',
       badge: t('streamHub.hot'),
-      activeUsers: liveStats.surprise
+      stats: liveStats.surprise
     },
     {
       id: 'public',
@@ -72,7 +72,7 @@ const StreamHub = () => {
       ],
       path: '/stream/live',
       badge: t('streamHub.new'),
-      activeUsers: liveStats.public
+      stats: liveStats.public
     },
     {
       id: 'competition',
@@ -88,7 +88,7 @@ const StreamHub = () => {
       ],
       path: '/stream/competition',
       badge: t('streamHub.soon'),
-      activeUsers: liveStats.competition
+      stats: liveStats.competition
     },
     {
       id: 'event',
@@ -104,7 +104,7 @@ const StreamHub = () => {
       ],
       path: '/stream/event',
       badge: t('streamHub.premiumBadge'),
-      activeUsers: liveStats.event
+      stats: liveStats.event
     }
   ];
 
@@ -131,7 +131,7 @@ const StreamHub = () => {
             <div className="stat-item">
               <FiUsers className="stat-icon" />
               <div className="stat-info">
-                <strong>{Object.values(liveStats).reduce((a, b) => a + b, 0)}</strong>
+                <strong>{Object.values(liveStats).reduce((sum, s) => sum + (s.total || 0), 0)}</strong>
                 <span>{t('streamHub.onlineNow')}</span>
               </div>
             </div>
@@ -154,6 +154,15 @@ const StreamHub = () => {
             />
           ))}
         </div>
+
+        {/* Bouton fixe Démarrer un live — TÂCHE-012 */}
+        <button
+          className="btn-start-live-fixed"
+          onClick={() => navigate('/stream/surprise')}
+        >
+          <FiVideo size={22} />
+          {t('streamHub.startLive')}
+        </button>
 
         <div className="info-banner">
           <FiClock />
@@ -204,7 +213,15 @@ const SectionCard = ({ section, onSelect }) => {
       <div className="card-footer">
         <div className="active-users">
           <FiUsers />
-          <span>{section.activeUsers} {t('streamHub.online')}</span>
+          {section.stats.streamers > 0 || section.stats.viewers > 0 ? (
+            <span className="stats-detail">
+              <span>{section.stats.streamers} {t('streamHub.streamers')}</span>
+              <span className="stats-dot">·</span>
+              <span>{section.stats.viewers} {t('streamHub.viewers')}</span>
+            </span>
+          ) : (
+            <span>{t('streamHub.noOne')}</span>
+          )}
         </div>
         <button className="btn-card-action">
           {t('streamHub.join')}
