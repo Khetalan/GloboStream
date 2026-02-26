@@ -201,11 +201,14 @@
 | LiveStream - clic spectateur → profil | Oui | ✅ Implémenté | `LiveStream.js`, `LiveViewer.js` |
 | LiveStream - message "X a quitté" | Oui | ✅ Implémenté | `LiveStream.js`, `LiveViewer.js` |
 | StreamHub - hub central | Oui | ✅ Amélioré | `StreamHub.js` + `StreamHub.css` |
-| StreamHub - bouton démarrer fixe | Oui | ✅ Implémenté | `StreamHub.js` (position: fixed) |
+| StreamHub - bouton démarrer fixe | Non | ✅ Retiré (n'avait pas sa place ici) | `StreamHub.js` (supprimé — FAB dans chaque page live) |
 | StreamHub - stats streamers + viewers | Oui | ✅ Implémenté | `StreamHub.js` (format détaillé) |
 | StreamHub - stats temps réel Socket.IO | Oui | OK (backend + frontend) | `liveRoom.js` + `stream.js` + `StreamHub.js` |
 | LiveCompetition page | Oui | Frontend non testé | `frontend/src/pages/LiveCompetition.js` |
-| LiveEvent page | Oui | Frontend non testé | `frontend/src/pages/LiveEvent.js` |
+| LiveEvent (ex-Événement) → Thématiques | Oui | Frontend non testé | `frontend/src/pages/LiveEvent.js` |
+| LiveStream - watermark anti-capture | Oui | ✅ Implémenté | `LiveStream.js`, `LiveStream.css` |
+| LiveViewer - watermark anti-capture | Oui | ✅ Implémenté | `LiveViewer.js`, `LiveViewer.css` |
+| LivePublic - FAB centré + repositionné | Oui | ✅ Implémenté | `LivePublic.js`, `LivePublic.css` |
 | Favoris live | Partiel | Non testé | `backend/routes/live.js` (non persisté) |
 | Vues/viewers dans room-info (backend) | Oui | OK | `liveRoom.js` (viewers[] avec photoUrl) |
 
@@ -281,6 +284,9 @@
 | Responsive design | Oui | ✅ OK (3 tailles) | Tous les fichiers CSS |
 | Animations Framer Motion | Oui | ✅ OK (visuel) | Pages avec animations |
 | Toast notifications | Oui | ✅ OK (visuel) | react-hot-toast |
+| Page légale (CGU/Confidentialité/Mentions) | Oui | ✅ Implémentée | `frontend/src/pages/Legal.js`, `Legal.css` |
+| Modale consentement RGPD (1er visit) | Oui | ✅ Implémentée | `frontend/src/components/ConsentModal.js`, `ConsentModal.css` |
+| Liens légaux dans Settings | Oui | ✅ Implémentés | `frontend/src/pages/Settings.js` |
 
 ### Tests visuels effectués (Chrome MCP) — 15 pages testées ✅
 - [x] `/` Landing page -> affichage parfait, hero, CTA, maquette téléphone
@@ -348,13 +354,44 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
 - `liveSurprise.online`, `filters`, `filterCountry`, `filterCountryPlaceholder`, `filterAge`, `timeoutMsg`, `expandSearch` — panel filtres + timeout
 - `liveSurprise.sendMessage`, `messageTo`, `messagePlaceholder`, `send`, `sending`, `messageSent` — bouton Message
 
+### Nouvelles clés ajoutées (Session 20)
+- `app.event` renommé → "Thématiques" / "Thematics" / "Tematici" / "Themen" / "Temáticos"
+- `streamHub.eventTitle`, `eventDesc` mis à jour dans 5 langues
+- `legal.title`, `tabCgu`, `tabPrivacy`, `tabMentions`, `back`, `settingsSection`, `cguLink`, `privacyLink`, `mentionsLink` — intégration légale RGPD (9 clés × 5 langues)
+
 ### Build production i18n
 - ✅ Build réussi : 246 KB JS + 20 KB CSS gzippés (+3.8 KB JS / +1.4 KB CSS par rapport à avant Session 19)
 - 0 erreur, 3 warnings pré-existants (App.js, Matches.js, Profile.js — sans rapport avec i18n)
 
 ---
 
-## 9. ÉLÉMENTS MANQUANTS (code non écrit)
+## 9. RGPD & CONFORMITÉ LÉGALE
+
+| Fonctionnalité | Code | État | Fichiers |
+|---|---|---|---|
+| Conditions Générales d'Utilisation (CGU) | Oui | ✅ Rédigées (placeholders) | `frontend/src/pages/Legal.js` (onglet CGU) |
+| Politique de confidentialité | Oui | ✅ Rédigée (placeholders) | `frontend/src/pages/Legal.js` (onglet Confidentialité) |
+| Mentions légales | Oui | ✅ Rédigées (placeholders) | `frontend/src/pages/Legal.js` (onglet Mentions) |
+| Modale de consentement (1er visit) | Oui | ✅ Implémentée | `ConsentModal.js` — localStorage `globostream_consent_v1` |
+| Liens légaux depuis les Paramètres | Oui | ✅ Implémentés | `Settings.js` — section "Informations légales" |
+| Route publique `/legal` | Oui | ✅ Implémentée | `App.js` (accessible sans authentification) |
+| Watermark anti-capture flux vidéo | Oui | ✅ Implémenté | `LiveStream.js`, `LiveViewer.js` |
+| Vérification âge (18+) | Partiel | ⚠️ Mention dans ConsentModal uniquement | Pas de vérification réelle en DB |
+| Droit à l'oubli (suppression compte) | Partiel | Bouton dans Settings (Danger Zone) | Backend : endpoint delete account à vérifier |
+| Export données personnelles | Non | Non implémenté | Phase 2 |
+| Signalements (reports) | Non | Non implémenté | Phase 2 |
+| Cookies / tracking | Non | Pas de cookies tiers actuellement | N/A pour l'instant |
+
+### Notes légales
+- Éditeur : personne physique (pas de SIRET ni numéro TVA)
+- Hébergement frontend : GitHub Pages (`khetalan.github.io/GloboStream`)
+- Hébergement backend : Render (`globostream.onrender.com`)
+- Placeholders à remplacer : `[NOM_ÉDITEUR]`, `[EMAIL_CONTACT]` dans `Legal.js`
+- Consentement persisté côté client uniquement (localStorage) — pas de trace serveur
+
+---
+
+## 10. ÉLÉMENTS MANQUANTS (code non écrit)
 
 | Fonctionnalité | Priorité | Phase |
 |---|---|---|
@@ -370,7 +407,7 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
 
 ---
 
-## 10. RÉSUMÉ
+## 11. RÉSUMÉ
 
 | Catégorie | Fonctionnalités codées | Testées (backend API) | Testées (frontend visuel) | Bugs corrigés |
 |---|---|---|---|---|
@@ -378,37 +415,41 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers :
 | Profil | 11 | 4 | 2 (profil, profil public) | 2 + 1 visuel |
 | Swipe & Matching | 11 | 6 | 2 (swipe, matchs) | 0 |
 | Messagerie | 13 | 7 | 1 (chat) | 1 (matches 500) |
-| Live Streaming | 32 | 10 | 5 (hub, surprise, live, stream, viewer) | 5 (WebRTC + cleanup + socketId + surprise) |
+| Live Streaming | 35 | 10 | 5 (hub, surprise, live, stream, viewer) | 5 (WebRTC + cleanup + socketId + surprise) |
 | Modération | 14 | 18 | 0 | 0 |
-| Interface & UX | 10 | 0 | 10 (toutes pages + nav + responsive) | 36 ESLint + 1 import |
+| Interface & UX | 13 | 0 | 10 (toutes pages + nav + responsive) | 36 ESLint + 1 import |
 | i18n (5 langues) | 6 | 0 | 1 (build OK) | 0 |
-| **TOTAL** | **107** | **52** | **15 pages testées** | **23 + 37 ESLint/import** |
+| RGPD & Légal | 7 | 0 | 3 (Legal, ConsentModal, Settings liens) | 0 |
+| **TOTAL** | **115** | **52** | **15 pages testées** | **23 + 37 ESLint/import** |
 
 ### Taux de couverture
-- **Backend API** : 52/107 fonctionnalités testées (49%)
+- **Backend API** : 52/115 fonctionnalités testées (45%)
 - **Bugs trouvés et corrigés** : 23 bugs (9 auth + 1 chat + 1 matches + 4 WebRTC/Socket.IO + 5 UX/CSS + 3 autre)
 - **Warnings ESLint corrigés** : 37 warnings au total (36 Session 14 + 1 Session 19 FiVolumeX)
 - **Frontend compilation** : ✅ `Compiled with warnings` — 3 warnings pré-existants (dev + build production)
 - **Frontend visuel** : ✅ 15/15 pages testées via Chrome MCP, 1 bug corrigé (Profile.js)
 - **Responsive** : ✅ 3 tailles testées (mobile 375×667, tablette 768×1024, desktop 1280×800)
-- **i18n** : ✅ 22/22 fichiers intégrés, 5 langues, ~680 clés/langue, build OK
+- **i18n** : ✅ 22/22 fichiers intégrés, 5 langues, ~689 clés/langue, build OK (dont 9 clés légales Session 20)
 - **WebSocket/temps réel** : Non testé en live (nécessite 2 clients navigateur simultanés)
 - **OAuth** : Non testé (nécessite credentials réels)
+- **RGPD** : ✅ ConsentModal + page Legal + watermark vidéo implémentés (Session 20)
 
 ### Prochaines étapes
 1. ~~Lancer le backend en local~~ FAIT
 2. ~~Tester les API backend~~ FAIT (30 fonctionnalités)
 3. ~~Corriger les bugs backend~~ FAIT (9 bugs corrigés)
 4. ~~Lancer le frontend~~ FAIT (compile sans erreurs)
-5. ~~Build production~~ FAIT (183 KB JS + 14 KB CSS gzippés → 246 KB JS + 20 KB CSS)
+5. ~~Build production~~ FAIT (183 KB JS + 14 KB CSS gzippés → 251 KB JS + 20 KB CSS)
 6. ~~Corriger les 36 warnings ESLint~~ FAIT (37 warnings corrigés au total)
 7. ~~Tester visuellement dans un navigateur~~ FAIT (15 pages via Chrome MCP, 1 bug corrigé)
 8. ~~Compléter les fonctionnalités frontend Live (TÂCHE-010 à 020)~~ FAIT (Session 19)
-9. Tester les fonctionnalités WebSocket/temps réel (nécessite 2 clients)
-10. Valider le MVP avant passage en Phase 2
+9. ~~Intégrer CGU/RGPD/Mentions légales~~ FAIT (Session 20 — placeholders à remplacer)
+10. Tester les fonctionnalités WebSocket/temps réel (nécessite 2 clients)
+11. Remplacer les placeholders légaux `[NOM_ÉDITEUR]` et `[EMAIL_CONTACT]` dans Legal.js
+12. Valider le MVP avant passage en Phase 2
 
 ---
 
 **Document** : Rapport GloboStream
-**Version** : 8.0
+**Version** : 9.0
 **Date** : 26 Février 2026
