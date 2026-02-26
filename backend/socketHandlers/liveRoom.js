@@ -5,9 +5,9 @@
 
 const liveRooms = new Map();
 // roomId → {
-//   streamerId, streamerSocketId, mode, title, tags,
-//   viewers: Map<socketId, { userId, displayName }>,
-//   participants: Map<socketId, { userId, displayName }>,
+//   streamerId, streamerSocketId, displayName, mode, title, tags,
+//   viewers: Map<socketId, { userId, displayName, photoUrl }>,
+//   participants: Map<socketId, { userId, displayName, photoUrl }>,
 //   createdAt
 // }
 
@@ -44,8 +44,8 @@ function setupLiveRoomHandlers(io, socket) {
     }
   });
 
-  // ── Rejoindre un salon (viewer) ──
-  socket.on('join-live-room', ({ roomId, userId, displayName }) => {
+  // ── Rejoindre un salon (viewer) ── TÂCHE-013
+  socket.on('join-live-room', async ({ roomId, userId, displayName }) => {
     try {
       const room = liveRooms.get(roomId);
       if (!room) {
@@ -53,24 +53,45 @@ function setupLiveRoomHandlers(io, socket) {
         return;
       }
 
-      room.viewers.set(socket.id, { userId, displayName });
+      // Récupérer la photo de profil pour l'afficher dans le chat live (TÂCHE-017 prep)
+      let photoUrl = null;
+      try {
+        const User = require('../models/User');
+        const user = await User.findById(userId).select('photos');
+        if (user && user.photos && user.photos.length > 0) {
+          const primary = user.photos.find(p => p.isPrimary) || user.photos[0];
+          photoUrl = primary.url;
+        }
+      } catch (e) { /* non-bloquant */ }
+
+      room.viewers.set(socket.id, { userId, displayName, photoUrl });
       socket.join(roomId);
       socket.liveRoomId = roomId;
-      socket.liveRole = 'viewer';
+      socket.liveRole   = 'viewer';
 
-      // Notifier le streamer du nouveau viewer
+      // Notifier le streamer du nouveau viewer (avec photoUrl)
       io.to(room.streamerSocketId).emit('viewer-joined', {
         viewerSocketId: socket.id,
-        viewerInfo: { userId, displayName }
+        viewerInfo:     { userId, displayName, photoUrl }
       });
 
-      // Envoyer au viewer les infos de la room (TÂCHE-005 : streamerName inclus)
+      // Construire la liste complète des viewers pour le panel spectateurs (TÂCHE-013)
+      const viewersList = buildViewersList(room);
+
+      // Envoyer au viewer les infos complètes de la room (liste incluse)
       socket.emit('room-info', {
         roomId,
         streamerSocketId: room.streamerSocketId,
-        streamerName: room.displayName,
+        streamerName:     room.displayName,
+        viewerCount:      room.viewers.size,
+        participantCount: room.participants.size,
+        viewers:          viewersList
+      });
+
+      // Diffuser la liste mise à jour à tous dans la room (streamer inclus)
+      io.to(roomId).emit('viewers-updated', {
         viewerCount: room.viewers.size,
-        participantCount: room.participants.size
+        viewers:     viewersList
       });
 
       broadcastStreamStats(io);
@@ -78,6 +99,21 @@ function setupLiveRoomHandlers(io, socket) {
     } catch (error) {
       console.error('Error joining room:', error);
       socket.emit('error', { message: 'Erreur pour rejoindre le salon' });
+    }
+  });
+
+  // ── Obtenir la liste des spectateurs (TÂCHE-013) ──
+  socket.on('get-viewers', ({ roomId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room) return;
+
+      socket.emit('viewers-list', {
+        viewerCount: room.viewers.size,
+        viewers:     buildViewersList(room)
+      });
+    } catch (error) {
+      console.error('Error get-viewers:', error);
     }
   });
 
@@ -127,14 +163,36 @@ function setupLiveRoomHandlers(io, socket) {
     });
   });
 
-  // ── Chat dans le salon ──
+  // ── Chat dans le salon ── TÂCHE-017 prep (ajout userId + photoUrl depuis la map)
   socket.on('live-chat', ({ roomId, text, username, lang }) => {
     if (!roomId || !text) return;
 
+    const room = liveRooms.get(roomId);
+    let userId  = null;
+    let photoUrl = null;
+
+    if (room) {
+      // Récupérer userId et photoUrl depuis les maps viewers/participants/streamer
+      const viewerInfo      = room.viewers.get(socket.id);
+      const participantInfo = room.participants.get(socket.id);
+
+      if (viewerInfo) {
+        userId   = viewerInfo.userId;
+        photoUrl = viewerInfo.photoUrl;
+      } else if (participantInfo) {
+        userId   = participantInfo.userId;
+        photoUrl = participantInfo.photoUrl;
+      } else if (room.streamerSocketId === socket.id) {
+        userId = room.streamerId;
+      }
+    }
+
     io.to(roomId).emit('live-chat-message', {
-      username: username || 'Anonyme',
-      text: text,
-      lang: lang || 'fr',
+      username:  username || 'Anonyme',
+      userId:    userId,
+      photoUrl:  photoUrl,
+      text:      text,
+      lang:      lang || 'fr',
       timestamp: Date.now()
     });
   });
@@ -260,15 +318,28 @@ function handleLeaveRoom(io, socket, roomId) {
 
     const wasParticipant = room.participants.has(socket.id);
 
+    // Récupérer les infos avant suppression pour le message de sortie (TÂCHE-014)
+    const viewerInfo      = room.viewers.get(socket.id);
+    const participantInfo = room.participants.get(socket.id);
+    const leavingInfo     = viewerInfo || participantInfo;
+
     // Retirer des viewers ou participants
     room.viewers.delete(socket.id);
     room.participants.delete(socket.id);
 
     socket.leave(roomId);
     socket.liveRoomId = null;
-    socket.liveRole = null;
+    socket.liveRole   = null;
 
-    // Notifier le streamer
+    // TÂCHE-014 — message "X a quitté le live" à toute la room
+    if (leavingInfo) {
+      io.to(roomId).emit('live-user-left', {
+        userId:      leavingInfo.userId,
+        displayName: leavingInfo.displayName
+      });
+    }
+
+    // Notifier le streamer (event spécifique pour gérer l'UI streamer)
     io.to(room.streamerSocketId).emit('viewer-left', {
       viewerSocketId: socket.id
     });
@@ -276,9 +347,16 @@ function handleLeaveRoom(io, socket, roomId) {
     if (wasParticipant) {
       io.to(roomId).emit('participant-left', {
         participantSocketId: socket.id,
-        participantCount: room.participants.size
+        participantCount:    room.participants.size
       });
     }
+
+    // TÂCHE-013 — diffuser la liste mise à jour après départ
+    const viewersList = buildViewersList(room);
+    io.to(roomId).emit('viewers-updated', {
+      viewerCount: room.viewers.size,
+      viewers:     viewersList
+    });
 
     broadcastStreamStats(io);
   } catch (error) {
@@ -286,14 +364,30 @@ function handleLeaveRoom(io, socket, roomId) {
   }
 }
 
-// Calculer le nombre de personnes par mode de stream
+// ── Construire la liste des viewers pour le panel spectateurs ── TÂCHE-013
+function buildViewersList(room) {
+  const list = [];
+  for (const [socketId, info] of room.viewers.entries()) {
+    list.push({ socketId, userId: info.userId, displayName: info.displayName, photoUrl: info.photoUrl });
+  }
+  return list;
+}
+
+// Calculer le nombre de personnes par mode (format détaillé pour TÂCHE-013 Gemini)
 function getStreamStats() {
-  const stats = { surprise: 0, public: 0, competition: 0, event: 0 };
+  const stats = {
+    surprise:    { streamers: 0, viewers: 0, total: 0 },
+    public:      { streamers: 0, viewers: 0, total: 0 },
+    competition: { streamers: 0, viewers: 0, total: 0 },
+    event:       { streamers: 0, viewers: 0, total: 0 }
+  };
   for (const room of liveRooms.values()) {
     const mode = room.mode;
-    if (Object.prototype.hasOwnProperty.call(stats, mode)) {
-      // streamer (1) + viewers + participants
-      stats[mode] += 1 + room.viewers.size + room.participants.size;
+    if (stats[mode]) {
+      const viewersCount        = room.viewers.size + room.participants.size;
+      stats[mode].streamers    += 1;
+      stats[mode].viewers      += viewersCount;
+      stats[mode].total        += 1 + viewersCount;
     }
   }
   return stats;

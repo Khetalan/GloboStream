@@ -1,20 +1,15 @@
 // =========================================
 // SOCKET.IO - LIVE SURPRISE HANDLER
-// À ajouter dans server.js
 // =========================================
 
-// File de recherche globale
-const surpriseQueue = new Map(); // userId -> { socketId, userInfo, timestamp, timerDuration }
-
-// Paires actives
-const activePairs = new Map(); // socketId -> partnerId
+const surpriseQueue = new Map(); // userId -> { socketId, userInfo, timestamp, timerDuration, isSearching, filters }
+const activePairs   = new Map(); // socketId -> partnerSocketId
 
 function setupSurpriseHandlers(io, socket) {
-  
-  // Rejoindre la file d'attente
-  socket.on('join-surprise-queue', async ({ userId }) => {
+
+  // ── Rejoindre la file d'attente ──
+  socket.on('join-surprise-queue', async ({ userId, filters = {} }) => {
     try {
-      // Récupérer info utilisateur
       const User = require('../models/User');
       const user = await User.findById(userId)
         .select('displayName firstName age gender photos location birthDate');
@@ -28,84 +23,79 @@ function setupSurpriseHandlers(io, socket) {
         (Date.now() - new Date(user.birthDate)) / (365.25 * 24 * 60 * 60 * 1000)
       );
 
+      // Récupérer la photo principale pour le chat live (TÂCHE-017 prep)
+      const photoUrl = user.photos && user.photos.length > 0
+        ? (user.photos.find(p => p.isPrimary) || user.photos[0]).url
+        : null;
+
       const userInfo = {
-        userId: user._id.toString(),
+        userId:      user._id.toString(),
         displayName: user.displayName || user.firstName,
-        age: age,
-        gender: user.gender,
-        photos: user.photos,
-        location: user.location,
-        socketId: socket.id
+        age:         age,
+        gender:      user.gender,
+        photos:      user.photos,
+        photoUrl:    photoUrl,
+        location:    user.location,
+        country:     user.location?.country || null,
+        socketId:    socket.id
       };
 
-      // Ajouter à la file (isSearching = false tant que l'utilisateur n'a pas cliqué "Start")
       surpriseQueue.set(userId, {
-        socketId: socket.id,
-        userInfo: userInfo,
-        timestamp: Date.now(),
+        socketId:      socket.id,
+        userInfo:      userInfo,
+        timestamp:     Date.now(),
         timerDuration: 3,
-        isSearching: false
+        isSearching:   false,
+        filters:       filters  // { country, ageMin, ageMax } — utilisé par findPartner (TÂCHE-016)
       });
 
-      console.log(`User ${userId} joined surprise queue. Queue size: ${surpriseQueue.size}`);
+      // TÂCHE-009 — diffuser le nouveau compteur
+      broadcastSurpriseCount(io);
+      console.log(`[Surprise] User ${userId} rejoint la file. Taille: ${surpriseQueue.size}`);
 
     } catch (error) {
-      console.error('Error joining queue:', error);
+      console.error('[Surprise] Erreur join-surprise-queue:', error);
       socket.emit('error', { message: 'Erreur lors de la connexion' });
     }
   });
 
-  // Démarrer la recherche
+  // ── Quitter la file d'attente volontairement ──
+  socket.on('leave-surprise-queue', ({ userId }) => {
+    if (surpriseQueue.has(userId)) {
+      surpriseQueue.delete(userId);
+      broadcastSurpriseCount(io);
+      console.log(`[Surprise] User ${userId} a quitté la file.`);
+    }
+  });
+
+  // ── Démarrer la recherche ──
   socket.on('start-search', ({ userId, timerDuration }) => {
     try {
-      // Mettre à jour timer duration et marquer comme en recherche
       const queueEntry = surpriseQueue.get(userId);
-      if (queueEntry) {
-        queueEntry.timerDuration = timerDuration || 3;
-        queueEntry.isSearching = true;
-        surpriseQueue.set(userId, queueEntry);
-      }
+      if (!queueEntry) return;
 
-      // Chercher un partenaire compatible
-      const partner = findPartner(userId);
+      // TÂCHE-012 — garantir un socketId frais au moment de la recherche
+      queueEntry.socketId          = socket.id;
+      queueEntry.userInfo.socketId = socket.id;
+      queueEntry.timerDuration     = timerDuration || 3;
+      queueEntry.isSearching       = true;
+      surpriseQueue.set(userId, queueEntry);
 
-      if (partner) {
-        // Retirer les deux de la file
-        const user1 = surpriseQueue.get(userId);
-        const user2 = surpriseQueue.get(partner);
-
-        surpriseQueue.delete(userId);
-        surpriseQueue.delete(partner);
-
-        // Ajouter aux paires actives
-        activePairs.set(user1.socketId, user2.socketId);
-        activePairs.set(user2.socketId, user1.socketId);
-
-        // Notifier les deux utilisateurs
-        io.to(user1.socketId).emit('partner-found', {
-          partner: user2.userInfo,
-          initiator: true,
-          timerDuration: user1.timerDuration
-        });
-
-        io.to(user2.socketId).emit('partner-found', {
-          partner: user1.userInfo,
-          initiator: false,
-          timerDuration: user2.timerDuration
-        });
-
-        console.log(`Match found: ${userId} <-> ${partner}`);
+      const partnerId = findPartner(userId, queueEntry.filters);
+      if (partnerId) {
+        createPair(io, userId, partnerId);
       } else {
-        console.log(`No partner found for ${userId}, waiting...`);
+        console.log(`[Surprise] Aucun partenaire pour ${userId}, en attente...`);
       }
 
+      broadcastSurpriseCount(io);
     } catch (error) {
-      console.error('Error starting search:', error);
+      console.error('[Surprise] Erreur start-search:', error);
       socket.emit('error', { message: 'Erreur lors de la recherche' });
     }
   });
 
-  // Envoyer signal WebRTC
+  // ── Signal WebRTC (relay pur) ── TÂCHE-012
   socket.on('send-signal', ({ to, signal }) => {
     io.to(to).emit('receive-signal', {
       from: socket.id,
@@ -113,29 +103,97 @@ function setupSurpriseHandlers(io, socket) {
     });
   });
 
-  // Envoyer décision (like/dislike/skip)
-  socket.on('send-decision', ({ partnerId, decision }) => {
-    const partnerSocketId = activePairs.get(socket.id);
-    
-    if (partnerSocketId) {
-      io.to(partnerSocketId).emit('decision-received', {
-        decision: decision
-      });
-    }
+  // ── Décision de l'utilisateur : like / dislike ── TÂCHE-010
+  socket.on('send-decision', async ({ partnerUserId, decision, myUserId }) => {
+    try {
+      const partnerSocketId = activePairs.get(socket.id);
 
-    // Retirer de la paire active
-    if (activePairs.has(socket.id)) {
-      const partner = activePairs.get(socket.id);
-      activePairs.delete(socket.id);
-      activePairs.delete(partner);
+      // Notifier le partenaire de la décision
+      if (partnerSocketId) {
+        io.to(partnerSocketId).emit('decision-received', { decision });
+      }
+
+      // Retirer de la paire active
+      cleanupPair(socket.id);
+
+      // Traitement du Like en base de données (même logique que POST /api/swipe/like/:userId)
+      if (decision === 'like' && myUserId && partnerUserId) {
+        const User = require('../models/User');
+        const currentUser = await User.findById(myUserId);
+        const targetUser  = await User.findById(partnerUserId);
+
+        if (currentUser && targetUser) {
+          // Ajouter aux likes si pas déjà fait
+          if (!currentUser.likes.map(String).includes(String(partnerUserId))) {
+            currentUser.likes.push(targetUser._id);
+            await currentUser.save();
+          }
+
+          // Vérifier match mutuel
+          const isMatch = targetUser.likes.map(String).includes(String(myUserId));
+
+          if (isMatch) {
+            if (!currentUser.matches.some(m => m.user.toString() === String(partnerUserId))) {
+              currentUser.matches.push({ user: targetUser._id, matchedAt: new Date() });
+              await currentUser.save();
+            }
+            if (!targetUser.matches.some(m => m.user.toString() === String(myUserId))) {
+              targetUser.matches.push({ user: currentUser._id, matchedAt: new Date() });
+              await targetUser.save();
+            }
+
+            // Notifier les deux qu'un match a été créé
+            socket.emit('surprise-match', { userId: partnerUserId });
+            if (partnerSocketId) io.to(partnerSocketId).emit('surprise-match', { userId: myUserId });
+            console.log(`[Surprise] Match créé : ${myUserId} <-> ${partnerUserId}`);
+          }
+        }
+      }
+
+      broadcastSurpriseCount(io);
+    } catch (error) {
+      console.error('[Surprise] Erreur send-decision:', error);
     }
   });
 
-  // Déconnexion
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  // ── Skip : les deux retournent en file d'attente ── TÂCHE-011
+  socket.on('surprise-skip', ({ userId }) => {
+    try {
+      const partnerSocketId = activePairs.get(socket.id);
 
-    // Retirer de la file
+      // Notifier le partenaire (il retournera en file côté frontend)
+      if (partnerSocketId) {
+        io.to(partnerSocketId).emit('partner-skipped');
+      }
+
+      // Nettoyer la paire
+      cleanupPair(socket.id);
+
+      // Remettre le skipper en file avec isSearching = true
+      const queueEntry = surpriseQueue.get(userId);
+      if (queueEntry) {
+        queueEntry.socketId          = socket.id;
+        queueEntry.userInfo.socketId = socket.id;
+        queueEntry.isSearching       = true;
+        surpriseQueue.set(userId, queueEntry);
+      }
+
+      // Essayer immédiatement de trouver un nouveau partenaire
+      const newPartnerId = findPartner(userId, queueEntry?.filters);
+      if (newPartnerId) {
+        createPair(io, userId, newPartnerId);
+      }
+
+      broadcastSurpriseCount(io);
+      console.log(`[Surprise] User ${userId} a skipé — remis en file.`);
+    } catch (error) {
+      console.error('[Surprise] Erreur surprise-skip:', error);
+    }
+  });
+
+  // ── Déconnexion ──
+  socket.on('disconnect', () => {
+    // Retirer de la file si présent
     for (const [userId, entry] of surpriseQueue.entries()) {
       if (entry.socketId === socket.id) {
         surpriseQueue.delete(userId);
@@ -143,43 +201,76 @@ function setupSurpriseHandlers(io, socket) {
       }
     }
 
-    // Notifier le partenaire si en paire active
+    // Notifier le partenaire si en session active
     if (activePairs.has(socket.id)) {
       const partnerSocketId = activePairs.get(socket.id);
       io.to(partnerSocketId).emit('partner-disconnected');
-      
-      activePairs.delete(socket.id);
-      activePairs.delete(partnerSocketId);
+      cleanupPair(socket.id);
     }
+
+    broadcastSurpriseCount(io);
+    console.log(`[Surprise] Socket déconnecté: ${socket.id}`);
   });
 }
 
-// Fonction pour trouver un partenaire compatible (uniquement parmi ceux en recherche)
-function findPartner(userId) {
+// ── Créer une paire entre deux utilisateurs ── TÂCHE-012
+function createPair(io, userId1, userId2) {
+  const user1 = surpriseQueue.get(userId1);
+  const user2 = surpriseQueue.get(userId2);
+
+  if (!user1 || !user2) return;
+
+  surpriseQueue.delete(userId1);
+  surpriseQueue.delete(userId2);
+
+  activePairs.set(user1.socketId, user2.socketId);
+  activePairs.set(user2.socketId, user1.socketId);
+
+  // TÂCHE-012 — le socketId dans le payload est toujours celui de l'entrée queue (frais)
+  io.to(user1.socketId).emit('partner-found', {
+    partner:       { ...user2.userInfo, socketId: user2.socketId },
+    initiator:     true,
+    timerDuration: user1.timerDuration
+  });
+
+  io.to(user2.socketId).emit('partner-found', {
+    partner:       { ...user1.userInfo, socketId: user1.socketId },
+    initiator:     false,
+    timerDuration: user2.timerDuration
+  });
+
+  console.log(`[Surprise] Paire créée : ${userId1} <-> ${userId2}`);
+}
+
+// ── Nettoyer une paire active (symétrique) ──
+function cleanupPair(socketId) {
+  const partnerSocketId = activePairs.get(socketId);
+  activePairs.delete(socketId);
+  if (partnerSocketId) activePairs.delete(partnerSocketId);
+}
+
+// ── Trouver un partenaire compatible dans la file ── TÂCHE-016 (préparation filtrage pays)
+function findPartner(userId, filters = {}) {
   for (const [candidateId, entry] of surpriseQueue.entries()) {
-    if (candidateId !== userId && entry.isSearching) {
-      return candidateId;
+    if (candidateId === userId) continue;
+    if (!entry.isSearching) continue;
+
+    // Filtrage par pays si précisé (TÂCHE-016)
+    if (filters.country && entry.userInfo.country &&
+        filters.country !== entry.userInfo.country) {
+      continue;
     }
+
+    return candidateId;
   }
   return null;
 }
 
-// Fonction améliorée avec filtres (optionnel)
-function findPartnerAdvanced(userId, userGender, userPreferences) {
-  for (const [candidateId, entry] of surpriseQueue.entries()) {
-    if (candidateId === userId) continue;
-
-    // Vérifier compatibilité genre si défini
-    if (userPreferences && userPreferences.showMe) {
-      if (!userPreferences.showMe.includes(entry.userInfo.gender)) {
-        continue;
-      }
-    }
-
-    // Premier compatible trouvé
-    return candidateId;
-  }
-  return null;
+// ── Diffuser le nombre de personnes actives en Live Surprise ── TÂCHE-009
+function broadcastSurpriseCount(io) {
+  const inQueue   = [...surpriseQueue.values()].filter(e => e.isSearching).length;
+  const inSession = activePairs.size; // chaque socket = 1 personne en session
+  io.emit('surprise-user-count', { count: inQueue + inSession, inQueue, inSession });
 }
 
 module.exports = { setupSurpriseHandlers };
