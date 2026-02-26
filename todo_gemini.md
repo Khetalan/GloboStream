@@ -53,7 +53,7 @@
 - **Statut**   : EN ATTENTE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
 - **Priorité** : HAUTE
-- **Dépend de** : TÂCHE-015 dans todo_claude.md (endpoint `GET /api/message-requests/sent-to/:userId`)
+- **Dépend de** : TÂCHE-015 dans todo_claude.md (endpoint `GET /api/message-requests/sent-to/:userId`) — **DONE ✓ débloquée**
 - **Fichiers concernés** : `frontend/src/pages/Matches.js`, `frontend/src/pages/Matches.css`
 - **Description** :
   - Remplacer le bouton "Discuter" par 2 boutons distincts : ♥ **Like** et ✉ **Message**
@@ -148,7 +148,7 @@
 - **Statut**   : EN ATTENTE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
 - **Priorité** : NORMALE
-- **Dépend de** : TÂCHE-009 dans todo_claude.md (event `surprise-user-count`)
+- **Dépend de** : TÂCHE-009 dans todo_claude.md (event `surprise-user-count`) — **DONE ✓ débloquée**
 - **Fichiers concernés** : `frontend/src/pages/LiveSurprise.js`, `frontend/src/pages/LiveSurprise.css`
 - **Description** : Écouter l'event Socket.IO `surprise-user-count` et afficher le nombre de personnes connectées en Live Surprise (ex: badge "🔴 42 en ligne"). Mettre à jour en temps réel.
 - **Contexte** : Test-01 — l'utilisateur veut voir combien de personnes sont connectées.
@@ -229,7 +229,7 @@
 - **Statut**   : EN ATTENTE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
 - **Priorité** : NORMALE
-- **Dépend de** : TÂCHE-014 dans todo_claude.md (event `live-user-left`)
+- **Dépend de** : TÂCHE-014 dans todo_claude.md (event `live-user-left`) — **DONE ✓ débloquée**
 - **Fichiers concernés** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveViewer.js`
 - **Description** : Écouter l'event Socket.IO `live-user-left` (payload : `{ displayName, userId }`) et afficher un message système dans le chat du live : *"[displayName] a quitté le live"*. Même style visuel que le message d'entrée déjà existant. Ajouter la clé i18n correspondante dans les 5 langues.
 - **Contexte** : Test-01 — le message d'entrée existe déjà, le message de sortie manque.
