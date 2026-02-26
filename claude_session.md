@@ -1533,3 +1533,79 @@ fc651ef  feat: MEMORY.md, no-zoom viewport, 768px layout cap (8 CSS files)
 - 📋 Merger `claude-work → main` si validé
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
+
+---
+
+## Session 20 : LivePublic FAB + StreamHub + Légal/RGPD + Watermark (26 Février 2026)
+**Date** : 26 Février 2026
+**Branche** : `claude-work` → `main` (mergé + déployé)
+**Commits** : `6ed44d7`, `4d59566`, `3a950df`, `58294ed` → merges `8f0bf84`, `c967f97`, `1d9539e`, `713f765`
+**Status** : Terminé ✅ — Déployé sur GitHub Pages
+
+### Contexte
+Suite directe de la Session 19. Correctifs UX sur la page LivePublic, nettoyage du StreamHub, renommage de mode, puis intégration complète des éléments légaux RGPD demandés par l'utilisateur.
+
+### Ce qui a été fait
+
+#### 1. LivePublic — Repositionnement bouton "Démarrer un live"
+**Fichiers** : `frontend/src/pages/LivePublic.js`, `frontend/src/pages/LivePublic.css`
+
+- `.start-live-fab` : centré (`left: 50%; transform: translateX(-50%)`), `bottom: 80px`, `padding: 16px 32px`, `font-size: 1.05rem`, `border-radius: 50px`
+- Hover : `transform: translateX(-50%) scale(1.05)`, active : `scale(0.97)`
+- Suppression du bloc `@media (min-width: 768px)` qui réduisait le bouton
+- `padding-bottom: 80px` → `160px` pour éviter le chevauchement avec le FAB
+
+#### 2. StreamHub — Retrait bouton fixe "Démarrer un live"
+**Fichiers** : `frontend/src/pages/StreamHub.js`, `frontend/src/pages/StreamHub.css`
+
+- Suppression complète du bloc `.btn-start-live-fixed` (button + ~32 lignes CSS)
+- `padding-bottom` revenu à 80px
+- Note : TÂCHE-021 créée — bouton FAB à ajouter dans LiveCompetition et LiveEvent à leur création
+
+#### 3. StreamHub — Inversion ordre + renommage Événement → Thématiques
+**Fichiers** : `frontend/src/pages/StreamHub.js`, `frontend/src/locales/{fr,en,it,de,es}.json`
+
+- Nouvel ordre des sections : Surprise → **Thématiques** → Compétition → Public
+- Clés `eventTitle` / `eventDesc` → "Thématiques" / "Thematics" / "Tematici" / "Themen" / "Temáticos"
+- Clé `app.event` mise à jour dans les 5 langues
+
+#### 4. Intégration légale complète — CGU/RGPD/Mentions légales
+
+**Fichiers créés** :
+- `frontend/src/pages/Legal.js` — page 3 onglets (CGU, Confidentialité, Mentions légales), texte légal complet en FR avec placeholders `[NOM_ÉDITEUR]` et `[EMAIL_CONTACT]`, hébergement GitHub Pages + Render, personne physique (pas de SIRET)
+- `frontend/src/pages/Legal.css` — header sticky avec bouton retour, tabs pill, texte stylisé (h2 `--primary`, h3, listes)
+- `frontend/src/components/ConsentModal.js` — modale bloquante (z-index 9999) au 1er visit, consentement persisté en `localStorage` (`globostream_consent_v1` avec date + version), 4 points checklist, AnimatePresence
+- `frontend/src/components/ConsentModal.css` — overlay sombre 92% opacité + blur, card 460px, bouton gradient rouge
+
+**Fichiers modifiés** :
+- `frontend/src/App.js` : import Legal + ConsentModal, route `/legal` (publique, avant catch-all), `<ConsentModal />` dans le Router
+- `frontend/src/pages/Settings.js` : nouvelle section "Informations légales" avec 3 liens → `/legal?tab=cgu|privacy|mentions`
+- `frontend/src/pages/Settings.css` : classe `.setting-link-btn` avec hover
+- Locales (5 langues) : objet `legal` ajouté (9 clés : title, tabCgu, tabPrivacy, tabMentions, back, settingsSection, cguLink, privacyLink, mentionsLink)
+
+#### 5. Watermark anti-capture sur flux vidéo
+**Fichiers** : `LiveStream.js` + `LiveStream.css`, `LiveViewer.js` + `LiveViewer.css`
+
+- **LiveStream** (streamer) : `<div className="ls-watermark">` après `<video ref={localVideoRef}>`, affiché si caméra active + user connecté
+- **LiveViewer** (spectateur) : `<div className="lv-watermark">` après `<video ref={remoteVideoRef}>`, affiché si stream actif + user connecté
+- Contenu : 8 derniers caractères de `user._id` (opaque à 0.18, non sélectionnable, pointer-events none)
+- CSS : `position: absolute; bottom: 6px; right: 8px; font-size: 9px; font-family: monospace; color: rgba(255,255,255,0.18); pointer-events: none; user-select: none; z-index: 10`
+
+### Commits
+```
+6ed44d7  fix(ui): LivePublic — bouton Démarrer centré + plus gros (couleur Live Publique conservée)
+4d59566  fix(ui): StreamHub — retrait bouton fixe Démarrer (n'a pas sa place ici)
+3a950df  feat(ui): StreamHub — inversion Thématiques/Compétitions + renommage Événement → Thématiques
+58294ed  feat(legal): intégration CGU/RGPD, ConsentModal et watermark vidéo
++ merges correspondants dans main (8f0bf84, c967f97, 1d9539e, 713f765)
+```
+
+### Déploiement
+- **Frontend** : `npm run deploy` → GitHub Pages ✅ Published (251.65 KB JS + 20.82 KB CSS gzippés)
+- **Backend** : Pas de modification backend — Render inchangé
+
+### Notes
+- Build : `Compiled with warnings` — 3 warnings pré-existants non liés à ce travail (App.js `t` unused, Matches.js hook deps, Profile.js `FiMapPin`)
+- TÂCHE-021 (EN ATTENTE) : Bouton FAB dans LiveCompetition + LiveEvent quand ces pages seront créées
+
+> **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
