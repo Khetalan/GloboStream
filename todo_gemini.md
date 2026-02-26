@@ -243,10 +243,12 @@
 - **Statut**   : EN ATTENTE
 - **Ajoutée**  : 26/02/2026 par Claude (Test-01)
 - **Priorité** : BASSE
-- **Dépend de** : TÂCHE-016 dans todo_claude.md (filtrage backend)
+- **Dépend de** : TÂCHE-016 dans todo_claude.md (filtrage backend — DONE)
 - **Fichiers concernés** : `frontend/src/pages/LiveSurprise.js`, `frontend/src/pages/LiveSurprise.css`
-- **Description** : Ajouter un panel de filtres accessible avant d'entrer dans la queue Surprise. Filtres : pays (sélection, par défaut = pays d'origine de l'utilisateur connecté), âge min/max. Envoyer ces filtres dans le payload d'entrée en queue. Ajouter les clés i18n dans les 5 langues.
-- **Contexte** : Test-01 — filtrage demandé, pays d'origine par défaut.
+- **Description** :
+  1. **Panel de filtres** (avant d'entrer dans la queue) : pays (sélection, par défaut = pays d'origine de l'utilisateur), âge min/max. Envoyer dans le payload `join-surprise-queue` → `{ country, ageMin, ageMax }`. Clés i18n dans les 5 langues.
+  2. **Gestion du timeout** : écouter l'event Socket.IO `surprise-search-timeout { filtersUsed }`. Si reçu → afficher un message dans l'écran "Recherche en cours" : *"Aucun partenaire trouvé en [pays]. Élargir la recherche mondiale ?"* + bouton **"Élargir"** qui re-émet `start-search` avec `filters = {}` (sans filtre pays). Bouton **"Continuer à chercher"** qui ne fait rien (l'utilisateur reste en file). Si le filtre pays est déjà vide (`filtersUsed.country` absent), ne pas afficher le bouton d'élargissement.
+- **Contexte** : Test-01 — filtrage demandé. Le backend (TÂCHE-016) cherche d'abord dans le même pays, puis notifie après 15s sans partenaire via `surprise-search-timeout`. L'élargissement est manuel (décision de l'utilisateur), jamais automatique.
 - **Résultat** : (à remplir par Gemini)
 
 ---

@@ -95,9 +95,10 @@
 - **Contexte** : Test-01 — filtrage demandé, pays d'origine par défaut.
 - **Résultat** :
   - `join-surprise-queue` : si `filters.country` absent, utilise `user.location?.country` comme filtre par défaut.
-  - `start-search` : si aucun partenaire compatible trouvé, programme un `setTimeout` 15s qui appelle `findPartner(userId, {})` (sans filtre pays = fallback mondial).
-  - `createPair`, `leave-surprise-queue`, `disconnect` : `clearTimeout(entry.fallbackTimer)` pour éviter les memory leaks.
+  - `start-search` : si aucun partenaire compatible trouvé, programme un `setTimeout` 15s qui émet `surprise-search-timeout { filtersUsed }` au client — PAS de fallback mondial automatique. L'utilisateur doit élargir lui-même via les filtres du frontend (TÂCHE-019 Gemini).
+  - `createPair`, `leave-surprise-queue`, `disconnect` : `clearTimeout(entry.timeoutTimer)` pour éviter les memory leaks.
   - `findPartner` : logique de filtre pays déjà présente, maintenant activée automatiquement via les filtres par défaut.
+  - **Event frontend attendu** : `surprise-search-timeout` → afficher bouton "Élargir la recherche mondiale" → re-émettre `start-search` avec `filters = {}`.
 
 ---
 
