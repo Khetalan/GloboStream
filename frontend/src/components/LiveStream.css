@@ -82,6 +82,163 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── Modale Règles de diffusion ─────────────────────────────── */
+.ls-rules-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.ls-rules-modal {
+  background: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+}
+
+.ls-rules-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ls-rules-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.ls-rules-header-icon {
+  color: var(--ls-accent-color);
+  flex-shrink: 0;
+}
+
+.ls-rules-subtitle {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.ls-rules-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.ls-rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.ls-rule-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ls-rules-accept {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s;
+}
+
+.ls-rules-accept:has(input:checked) {
+  border-color: var(--ls-accent-color);
+}
+
+.ls-rules-accept input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--ls-accent-color);
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.ls-rules-accept span {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.ls-rules-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ls-rules-cancel-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ls-rules-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ls-rules-start-btn {
+  flex: 2;
+  height: 48px;
+  border-radius: 50px;
+  border: none;
+  background: var(--ls-accent-gradient);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+  box-shadow: var(--ls-accent-shadow);
+}
+
+.ls-rules-start-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  box-shadow: none;
+}
+
+.ls-rules-start-btn:not(:disabled):hover {
+  opacity: 0.88;
+}
+
 /* ── Warning pas de photo ──────────────────────────────────── */
 .ls-no-photo-warning {
   background: rgba(239, 68, 68, 0.15);
@@ -384,6 +541,11 @@
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
+  max-width: calc(100% - 16px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 
 .ls-cam-off-photo {
@@ -413,6 +575,10 @@
   font-size: 11px;
   font-weight: 600;
   z-index: 5;
+  max-width: calc(100% - 12px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ls-empty-slot {
@@ -865,7 +1031,69 @@
     display: none; /* Masquer le 'username' pour les messages système */
 }
 
-/* ── Barre du bas : input + contrôles ──────────────────────── */
+/* ── Panel de saisie chat (slide-up streamer) ───────────────── */
+.ls-chat-panel {
+  position: absolute;
+  bottom: calc(68px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 8px 12px;
+  z-index: 50;
+}
+
+.ls-chat-panel-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+}
+
+.ls-chat-panel-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.ls-chat-panel-send,
+.ls-chat-panel-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  flex-shrink: 0;
+  min-height: unset;
+  transition: background 0.15s;
+}
+
+.ls-chat-panel-send {
+  background: var(--ls-accent-color);
+  color: #fff;
+}
+
+.ls-chat-panel-send:hover {
+  opacity: 0.85;
+}
+
+.ls-chat-panel-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Barre du bas : bouton Écrire + contrôles ───────────────── */
 .ls-bottom-bar {
   display: flex;
   align-items: center;
@@ -882,42 +1110,39 @@
   gap: 8px;
 }
 
-.ls-input-container {
+/* Bouton "Écrire" (remplace l'input côté streamer) */
+.ls-write-btn {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
-  border: none; /* Suppression de la bordure pour un look plus clean */
-  background-color: rgba(255, 255, 255, 0.15); /* Fond unifié */
-  border-radius: 24px; /* Plus arrondi */
+  border: none;
+  border-radius: 24px;
   padding: 0 16px;
   height: 48px;
   flex: 1;
   min-width: 0;
-  order: 1; /* Input en premier (gauche) */
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  order: 1;
+  transition: background 0.2s;
 }
 
-.ls-input-container input {
-  font-size: 1rem;
+.ls-write-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
   color: #fff;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  appearance: none;
-}
-
-.ls-input-container input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Réorganisation des boutons */
 .ls-controls-left {
-  order: 2; /* Boutons demandes/cadeaux après l'input */
+  order: 2;
 }
 
 .ls-controls-right {
-  order: 3; /* Contrôles média à la fin */
+  order: 3;
 }
 
 .ls-send-btn {

@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
-  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
@@ -54,6 +54,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
   const [viewers, setViewers] = useState([]);
   const [gifts] = useState([]);
+  const [showJoinRulesModal, setShowJoinRulesModal] = useState(false);
+  const [joinRulesAccepted, setJoinRulesAccepted] = useState(false);
 
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -606,11 +608,11 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
               </div>
 
               <div className="lv-actions-group">
-                {/* Bouton demander à rejoindre */}
+                {/* Bouton demander à rejoindre — ouvre la modale de règles */}
                 {!isParticipant && (
                   <button
                     className={`lv-join-btn ${joinRequestStatus}`}
-                    onClick={handleRequestJoin}
+                    onClick={() => joinRequestStatus === 'idle' && setShowJoinRulesModal(true)}
                     disabled={joinRequestStatus !== 'idle'}
                   >
                     <FiUserPlus size={20} />
@@ -639,6 +641,86 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                 </>
               )}
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modale — Règles de participation */}
+      <AnimatePresence>
+        {showJoinRulesModal && (
+          <motion.div
+            className="lv-rules-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="lv-rules-modal"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {/* En-tête */}
+              <div className="lv-rules-header">
+                <FiAlertTriangle size={22} className="lv-rules-header-icon" />
+                <h3>{t('liveViewer.joinRulesTitle')}</h3>
+              </div>
+              <p className="lv-rules-subtitle">{t('liveViewer.joinRulesSubtitle')}</p>
+
+              {/* Liste des règles */}
+              <ul className="lv-rules-list">
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🔞</span>
+                  <span>{t('liveStream.rules.nudity')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🚫</span>
+                  <span>{t('liveStream.rules.racism')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🚫</span>
+                  <span>{t('liveStream.rules.politics')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🚫</span>
+                  <span>{t('liveStream.rules.religion')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">⚠️</span>
+                  <span>{t('liveStream.rules.violence')}</span>
+                </li>
+              </ul>
+
+              {/* Case à cocher */}
+              <label className="lv-rules-accept">
+                <input
+                  type="checkbox"
+                  checked={joinRulesAccepted}
+                  onChange={(e) => setJoinRulesAccepted(e.target.checked)}
+                />
+                <span>{t('liveStream.rules.accept')}</span>
+              </label>
+
+              {/* Boutons */}
+              <div className="lv-rules-actions">
+                <button
+                  className="lv-rules-cancel-btn"
+                  onClick={() => { setShowJoinRulesModal(false); setJoinRulesAccepted(false); }}
+                >
+                  {t('liveStream.rules.cancel')}
+                </button>
+                <button
+                  className="lv-rules-confirm-btn"
+                  disabled={!joinRulesAccepted}
+                  onClick={() => { setShowJoinRulesModal(false); handleRequestJoin(); }}
+                >
+                  <FiUserPlus size={16} />
+                  {t('liveViewer.join')}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

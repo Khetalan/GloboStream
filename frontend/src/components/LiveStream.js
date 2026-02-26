@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiUsers,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
-  FiUserPlus, FiCheck, FiSlash
+  FiUserPlus, FiCheck, FiSlash, FiEdit2, FiAlertTriangle
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
@@ -54,6 +54,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [joinRequests, setJoinRequests] = useState([]);
   const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
   const [isUiVisible, setIsUiVisible] = useState(true);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [rulesAccepted, setRulesAccepted] = useState(false);
 
   // Refs
   const chatRef = useRef(null);
@@ -635,7 +638,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           <h3 className="ls-preview-title">{t('liveStream.previewTitle')}</h3>
           <p className="ls-preview-desc">{t('liveStream.previewDesc')}</p>
           {user?.photos?.length > 0 ? (
-            <button className="ls-go-live-btn" onClick={handleGoLive}>
+            <button className="ls-go-live-btn" onClick={() => setShowRulesModal(true)}>
               <FiPlay size={20} />
               <span>{t('liveStream.goLive')}</span>
             </button>
@@ -649,6 +652,86 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             <span>{t('common.back')}</span>
           </button>
         </div>
+
+        {/* Modale — Règles de diffusion */}
+        <AnimatePresence>
+          {showRulesModal && (
+            <motion.div
+              className="ls-rules-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                className="ls-rules-modal"
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                {/* En-tête */}
+                <div className="ls-rules-header">
+                  <FiAlertTriangle size={22} className="ls-rules-header-icon" />
+                  <h3>{t('liveStream.rules.title')}</h3>
+                </div>
+                <p className="ls-rules-subtitle">{t('liveStream.rules.subtitle')}</p>
+
+                {/* Liste des règles */}
+                <ul className="ls-rules-list">
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🔞</span>
+                    <span>{t('liveStream.rules.nudity')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🚫</span>
+                    <span>{t('liveStream.rules.racism')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🚫</span>
+                    <span>{t('liveStream.rules.politics')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🚫</span>
+                    <span>{t('liveStream.rules.religion')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">⚠️</span>
+                    <span>{t('liveStream.rules.violence')}</span>
+                  </li>
+                </ul>
+
+                {/* Case à cocher */}
+                <label className="ls-rules-accept">
+                  <input
+                    type="checkbox"
+                    checked={rulesAccepted}
+                    onChange={(e) => setRulesAccepted(e.target.checked)}
+                  />
+                  <span>{t('liveStream.rules.accept')}</span>
+                </label>
+
+                {/* Boutons */}
+                <div className="ls-rules-actions">
+                  <button
+                    className="ls-rules-cancel-btn"
+                    onClick={() => { setShowRulesModal(false); setRulesAccepted(false); }}
+                  >
+                    {t('liveStream.rules.cancel')}
+                  </button>
+                  <button
+                    className="ls-rules-start-btn"
+                    disabled={!rulesAccepted}
+                    onClick={() => { setShowRulesModal(false); handleGoLive(); }}
+                  >
+                    <FiPlay size={16} />
+                    {t('liveStream.rules.start')}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -818,22 +901,52 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
               ))}
             </div>
 
+            {/* Panel de saisie du chat (slide-up au-dessus de la barre) */}
+            <AnimatePresence>
+              {showChatPanel && (
+                <motion.div
+                  className="ls-chat-panel"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <input
+                    type="text"
+                    className="ls-chat-panel-input"
+                    placeholder={t('liveStream.chatPlaceholder')}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') { handleSendMessage(); setShowChatPanel(false); }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    className="ls-chat-panel-send"
+                    onClick={() => { handleSendMessage(); setShowChatPanel(false); }}
+                  >
+                    <FiSend size={16} />
+                  </button>
+                  <button
+                    className="ls-chat-panel-close"
+                    onClick={() => { setChatInput(''); setShowChatPanel(false); }}
+                  >
+                    <FiX size={16} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Barre du bas */}
             <div className="ls-bottom-bar">
-              <div className="ls-input-container">
-                <input
-                  type="text"
-                  placeholder={t('liveStream.chatPlaceholder')}
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-                {chatInput.trim() && (
-                  <button className="ls-send-btn" onClick={handleSendMessage}>
-                    <FiSend size={18} />
-                  </button>
-                )}
-              </div>
+              <button
+                className="ls-write-btn"
+                onClick={() => setShowChatPanel(prev => !prev)}
+              >
+                <FiEdit2 size={16} />
+                <span>{t('liveStream.writeBtn')}</span>
+              </button>
 
               <div className="ls-controls-left">
                 <button className="ls-control-btn requests-btn" onClick={(e) => { e.stopPropagation(); setShowJoinRequestsPanel(true); }}>
