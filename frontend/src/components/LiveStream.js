@@ -17,6 +17,16 @@ import './LiveStream.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Catalogue des cadeaux disponibles
+const GIFTS = [
+  { id: 'rose',    emoji: '🌹', name: 'Rose',     value: 1   },
+  { id: 'kiss',    emoji: '💋', name: 'Bisou',    value: 5   },
+  { id: 'heart',   emoji: '❤️', name: 'Cœur',     value: 10  },
+  { id: 'star',    emoji: '⭐', name: 'Étoile',   value: 20  },
+  { id: 'crown',   emoji: '👑', name: 'Couronne', value: 50  },
+  { id: 'diamond', emoji: '💎', name: 'Diamant',  value: 100 },
+];
+
 // Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
 const PEER_CONFIG = {
   iceServers: [
@@ -46,17 +56,20 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
-  const [giftCount] = useState(0);
+  const [giftCount, setGiftCount] = useState(0);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
   const [viewers, setViewers] = useState([]);
-  const [gifts] = useState([]);
+  const [gifts, setGifts] = useState([]);
+  const [showGiftPanel, setShowGiftPanel] = useState(false);
+  const [selectedParticipantForGift, setSelectedParticipantForGift] = useState(null);
   const [joinRequests, setJoinRequests] = useState([]);
   const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
   const [isUiVisible, setIsUiVisible] = useState(true);
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesAccepted, setRulesAccepted] = useState(false);
+  const [liveDescription, setLiveDescription] = useState('');
 
   // Refs
   const chatRef = useRef(null);
@@ -327,6 +340,23 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       setParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
     });
 
+    // Cadeau reçu par le streamer ou un participant
+    socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji, giftValue }) => {
+      if (recipientType === 'streamer') {
+        setGiftCount(prev => prev + 1);
+        setGifts(prev => {
+          const idx = prev.findIndex(g => g.name === senderName);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], gifts: updated[idx].gifts + giftValue };
+            return [...updated].sort((a, b) => b.gifts - a.gifts);
+          }
+          return [...prev, { name: senderName, gifts: giftValue }].sort((a, b) => b.gifts - a.gifts);
+        });
+      }
+      toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
+    });
+
     // Enregistrer l'utilisateur
     if (user?._id) {
       socket.emit('register', user._id);
@@ -427,7 +457,8 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         title: `Live de ${streamerName}`,
         tags: ['Rencontres', 'Discussion'],
         userId: user?._id,
-        displayName: streamerName
+        displayName: streamerName,
+        description: liveDescription
       });
 
       // Le passage à isLive se fait dans le listener 'room-created'
@@ -584,6 +615,22 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     toast.success(newMuteState ? t('liveStream.participantMuted', { name: participant.name }) : t('liveStream.participantUnmuted', { name: participant.name }));
   }, [t]);
 
+  // Envoyer un cadeau à un participant (streamer uniquement)
+  const handleSendGift = useCallback((gift, participant) => {
+    if (!socketRef.current || !roomIdRef.current || !participant) return;
+    socketRef.current.emit('send-gift', {
+      roomId: roomIdRef.current,
+      giftId: gift.id,
+      giftEmoji: gift.emoji,
+      giftName: gift.name,
+      giftValue: gift.value,
+      recipientSocketId: participant.socketId
+    });
+    setShowGiftPanel(false);
+    setSelectedParticipantForGift(null);
+    toast.success(t('liveGifts.sent'));
+  }, [t]);
+
   // Composant vidéo participant avec ref callback
   const ParticipantVideo = ({ stream }) => {
     const videoRef = useRef(null);
@@ -637,6 +684,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           </div>
           <h3 className="ls-preview-title">{t('liveStream.previewTitle')}</h3>
           <p className="ls-preview-desc">{t('liveStream.previewDesc')}</p>
+          <textarea
+            className="ls-description-input"
+            placeholder={t('liveStream.descriptionPlaceholder')}
+            value={liveDescription}
+            onChange={(e) => setLiveDescription(e.target.value)}
+            maxLength={150}
+            rows={2}
+          />
           {user?.photos?.length > 0 ? (
             <button className="ls-go-live-btn" onClick={() => setShowRulesModal(true)}>
               <FiPlay size={20} />
@@ -953,7 +1008,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
                   <FiUsers size={20} />
                   {joinRequests.length > 0 && <span className="ls-requests-count">{joinRequests.length}</span>}
                 </button>
-                <button className="ls-control-btn gift-btn">
+                <button className="ls-control-btn gift-btn" onClick={(e) => { e.stopPropagation(); setShowGiftPanel(true); }}>
                   <FiGift size={20} />
                 </button>
               </div>
@@ -1095,6 +1150,70 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           )}
         </div>
       </div>
+      {/* Panel Cadeaux — Streamer → Participant */}
+      <AnimatePresence>
+        {showGiftPanel && (
+          <motion.div
+            className="ls-gift-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => { setShowGiftPanel(false); setSelectedParticipantForGift(null); }}
+          >
+            <motion.div
+              className="ls-gift-panel"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="ls-gift-panel-header">
+                <FiGift size={20} className="ls-gift-panel-icon" />
+                <h3>{t('liveGifts.panelTitle')}</h3>
+                <button className="ls-gift-panel-close" onClick={() => { setShowGiftPanel(false); setSelectedParticipantForGift(null); }}>
+                  <FiX size={16} />
+                </button>
+              </div>
+
+              {participants.length === 0 ? (
+                <p className="ls-gift-no-participants">{t('liveGifts.noParticipants')}</p>
+              ) : (
+                <>
+                  <p className="ls-gift-subtitle">{t('liveGifts.selectParticipant')}</p>
+                  <div className="ls-gift-participants-scroll">
+                    {participants.map(p => (
+                      <button
+                        key={p.socketId}
+                        className={`ls-gift-participant-btn${selectedParticipantForGift?.socketId === p.socketId ? ' selected' : ''}`}
+                        onClick={() => setSelectedParticipantForGift(p)}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {selectedParticipantForGift && (
+                    <>
+                      <p className="ls-gift-subtitle">{t('liveGifts.toParticipant', { name: selectedParticipantForGift.name })}</p>
+                      <div className="ls-gift-grid">
+                        {GIFTS.map(gift => (
+                          <button key={gift.id} className="ls-gift-item" onClick={() => handleSendGift(gift, selectedParticipantForGift)}>
+                            <span className="ls-gift-emoji">{gift.emoji}</span>
+                            <span className="ls-gift-name">{gift.name}</span>
+                            <span className="ls-gift-value">{gift.value}pts</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -421,6 +421,7 @@
     "startLive": "Iniciar",
     "previewTitle": "Vista previa de cámara",
     "previewDesc": "Comprueba tu cámara antes de iniciar el directo",
+    "descriptionPlaceholder": "Describe tu directo para atraer espectadores...",
     "goLive": "Iniciar directo",
     "cameraError": "No se puede acceder a la cámara",
     "permissionDenied": "Permite la cámara y el micrófono en la configuración del navegador",
@@ -468,6 +469,14 @@
     "joinedLive": "¡Te has unido al directo!",
     "requestRejected": "Solicitud rechazada",
     "liveEnded": "El directo ha terminado"
+  },
+  "liveGifts": {
+    "panelTitle": "Enviar un regalo",
+    "toStreamer": "Para {{name}}",
+    "selectParticipant": "Elige un participante",
+    "toParticipant": "Para {{name}}",
+    "noParticipants": "Sin participantes por ahora",
+    "sent": "¡Regalo enviado!"
   },
   "liveSurprise": {
     "quit": "Salir",

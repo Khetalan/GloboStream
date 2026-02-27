@@ -419,6 +419,7 @@
     "startLive": "Démarrer",
     "previewTitle": "Aperçu caméra",
     "previewDesc": "Vérifiez votre caméra avant de démarrer le live",
+    "descriptionPlaceholder": "Décrivez votre live pour attirer du monde...",
     "goLive": "Lancer le Live",
     "cameraError": "Impossible d'accéder à la caméra",
     "permissionDenied": "Autorisez la caméra et le micro dans les paramètres de votre navigateur",
@@ -466,6 +467,14 @@
     "joinedLive": "Vous avez rejoint le live !",
     "requestRejected": "Demande refusée",
     "liveEnded": "Le live est terminé"
+  },
+  "liveGifts": {
+    "panelTitle": "Envoyer un cadeau",
+    "toStreamer": "Pour {{name}}",
+    "selectParticipant": "Choisir un participant",
+    "toParticipant": "Pour {{name}}",
+    "noParticipants": "Aucun participant pour l'instant",
+    "sent": "Cadeau envoyé !"
   },
   "liveSurprise": {
     "quit": "Quitter",

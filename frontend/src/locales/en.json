@@ -421,6 +421,7 @@
     "startLive": "Start",
     "previewTitle": "Camera Preview",
     "previewDesc": "Check your camera before going live",
+    "descriptionPlaceholder": "Describe your live to attract viewers...",
     "goLive": "Go Live",
     "cameraError": "Unable to access camera",
     "permissionDenied": "Allow camera and microphone in your browser settings",
@@ -468,6 +469,14 @@
     "joinedLive": "You joined the live!",
     "requestRejected": "Request rejected",
     "liveEnded": "The live has ended"
+  },
+  "liveGifts": {
+    "panelTitle": "Send a gift",
+    "toStreamer": "To {{name}}",
+    "selectParticipant": "Choose a participant",
+    "toParticipant": "To {{name}}",
+    "noParticipants": "No participants for now",
+    "sent": "Gift sent!"
   },
   "liveSurprise": {
     "quit": "Quit",

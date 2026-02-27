@@ -15,6 +15,16 @@ import './LiveViewer.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Catalogue des cadeaux disponibles
+const GIFTS = [
+  { id: 'rose',    emoji: '🌹', name: 'Rose',     value: 1   },
+  { id: 'kiss',    emoji: '💋', name: 'Bisou',    value: 5   },
+  { id: 'heart',   emoji: '❤️', name: 'Cœur',     value: 10  },
+  { id: 'star',    emoji: '⭐', name: 'Étoile',   value: 20  },
+  { id: 'crown',   emoji: '👑', name: 'Couronne', value: 50  },
+  { id: 'diamond', emoji: '💎', name: 'Diamant',  value: 100 },
+];
+
 // Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
 const PEER_CONFIG = {
   iceServers: [
@@ -53,7 +63,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
   const [viewers, setViewers] = useState([]);
-  const [gifts] = useState([]);
+  const [giftScore, setGiftScore] = useState(0);
+  const [showGiftPanel, setShowGiftPanel] = useState(false);
   const [showJoinRulesModal, setShowJoinRulesModal] = useState(false);
   const [joinRulesAccepted, setJoinRulesAccepted] = useState(false);
 
@@ -258,6 +269,14 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       setIsStreamerMuted(isMuted);
     });
 
+    // Cadeau envoyé/reçu dans le salon
+    socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji }) => {
+      if (recipientType === 'streamer') {
+        setGiftScore(prev => prev + 1);
+      }
+      toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
+    });
+
     return () => {
       // N'émettre leave que si handleLeave ne l'a pas déjà fait (évite le double emit)
       if (!hasLeftRef.current) {
@@ -439,6 +458,20 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     onLeave();
   }, [roomId, onLeave]);
 
+  // Envoyer un cadeau au streamer (viewer/participant)
+  const handleSendGift = useCallback((gift) => {
+    if (!socketRef.current) return;
+    socketRef.current.emit('send-gift', {
+      roomId,
+      giftId: gift.id,
+      giftEmoji: gift.emoji,
+      giftName: gift.name,
+      giftValue: gift.value
+    });
+    setShowGiftPanel(false);
+    toast.success(t('liveGifts.sent'));
+  }, [roomId, t]);
+
   const toggleUiVisibility = useCallback(() => {
     setIsUiVisible(prev => !prev);
   }, []);
@@ -538,7 +571,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                     <FiEye /> {viewerCount}
                   </button>
                   <button className="lv-gift-count" onClick={(e) => { e.stopPropagation(); setActiveStatsTab('gifts'); setShowStatsPanel(true); }}>
-                    <FiGift /> {gifts.length}
+                    <FiGift /> {giftScore}
                   </button>
                 </div>
               </div>
@@ -618,7 +651,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                     <FiUserPlus size={20} />
                   </button>
                 )}
-                <button className="lv-control-btn gift-btn">
+                <button className="lv-control-btn gift-btn" onClick={(e) => { e.stopPropagation(); setShowGiftPanel(true); }}>
                   <FiGift size={20} />
                 </button>
               </div>
@@ -725,6 +758,47 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         )}
       </AnimatePresence>
 
+      {/* Panel Cadeaux — Viewer/Participant → Streamer */}
+      <AnimatePresence>
+        {showGiftPanel && (
+          <motion.div
+            className="lv-gift-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setShowGiftPanel(false)}
+          >
+            <motion.div
+              className="lv-gift-panel"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="lv-gift-panel-header">
+                <FiGift size={20} className="lv-gift-panel-icon" />
+                <h3>{t('liveGifts.panelTitle')}</h3>
+                <button className="lv-gift-panel-close" onClick={() => setShowGiftPanel(false)}>
+                  <FiX size={16} />
+                </button>
+              </div>
+              <p className="lv-gift-recipient">{t('liveGifts.toStreamer', { name: streamerName })}</p>
+              <div className="lv-gift-grid">
+                {GIFTS.map(gift => (
+                  <button key={gift.id} className="lv-gift-item" onClick={() => handleSendGift(gift)}>
+                    <span className="lv-gift-emoji">{gift.emoji}</span>
+                    <span className="lv-gift-name">{gift.name}</span>
+                    <span className="lv-gift-value">{gift.value}pts</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Panel Stats (Viewers/Gifts) */}
       {showStatsPanel && (
         <div className="lv-stats-overlay" onClick={() => setShowStatsPanel(false)} />
@@ -785,7 +859,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           <div className="lv-tab-content">
             <div className="lv-stats-total">
               <span className="lv-stats-total-label">{t('liveStream.totalGifts')}</span>
-              <span className="lv-stats-total-value">0</span>
+              <span className="lv-stats-total-value">{giftScore}</span>
             </div>
             <div className="lv-stats-list">
               {/* Liste des cadeaux vide pour l'instant */}

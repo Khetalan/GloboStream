@@ -421,6 +421,7 @@
     "startLive": "Starten",
     "previewTitle": "Kamera-Vorschau",
     "previewDesc": "Überprüfe deine Kamera bevor du live gehst",
+    "descriptionPlaceholder": "Beschreibe deinen Livestream, um Zuschauer anzulocken...",
     "goLive": "Live gehen",
     "cameraError": "Kein Zugriff auf die Kamera",
     "permissionDenied": "Erlaube Kamera und Mikrofon in deinen Browser-Einstellungen",
@@ -468,6 +469,14 @@
     "joinedLive": "Du bist dem Livestream beigetreten!",
     "requestRejected": "Anfrage abgelehnt",
     "liveEnded": "Der Livestream ist beendet"
+  },
+  "liveGifts": {
+    "panelTitle": "Geschenk senden",
+    "toStreamer": "An {{name}}",
+    "selectParticipant": "Teilnehmer wählen",
+    "toParticipant": "An {{name}}",
+    "noParticipants": "Derzeit keine Teilnehmer",
+    "sent": "Geschenk gesendet!"
   },
   "liveSurprise": {
     "quit": "Verlassen",
