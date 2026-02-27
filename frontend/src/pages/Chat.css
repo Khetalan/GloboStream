@@ -402,13 +402,15 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* Fix emoji-picker-react : les boutons catégorie doivent masquer l'état inactif */
-.chat-emoji-picker-dropdown .epr-cat-btn {
-  overflow: hidden !important;
-}
-/* Fix même problème dans TeamPage */
+/* Fix emoji-picker-react : les boutons catégorie empilent 2 icônes (inactive+active)
+   et les clip avec overflow:hidden + hauteur fixe.
+   Le CSS global du projet reset height:auto sur les boutons → les 2 icônes sont visibles.
+   On force ici overflow:hidden ET la hauteur exacte du bouton. */
+.chat-emoji-picker-dropdown .epr-cat-btn,
 .team-emoji-picker-dropdown .epr-cat-btn {
   overflow: hidden !important;
+  height: var(--epr-category-navigation-button-size, 30px) !important;
+  min-height: unset !important;
 }
 
 .chat-emoji-toggle.active {
