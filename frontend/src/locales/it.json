@@ -303,7 +303,7 @@
     "moreOptions": "Altre opzioni",
     "selectConversation": "Seleziona una conversazione",
     "selectConversationDesc": "Scegli un match per iniziare a chattare",
-    "messagePlaceholder": "Scrivi il tuo messaggio...",
+    "messagePlaceholder": "Scrivi...",
     "loadConversationsError": "Errore durante il caricamento delle conversazioni",
     "loadMessagesError": "Errore durante il caricamento dei messaggi",
     "sendError": "Errore durante l'invio"

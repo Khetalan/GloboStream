@@ -8,6 +8,30 @@
 
 ## En attente
 
+---
+
+## Terminées (session en cours)
+
+#### TÂCHE-042 — Corrections Chat : emoji picker dropdown + input mobile
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Facile
+- **Fichiers** : `frontend/src/pages/Chat.css`, `frontend/src/pages/Chat.js`, `frontend/src/locales/*.json`
+- **Résultat** : Retiré `overflow: hidden` du dropdown picker (clipping catégories). Ajout `style={{ borderRadius: '12px' }}` sur EmojiPicker. `min-width: 0` sur input + `.messages-input .btn-ghost` fixe 36px. Placeholder raccourci : "Écrivez..." / "Message..." / "Escribe..." / "Schreiben..." / "Scrivi..."
+
+#### TÂCHE-041 — Emoji picker sur la page Chat (conversations/matches)
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Facile
+- **Fichiers** : `frontend/src/pages/Chat.js`, `frontend/src/pages/Chat.css`
+- **Résultat** : EmojiPicker (toutes catégories) dans dropdown au-dessus de l'input. Bouton FiSmile toggle. Fix font-family emoji sur bulles et input.
+
+#### TÂCHE-040 — Emoji picker dropdown TeamPage (remplace grille 60 emojis)
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Facile
+- **Fichiers** : `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`
+- **Résultat** : emoji-picker-react v4.18.0, 7 catégories sans faces/persos/mains, skinTonesDisabled, dropdown click-outside.
+
+---
+
 #### TÂCHE-039 — Corrections CSS + Chat + Emoji + maxMembers + Infos Générales
 - **Statut** : IN_PROGRESS
 - **Modèle** : Sonnet | **Difficulté** : Facile-Moyenne

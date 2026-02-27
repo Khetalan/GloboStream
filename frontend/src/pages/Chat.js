@@ -342,6 +342,7 @@ const Chat = () => {
                       height={380}
                       width="100%"
                       previewConfig={{ showPreview: false }}
+                      style={{ borderRadius: '12px' }}
                     />
                   </div>
                 )}

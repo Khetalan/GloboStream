@@ -399,8 +399,6 @@
   left: 0;
   right: 0;
   z-index: 300;
-  border-radius: 12px;
-  overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
@@ -422,6 +420,7 @@
 
 .messages-input input {
   flex: 1;
+  min-width: 0;
   padding: 10px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -431,6 +430,16 @@
   transition: var(--transition);
   min-height: 44px;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+}
+
+.messages-input .btn-ghost {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .messages-input input:focus {

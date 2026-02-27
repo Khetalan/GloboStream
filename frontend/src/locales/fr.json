@@ -301,7 +301,7 @@
     "moreOptions": "Plus d'options",
     "selectConversation": "Sélectionnez une conversation",
     "selectConversationDesc": "Choisissez un match pour commencer à discuter",
-    "messagePlaceholder": "Écrivez votre message...",
+    "messagePlaceholder": "Écrivez...",
     "loadConversationsError": "Erreur lors du chargement des conversations",
     "loadMessagesError": "Erreur lors du chargement des messages",
     "sendError": "Erreur lors de l'envoi"
