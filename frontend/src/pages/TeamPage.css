@@ -1,0 +1,1350 @@
+/* ============================================================
+   TeamPage — Gestion d'équipe pour Live Compétition
+   ============================================================ */
+
+.team-page {
+  min-height: 100dvh;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.team-header {
+  z-index: 100;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team-header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* ── Barre d'onglets ──────────────────────────────────────── */
+.team-tabs {
+  z-index: 90;
+  display: flex;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.team-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.team-tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.18s;
+  white-space: nowrap;
+}
+
+.team-tab-btn svg {
+  font-size: 1.1rem;
+}
+
+.team-tab-btn.active {
+  color: #F59E0B;
+}
+
+.team-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: #F59E0B;
+  border-radius: 2px 2px 0 0;
+}
+
+.team-tab-badge {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  background: #EF4444;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Contenu principal ────────────────────────────────────── */
+.team-content {
+  padding: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Loading ──────────────────────────────────────────────── */
+.team-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding-top: 120px;
+}
+
+/* ── Pas d'équipe ─────────────────────────────────────────── */
+.team-no-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 100px 20px 120px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.team-no-team-emoji {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.team-no-team h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.team-no-team p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.team-create-btn {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Boutons no-team ──────────────────────────────────────── */
+.team-no-team-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 8px;
+}
+
+/* ── Listing équipes disponibles ──────────────────────────── */
+.team-loading-inline {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.team-empty-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.team-empty-list span {
+  font-size: 3rem;
+}
+
+.team-available-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team-available-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.team-available-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.team-available-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.team-available-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-available-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-available-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-closed-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 20px;
+  padding: 1px 7px;
+}
+
+.team-available-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.team-apply-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.18s, background 0.18s;
+}
+
+.team-apply-btn.primary {
+  background: #F59E0B;
+  color: #000;
+}
+
+.team-apply-btn.sent {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22C55E;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  cursor: default;
+}
+
+.team-apply-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Bulle candidatures (onglet Membres) ──────────────────── */
+.team-requests-bubble {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.team-requests-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #F59E0B;
+  margin: 0 0 10px;
+}
+
+.team-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-request-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-member-avatar.small {
+  width: 34px;
+  height: 34px;
+}
+
+.team-member-name.flex1 {
+  flex: 1;
+}
+
+/* ── Formulaire de création / édition ─────────────────────── */
+.team-create-form,
+.team-edit-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.team-create-form h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.team-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: -4px;
+}
+
+.team-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.team-input:focus {
+  border-color: #F59E0B;
+}
+
+.team-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.team-textarea:focus {
+  border-color: #F59E0B;
+}
+
+.team-create-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ── Liste des membres ────────────────────────────────────── */
+.team-member-count {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+  padding-top: 4px;
+}
+
+.team-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-member-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.team-member-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid #F59E0B;
+}
+
+.team-member-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.team-member-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.team-member-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.team-role-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 1px 8px;
+  align-self: flex-start;
+  border: 1px solid transparent;
+}
+
+.team-role-badge.role-captain {
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.team-role-badge.role-officer {
+  color: #94A3B8;
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.team-role-badge.role-member {
+  color: #60A5FA;
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.team-role-badge.role-nouveau {
+  color: var(--text-secondary);
+  background: rgba(128, 128, 128, 0.1);
+  border-color: rgba(128, 128, 128, 0.2);
+}
+
+.team-role-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.team-action-btn.promote {
+  color: #22C55E;
+  font-size: 0.85rem;
+}
+
+.team-action-btn.demote {
+  color: #F59E0B;
+  font-size: 0.85rem;
+}
+
+.team-kick-btn {
+  color: var(--text-secondary);
+  padding: 6px;
+}
+
+.team-kick-btn:hover {
+  color: #EF4444;
+}
+
+/* ── Infos équipe ─────────────────────────────────────────── */
+.team-info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.team-info-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.team-info-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.team-info-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+.team-info-empty {
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.team-info-competition {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #F59E0B;
+  margin: 0;
+}
+
+.team-edit-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ── Infos concours ───────────────────────────────────────── */
+.team-entries-section {
+  margin-top: 16px;
+}
+
+.team-entries-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.team-section-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.team-add-entry-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: #F59E0B;
+}
+
+.team-entries-empty {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 12px 0;
+  margin: 0;
+}
+
+.team-entry-bubble {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.team-entry-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team-entry-comp-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.team-entry-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.team-entry-edit,
+.team-entry-del {
+  padding: 5px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.team-entry-del:hover {
+  color: #EF4444;
+}
+
+.team-entry-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 6px;
+}
+
+.team-entry-avatars {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.team-entry-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.team-entry-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-entry-instructions {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Panel bottom sheet ───────────────────────────────────── */
+.team-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 400;
+  display: flex;
+  align-items: flex-end;
+}
+
+.team-panel-card {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border-radius: 24px 24px 0 0;
+  border: 1px solid var(--border);
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.team-panel-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.team-panel-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-panel-members {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.team-panel-member-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+
+.team-panel-member-btn.selected {
+  border-color: #F59E0B;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.team-panel-member-btn.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.team-panel-check {
+  margin-left: auto;
+  color: #F59E0B;
+  font-size: 0.9rem;
+}
+
+.team-panel-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* ── Gestion : identité */
+.team-manage-identity-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.team-manage-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.team-manage-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.team-edit-icon-btn {
+  padding: 6px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+/* ── Chat ─────────────────────────────────────────────────── */
+
+/* Barre membres connectés */
+.team-online-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.team-online-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.team-online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22C55E;
+  flex-shrink: 0;
+}
+
+.team-online-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #22C55E;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.team-online-avatars {
+  display: flex;
+  gap: 4px;
+}
+
+.team-online-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #22C55E;
+  flex-shrink: 0;
+}
+
+.team-online-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
+}
+
+.team-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin: 8px;
+}
+
+.team-chat-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: 40px 0;
+  margin: 0;
+}
+
+.team-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 78%;
+  gap: 4px;
+}
+
+.team-msg-me {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.team-msg-other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+/* Ligne avatar + nom */
+.team-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-msg-meta.me {
+  flex-direction: row-reverse;
+}
+
+.team-msg-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.team-msg-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-msg-author {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.team-msg-bubble {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.team-msg-me .team-msg-bubble {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  border-radius: 16px 4px 16px 16px;
+}
+
+.team-msg-other .team-msg-bubble {
+  border-radius: 4px 16px 16px 16px;
+}
+
+.team-msg-time {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.team-chat-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+}
+
+.team-chat-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.team-chat-input:focus {
+  border-color: #F59E0B;
+}
+
+.team-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #F59E0B;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.18s, transform 0.18s;
+}
+
+.team-send-btn:hover {
+  background: #D97706;
+  transform: scale(1.05);
+}
+
+.team-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Gestion ──────────────────────────────────────────────── */
+.team-section {
+  margin-bottom: 24px;
+  padding-top: 4px;
+}
+
+.team-section-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px;
+}
+
+.team-section-title.danger {
+  color: #EF4444;
+}
+
+.team-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.team-action-btn.accept {
+  color: #22C55E;
+}
+
+.team-action-btn.accept:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.team-action-btn.reject {
+  color: #EF4444;
+}
+
+.team-action-btn.reject:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* ── Toggle ouvert/fermé ──────────────────────────────────── */
+.team-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.team-toggle {
+  width: 44px;
+  height: 26px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.team-toggle.on {
+  background: #22C55E;
+  color: white;
+}
+
+.team-toggle.off {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+
+/* ── Danger zone ──────────────────────────────────────────── */
+.team-danger-zone {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.team-danger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  background: transparent;
+  color: #EF4444;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+  transition: background 0.18s;
+}
+
+.team-danger-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── FAB Quitter (non-capitaine) ──────────────────────────── */
+.team-leave-fab {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 50px;
+  background: var(--bg-card);
+  color: #EF4444;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.team-leave-fab:hover {
+  transform: translateX(-50%) scale(1.05);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── TAG badge (Gestion + LiveCompetition) ────────────────── */
+.team-tag-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 5px;
+  padding: 2px 7px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.team-manage-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Emoji picker dropdown ────────────────────────────────── */
+.team-emoji-trigger-wrapper {
+  position: relative;
+}
+
+.team-emoji-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text-primary);
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s;
+}
+
+.team-emoji-trigger-btn:hover {
+  border-color: #F59E0B;
+}
+
+.team-emoji-trigger-current {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.team-emoji-trigger-label {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.team-emoji-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 300;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ── TAG input + preview ──────────────────────────────────── */
+.team-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-tag-input {
+  width: 90px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.team-tag-preview {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 5px;
+  padding: 3px 8px;
+  letter-spacing: 0.05em;
+}
+
+/* ── Color swatches ───────────────────────────────────────── */
+.team-color-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.team-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.team-color-swatch.selected {
+  border-color: #fff;
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+/* ── Transfert capitaine ──────────────────────────────────── */
+.team-danger-btn.transfer {
+  color: #F59E0B;
+  border-color: rgba(245, 158, 11, 0.3);
+  margin-bottom: 0;
+}
+
+.team-danger-btn.transfer:hover {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.team-danger-btn.confirm {
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.team-transfer-form {
+  background: var(--bg-input);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-transfer-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ── Infos Générales (onglet Infos) ───────────────────────── */
+.team-general-info-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.team-general-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.team-general-info-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #F59E0B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.team-general-info-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.team-general-info-empty {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.team-general-info-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-general-info-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── 768px+ ───────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .team-content {
+    padding: 8px 16px;
+  }
+}

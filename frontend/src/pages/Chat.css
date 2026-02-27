@@ -373,6 +373,7 @@
   word-wrap: break-word;
   line-height: 1.5;
   font-size: 0.95rem;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
 }
 
 .message-time {
@@ -384,6 +385,36 @@
 
 .message.own .message-time {
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Emoji picker (Chat page) ─────────────────────────────── */
+.chat-input-area {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chat-emoji-picker-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Fix emoji-picker-react : les boutons catégorie empilent 2 icônes (inactive+active)
+   et les clip avec overflow:hidden + hauteur fixe.
+   Le CSS global du projet reset height:auto sur les boutons → les 2 icônes sont visibles.
+   On force ici overflow:hidden ET la hauteur exacte du bouton. */
+.chat-emoji-picker-dropdown .epr-cat-btn,
+.team-emoji-picker-dropdown .epr-cat-btn {
+  overflow: hidden !important;
+  height: var(--epr-category-navigation-button-size, 30px) !important;
+  min-height: unset !important;
+}
+
+.chat-emoji-toggle.active {
+  color: var(--primary);
 }
 
 /* ── Input ─────────────────────────────────────────────────── */
@@ -400,6 +431,7 @@
 
 .messages-input input {
   flex: 1;
+  min-width: 0;
   padding: 10px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -408,6 +440,17 @@
   font-size: 1rem;
   transition: var(--transition);
   min-height: 44px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+}
+
+.messages-input .btn-ghost {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .messages-input input:focus {

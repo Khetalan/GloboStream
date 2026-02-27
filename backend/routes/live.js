@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const { liveRooms } = require('../socketHandlers/liveRoom');
 
 // Toutes les routes nécessitent l'authentification
 router.use(authMiddleware);
@@ -48,6 +49,14 @@ router.get('/public', async (req, res) => {
         distance = R * c;
       }
 
+      // Lire les vraies données depuis liveRooms (Socket.IO in-memory)
+      const roomId = `live-${user._id}`;
+      const room = liveRooms.get(roomId);
+      const viewersCount = room ? (room.viewers.size + room.participants.size) : 0;
+      const durationSeconds = room ? Math.floor((Date.now() - room.createdAt) / 1000) : 0;
+      const liveDescription = room?.description || '';
+      const roomTitle = room?.title || `Live de ${user.displayName || user.firstName}`;
+
       return {
         _id: user._id,
         streamer: {
@@ -57,14 +66,15 @@ router.get('/public', async (req, res) => {
           photos: user.photos,
           isVerified: user.isVerified
         },
-        title: `Live de ${user.displayName || user.firstName}`,
+        title: roomTitle,
+        description: liveDescription,
         thumbnail: user.photos?.[0]?.url || null,
-        viewersCount: Math.floor(Math.random() * 100) + 5, // Simulé
-        duration: Math.floor(Math.random() * 3600), // Simulé en secondes
-        tags: ['Rencontres', 'Discussion'],
+        viewersCount,
+        duration: durationSeconds,
+        tags: room?.tags || ['Rencontres', 'Discussion'],
         distance: distance,
         isFavorite: favoriteSet.has(user._id.toString()),
-        startedAt: new Date()
+        startedAt: room ? new Date(room.createdAt) : new Date()
       };
     });
 

@@ -9,13 +9,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiUsers,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
-  FiUserPlus, FiCheck, FiSlash
+  FiUserPlus, FiCheck, FiSlash, FiEdit2, FiAlertTriangle
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
 import './LiveStream.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+// Catalogue des cadeaux disponibles
+const GIFTS = [
+  { id: 'rose',    emoji: '🌹', name: 'Rose',     value: 1   },
+  { id: 'kiss',    emoji: '💋', name: 'Bisou',    value: 5   },
+  { id: 'heart',   emoji: '❤️', name: 'Cœur',     value: 10  },
+  { id: 'star',    emoji: '⭐', name: 'Étoile',   value: 20  },
+  { id: 'crown',   emoji: '👑', name: 'Couronne', value: 50  },
+  { id: 'diamond', emoji: '💎', name: 'Diamant',  value: 100 },
+];
 
 // Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
 const PEER_CONFIG = {
@@ -25,11 +35,23 @@ const PEER_CONFIG = {
   ]
 };
 
+// Thèmes disponibles pour le mode event (partagé avec LiveEvent.js)
+const EVENT_THEMES = [
+  { id: 'music',      label: 'Musique',    emoji: '🎵', color: '#8b5cf6' },
+  { id: 'gaming',     label: 'Gaming',     emoji: '🎮', color: '#3b82f6' },
+  { id: 'sport',      label: 'Sport',      emoji: '🏋️', color: '#10b981' },
+  { id: 'cuisine',    label: 'Cuisine',    emoji: '🍳', color: '#f59e0b' },
+  { id: 'beauty',     label: 'Beauté',     emoji: '💄', color: '#ec4899' },
+  { id: 'travel',     label: 'Voyage',     emoji: '✈️', color: '#06b6d4' },
+  { id: 'art',        label: 'Art',        emoji: '🎨', color: '#f97316' },
+  { id: 'discussion', label: 'Discussion', emoji: '💬', color: '#6b7280' },
+];
+
 /**
  * Composant LiveStream (côté streamer)
  * Flow : montage → getUserMedia → preview → "Go Live" → crée salon Socket.IO → WebRTC peers
  */
-const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }) => {
+const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, theme = null }) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -40,20 +62,28 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
 
   // États live
   const [participants, setParticipants] = useState([]);
+  const [hiddenParticipants, setHiddenParticipants] = useState(new Set());
   const [, setLocalStream] = useState(null);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
-  const [giftCount] = useState(0);
+  const [giftCount, setGiftCount] = useState(0);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
   const [viewers, setViewers] = useState([]);
-  const [gifts] = useState([]);
+  const [gifts, setGifts] = useState([]);
+  const [showGiftPanel, setShowGiftPanel] = useState(false);
+  const [selectedParticipantForGift, setSelectedParticipantForGift] = useState(null);
   const [joinRequests, setJoinRequests] = useState([]);
   const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
   const [isUiVisible, setIsUiVisible] = useState(true);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [rulesAccepted, setRulesAccepted] = useState(false);
+  const [liveDescription, setLiveDescription] = useState('');
+  const [selectedEventTheme, setSelectedEventTheme] = useState(theme);
 
   // Refs
   const chatRef = useRef(null);
@@ -171,6 +201,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         username: 'System',
         text: t('liveStream.userLeft', { name: displayName }),
         isSystem: true,
+        isJoinEvent: true,
         isOwn: false,
         photoUrl: null
       }]);
@@ -268,9 +299,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     });
 
     // Message chat reçu — TÂCHE-017 : photoUrl
-    socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+    socket.on('live-chat-message', ({ username, text, lang, timestamp, photoUrl: msgPhotoUrl }) => {
       const info = viewersInfoRef.current.get(username);
-      const photoUrl = info?.photoUrl || null;
+      const photoUrl = msgPhotoUrl || info?.photoUrl || null;
       const userId = info?.userId || null;
       setMessages(prev => [...prev, {
         id: `msg-${timestamp}-${Math.random()}`,
@@ -322,6 +353,23 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         participantPeersRef.current.delete(participantSocketId);
       }
       setParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
+    });
+
+    // Cadeau reçu par le streamer ou un participant
+    socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji, giftValue }) => {
+      if (recipientType === 'streamer') {
+        setGiftCount(prev => prev + 1);
+        setGifts(prev => {
+          const idx = prev.findIndex(g => g.name === senderName);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], gifts: updated[idx].gifts + giftValue };
+            return [...updated].sort((a, b) => b.gifts - a.gifts);
+          }
+          return [...prev, { name: senderName, gifts: giftValue }].sort((a, b) => b.gifts - a.gifts);
+        });
+      }
+      toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
     });
 
     // Enregistrer l'utilisateur
@@ -422,9 +470,12 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       socketRef.current.emit('create-live-room', {
         mode: mode,
         title: `Live de ${streamerName}`,
-        tags: ['Rencontres', 'Discussion'],
+        tags: [
+          ...(mode === 'event' && selectedEventTheme ? [selectedEventTheme.id] : []),
+        ],
         userId: user?._id,
-        displayName: streamerName
+        displayName: streamerName,
+        description: liveDescription
       });
 
       // Le passage à isLive se fait dans le listener 'room-created'
@@ -581,6 +632,33 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     toast.success(newMuteState ? t('liveStream.participantMuted', { name: participant.name }) : t('liveStream.participantUnmuted', { name: participant.name }));
   }, [t]);
 
+  // Expulser un spectateur du live (streamer uniquement) — TÂCHE-024
+  const handleKickViewer = useCallback((viewer) => {
+    if (!socketRef.current || !roomIdRef.current) return;
+    socketRef.current.emit('streamer-kick-participant', {
+      roomId: roomIdRef.current,
+      participantSocketId: viewer.socketId,
+    });
+    setViewers(prev => prev.filter(v => v.socketId !== viewer.socketId));
+    toast.success(t('liveStream.participantKicked', { name: viewer.name }));
+  }, [t]);
+
+  // Envoyer un cadeau à un participant (streamer uniquement)
+  const handleSendGift = useCallback((gift, participant) => {
+    if (!socketRef.current || !roomIdRef.current || !participant) return;
+    socketRef.current.emit('send-gift', {
+      roomId: roomIdRef.current,
+      giftId: gift.id,
+      giftEmoji: gift.emoji,
+      giftName: gift.name,
+      giftValue: gift.value,
+      recipientSocketId: participant.socketId
+    });
+    setShowGiftPanel(false);
+    setSelectedParticipantForGift(null);
+    toast.success(t('liveGifts.sent'));
+  }, [t]);
+
   // Composant vidéo participant avec ref callback
   const ParticipantVideo = ({ stream }) => {
     const videoRef = useRef(null);
@@ -634,8 +712,36 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           </div>
           <h3 className="ls-preview-title">{t('liveStream.previewTitle')}</h3>
           <p className="ls-preview-desc">{t('liveStream.previewDesc')}</p>
+          <textarea
+            className="ls-description-input"
+            placeholder={t('liveStream.descriptionPlaceholder')}
+            value={liveDescription}
+            onChange={(e) => setLiveDescription(e.target.value)}
+            maxLength={150}
+            rows={2}
+          />
+          {mode === 'event' && (
+            <div className="ls-theme-selector">
+              <label className="ls-theme-selector-label">
+                {t('liveEvent.chooseTheme')}
+              </label>
+              <div className="ls-theme-chips">
+                {EVENT_THEMES.map(th => (
+                  <button
+                    key={th.id}
+                    type="button"
+                    className={`ls-theme-chip ${selectedEventTheme?.id === th.id ? 'active' : ''}`}
+                    style={{ '--theme-color': th.color }}
+                    onClick={() => setSelectedEventTheme(th)}
+                  >
+                    {th.emoji} {th.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {user?.photos?.length > 0 ? (
-            <button className="ls-go-live-btn" onClick={handleGoLive}>
+            <button className="ls-go-live-btn" onClick={() => setShowRulesModal(true)}>
               <FiPlay size={20} />
               <span>{t('liveStream.goLive')}</span>
             </button>
@@ -649,6 +755,86 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             <span>{t('common.back')}</span>
           </button>
         </div>
+
+        {/* Modale — Règles de diffusion */}
+        <AnimatePresence>
+          {showRulesModal && (
+            <motion.div
+              className="ls-rules-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                className="ls-rules-modal"
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                {/* En-tête */}
+                <div className="ls-rules-header">
+                  <FiAlertTriangle size={22} className="ls-rules-header-icon" />
+                  <h3>{t('liveStream.rules.title')}</h3>
+                </div>
+                <p className="ls-rules-subtitle">{t('liveStream.rules.subtitle')}</p>
+
+                {/* Liste des règles */}
+                <ul className="ls-rules-list">
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🔞</span>
+                    <span>{t('liveStream.rules.nudity')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🚫</span>
+                    <span>{t('liveStream.rules.racism')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🚫</span>
+                    <span>{t('liveStream.rules.politics')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">🚫</span>
+                    <span>{t('liveStream.rules.religion')}</span>
+                  </li>
+                  <li className="ls-rule-item">
+                    <span className="ls-rule-icon">⚠️</span>
+                    <span>{t('liveStream.rules.violence')}</span>
+                  </li>
+                </ul>
+
+                {/* Case à cocher */}
+                <label className="ls-rules-accept">
+                  <input
+                    type="checkbox"
+                    checked={rulesAccepted}
+                    onChange={(e) => setRulesAccepted(e.target.checked)}
+                  />
+                  <span>{t('liveStream.rules.accept')}</span>
+                </label>
+
+                {/* Boutons */}
+                <div className="ls-rules-actions">
+                  <button
+                    className="ls-rules-cancel-btn"
+                    onClick={() => { setShowRulesModal(false); setRulesAccepted(false); }}
+                  >
+                    {t('liveStream.rules.cancel')}
+                  </button>
+                  <button
+                    className="ls-rules-start-btn"
+                    disabled={!rulesAccepted}
+                    onClick={() => { setShowRulesModal(false); handleGoLive(); }}
+                  >
+                    <FiPlay size={16} />
+                    {t('liveStream.rules.start')}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -679,33 +865,54 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const streamerPhoto = user.photos?.find(p => p.isPrimary)?.url || user.photos?.[0]?.url;
 
   const renderParticipantCards = () => {
-    return participants.map((p, i) => (
-      <div key={p.socketId || i} className="ls-video-card user">
-        <div className="ls-video-placeholder">
-          {p.isCamOff ? (
-            <div className="ls-video-placeholder cam-off">
-              {p.photoUrl ? (
-                <img src={p.photoUrl} alt={p.name} className="ls-cam-off-photo" />
-              ) : (
-                <div className="ls-cam-off-avatar">{p.name.charAt(0)}</div>
-              )}
-              <div className="ls-cam-off-name">{p.name}</div>
-            </div>
-          ) : (
-            p.stream ? <ParticipantVideo stream={p.stream} /> : <FiVideo size={32} />
+    return participants.map((p, i) => {
+      // Carte masquée localement par le streamer
+      if (hiddenParticipants.has(p.socketId)) return null;
+
+      return (
+        <div key={p.socketId || i} className="ls-video-card user">
+          <div className="ls-video-placeholder">
+            {p.isCamOff ? (
+              <div className="ls-video-placeholder cam-off">
+                {p.photoUrl ? (
+                  <img src={p.photoUrl} alt={p.name} className="ls-cam-off-photo" />
+                ) : (
+                  <div className="ls-cam-off-avatar">{p.name.charAt(0)}</div>
+                )}
+                <div className="ls-cam-off-name">{p.name}</div>
+              </div>
+            ) : (
+              p.stream ? <ParticipantVideo stream={p.stream} /> : <FiVideo size={32} />
+            )}
+          </div>
+          <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
+          <div className="ls-participant-controls">
+            {/* Micro : icône dynamique selon état muté */}
+            <button
+              className={`ls-participant-ctrl-btn mic-btn ${p.isMutedByStreamer ? 'muted' : ''}`}
+              onClick={(e) => { e.stopPropagation(); handleToggleMuteParticipant(p); }}
+              title={p.isMutedByStreamer ? t('liveStream.unmuteParticipant') : t('liveStream.muteParticipant')}
+            >
+              {p.isMutedByStreamer ? <FiMicOff size={14} /> : <FiMic size={14} />}
+            </button>
+            {/* X : masquer la carte localement (le participant reste dans le live) */}
+            <button
+              className="ls-participant-ctrl-btn hide-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setHiddenParticipants(prev => new Set([...prev, p.socketId]));
+              }}
+              title={t('liveStream.hideParticipant')}
+            >
+              <FiX size={14} />
+            </button>
+          </div>
+          {p.isMutedByStreamer && (
+            <div className="ls-mic-muted"><FiMicOff size={13} /></div>
           )}
         </div>
-        <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
-        <div className="ls-participant-controls">
-          <button className="ls-participant-ctrl-btn" onClick={() => handleToggleMuteParticipant(p)} title={p.isMutedByStreamer ? t('liveStream.unmuteParticipant') : t('liveStream.muteParticipant')}>
-            <FiMicOff size={14} />
-          </button>
-        </div>
-        {p.isMutedByStreamer && (
-          <div className="ls-mic-muted"><FiMicOff size={13} /></div>
-        )}
-      </div>
-    ));
+      );
+    });
   };
 
   return (
@@ -775,6 +982,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
                   </button>
                 </div>
               </div>
+              {/* Bouton quitter — déplacé depuis la barre du bas — TÂCHE-024 */}
+              <button
+                className="ls-top-quit"
+                onClick={(e) => { e.stopPropagation(); handleQuit(); }}
+                title={t('liveStream.stopStream')}
+              >
+                <FiX size={20} />
+              </button>
             </div>
 
             {/* Chat — TÂCHE-017 : photo spectateur */}
@@ -818,29 +1033,59 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
               ))}
             </div>
 
+            {/* Panel de saisie du chat (slide-up au-dessus de la barre) */}
+            <AnimatePresence>
+              {showChatPanel && (
+                <motion.div
+                  className="ls-chat-panel"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <input
+                    type="text"
+                    className="ls-chat-panel-input"
+                    placeholder={t('liveStream.chatPlaceholder')}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') { handleSendMessage(); setShowChatPanel(false); }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    className="ls-chat-panel-send"
+                    onClick={() => { handleSendMessage(); setShowChatPanel(false); }}
+                  >
+                    <FiSend size={16} />
+                  </button>
+                  <button
+                    className="ls-chat-panel-close"
+                    onClick={() => { setChatInput(''); setShowChatPanel(false); }}
+                  >
+                    <FiX size={16} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Barre du bas */}
             <div className="ls-bottom-bar">
-              <div className="ls-input-container">
-                <input
-                  type="text"
-                  placeholder={t('liveStream.chatPlaceholder')}
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-                {chatInput.trim() && (
-                  <button className="ls-send-btn" onClick={handleSendMessage}>
-                    <FiSend size={18} />
-                  </button>
-                )}
-              </div>
+              <button
+                className="ls-write-btn"
+                onClick={() => setShowChatPanel(prev => !prev)}
+              >
+                <FiEdit2 size={16} />
+                <span>{t('liveStream.writeBtn')}</span>
+              </button>
 
               <div className="ls-controls-left">
                 <button className="ls-control-btn requests-btn" onClick={(e) => { e.stopPropagation(); setShowJoinRequestsPanel(true); }}>
                   <FiUsers size={20} />
                   {joinRequests.length > 0 && <span className="ls-requests-count">{joinRequests.length}</span>}
                 </button>
-                <button className="ls-control-btn gift-btn">
+                <button className="ls-control-btn gift-btn" onClick={(e) => { e.stopPropagation(); setShowGiftPanel(true); }}>
                   <FiGift size={20} />
                 </button>
               </div>
@@ -852,9 +1097,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
                 <button className={`ls-control-btn ${isCamOff ? 'off' : ''}`} onClick={toggleCam}>
                   {isCamOff ? <FiVideoOff size={20} /> : <FiVideo size={20} />}
                 </button>
-                <button className="ls-control-btn stop-stream" onClick={handleQuit}>
-                  <FiX size={20} />
-                </button>
+                {/* stop-stream déplacé dans ls-top-bar — TÂCHE-024 */}
               </div>
             </div>
           </motion.div>
@@ -911,6 +1154,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
                       <div className="ls-stats-badge">{v.joinedAt}</div>
                     </div>
                   </div>
+                  {/* Bouton Kick — streamer uniquement */}
+                  <button
+                    className="ls-kick-btn"
+                    onClick={(e) => { e.stopPropagation(); handleKickViewer(v); }}
+                    title={t('liveStream.kickParticipant')}
+                  >
+                    <FiSlash size={14} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -982,6 +1233,70 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
           )}
         </div>
       </div>
+      {/* Panel Cadeaux — Streamer → Participant */}
+      <AnimatePresence>
+        {showGiftPanel && (
+          <motion.div
+            className="ls-gift-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => { setShowGiftPanel(false); setSelectedParticipantForGift(null); }}
+          >
+            <motion.div
+              className="ls-gift-panel"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="ls-gift-panel-header">
+                <FiGift size={20} className="ls-gift-panel-icon" />
+                <h3>{t('liveGifts.panelTitle')}</h3>
+                <button className="ls-gift-panel-close" onClick={() => { setShowGiftPanel(false); setSelectedParticipantForGift(null); }}>
+                  <FiX size={16} />
+                </button>
+              </div>
+
+              {participants.length === 0 ? (
+                <p className="ls-gift-no-participants">{t('liveGifts.noParticipants')}</p>
+              ) : (
+                <>
+                  <p className="ls-gift-subtitle">{t('liveGifts.selectParticipant')}</p>
+                  <div className="ls-gift-participants-scroll">
+                    {participants.map(p => (
+                      <button
+                        key={p.socketId}
+                        className={`ls-gift-participant-btn${selectedParticipantForGift?.socketId === p.socketId ? ' selected' : ''}`}
+                        onClick={() => setSelectedParticipantForGift(p)}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {selectedParticipantForGift && (
+                    <>
+                      <p className="ls-gift-subtitle">{t('liveGifts.toParticipant', { name: selectedParticipantForGift.name })}</p>
+                      <div className="ls-gift-grid">
+                        {GIFTS.map(gift => (
+                          <button key={gift.id} className="ls-gift-item" onClick={() => handleSendGift(gift, selectedParticipantForGift)}>
+                            <span className="ls-gift-emoji">{gift.emoji}</span>
+                            <span className="ls-gift-name">{gift.name}</span>
+                            <span className="ls-gift-value">{gift.value}pts</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

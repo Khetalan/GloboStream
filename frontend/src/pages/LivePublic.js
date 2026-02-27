@@ -21,6 +21,14 @@ const LivePublic = () => {
   // État : navigation entre liste et interface live
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Restaurer l'interface live si le streamer recharge la page pendant son live
+  useEffect(() => {
+    if (user?.isLive) {
+      setIsStreaming(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [activeTab, setActiveTab] = useState('trending');
   const [liveStreams, setLiveStreams] = useState([]);
   const [filteredStreams, setFilteredStreams] = useState([]);
@@ -37,6 +45,25 @@ const LivePublic = () => {
 
   useEffect(() => {
     loadLiveStreams();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Rafraîchissement silencieux toutes les 30s (sans spinner)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await axios.get('/api/live/public', {
+          params: {
+            filter: activeTab,
+            mode: 'public',
+            userLat: user?.location?.coordinates?.[1],
+            userLon: user?.location?.coordinates?.[0]
+          }
+        });
+        setLiveStreams(response.data.streams || []);
+      } catch { /* silencieux */ }
+    }, 30000);
+    return () => clearInterval(interval);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
@@ -250,6 +277,13 @@ const LivePublic = () => {
 
 const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
   const { t } = useTranslation();
+  const [elapsed, setElapsed] = useState(stream.duration || 0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setElapsed(e => e + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const primaryPhoto = stream.streamer.photos?.find(p => p.isPrimary) || stream.streamer.photos?.[0];
 
   // Calcul de l'âge si birthDate disponible
@@ -289,9 +323,9 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
         )}
 
         {/* Durée du live */}
-        {stream.duration && (
+        {elapsed > 0 && (
           <div className="stream-duration">
-            {formatDuration(stream.duration)}
+            {formatDuration(elapsed)}
           </div>
         )}
       </div>
@@ -316,18 +350,6 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
                 <span className="verified-badge">✓</span>
               )}
             </p>
-            <div className="stream-meta">
-              {stream.viewersCount > 0 && (
-                <span className="meta-viewers">
-                  <FiEye size={11} /> {stream.viewersCount}
-                </span>
-              )}
-              {stream.duration && (
-                <span className="meta-timer">
-                  {formatDuration(stream.duration)}
-                </span>
-              )}
-            </div>
           </div>
 
           <button
@@ -340,6 +362,9 @@ const StreamCard = ({ stream, onJoin, onToggleFavorite }) => {
             <FiHeart />
           </button>
         </div>
+        {stream.description && (
+          <p className="stream-description">{stream.description}</p>
+        )}
       </div>
     </div>
   );

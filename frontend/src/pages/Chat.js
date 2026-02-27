@@ -9,8 +9,9 @@ import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import {
   FiArrowLeft, FiHeart, FiSend, FiImage, FiMoreVertical,
-  FiPhone, FiVideo, FiSearch
+  FiPhone, FiVideo, FiSearch, FiSmile
 } from 'react-icons/fi';
+import EmojiPicker from 'emoji-picker-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import './Chat.css';
@@ -32,6 +33,8 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   useEffect(() => {
     // Connexion WebSocket
@@ -149,6 +152,18 @@ const Chat = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Fermer le picker emoji au clic en dehors
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handleClickOutside = (e) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
 
   if (loading) {
     return (
@@ -316,29 +331,52 @@ const Chat = () => {
                 </div>
               </div>
 
-              {/* Input */}
-              <form className="messages-input" onSubmit={handleSendMessage}>
-                <button type="button" className="btn btn-ghost">
-                  <FiImage />
-                </button>
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => {
-                    setNewMessage(e.target.value);
-                    handleTyping();
-                  }}
-                  placeholder={t('chat.messagePlaceholder')}
-                  disabled={sending}
-                />
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                  disabled={!newMessage.trim() || sending}
-                >
-                  {sending ? <div className="loading"></div> : <FiSend />}
-                </button>
-              </form>
+              {/* Input + Emoji picker */}
+              <div className="chat-input-area" ref={emojiPickerRef}>
+                {showEmojiPicker && (
+                  <div className="chat-emoji-picker-dropdown">
+                    <EmojiPicker
+                      onEmojiClick={(emojiData) => {
+                        setNewMessage(prev => prev + emojiData.emoji);
+                      }}
+                      height={380}
+                      width="100%"
+                      skinTonesDisabled
+                      previewConfig={{ showPreview: false }}
+                      style={{ borderRadius: '12px' }}
+                    />
+                  </div>
+                )}
+                <form className="messages-input" onSubmit={handleSendMessage}>
+                  <button type="button" className="btn btn-ghost">
+                    <FiImage />
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn btn-ghost chat-emoji-toggle ${showEmojiPicker ? 'active' : ''}`}
+                    onClick={() => setShowEmojiPicker(prev => !prev)}
+                  >
+                    <FiSmile />
+                  </button>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      handleTyping();
+                    }}
+                    placeholder={t('chat.messagePlaceholder')}
+                    disabled={sending}
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={!newMessage.trim() || sending}
+                  >
+                    {sending ? <div className="loading"></div> : <FiSend />}
+                  </button>
+                </form>
+              </div>
             </>
           ) : (
             <div className="no-conversation-selected">

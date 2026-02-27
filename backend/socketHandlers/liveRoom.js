@@ -14,7 +14,7 @@ const liveRooms = new Map();
 function setupLiveRoomHandlers(io, socket) {
 
   // ── Créer un salon ──
-  socket.on('create-live-room', ({ mode, title, tags, userId, displayName }) => {
+  socket.on('create-live-room', ({ mode, title, tags, userId, displayName, description }) => {
     try {
       const roomId = `live-${userId}`;
 
@@ -25,6 +25,7 @@ function setupLiveRoomHandlers(io, socket) {
         mode: mode || 'public',
         title: title || 'Live',
         tags: tags || [],
+        description: description || '',
         viewers: new Map(),
         participants: new Map(),
         createdAt: Date.now()
@@ -264,6 +265,18 @@ function setupLiveRoomHandlers(io, socket) {
     }
   });
 
+  // ── Expulser un spectateur ou participant (streamer uniquement) — TÂCHE-024
+  socket.on('streamer-kick-participant', ({ roomId, participantSocketId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room || room.streamerSocketId !== socket.id) return;
+      // Le participant reçoit l'événement, émet leave-live-room et gère le cleanup
+      io.to(participantSocketId).emit('kicked-from-room', {});
+    } catch (error) {
+      console.error('Error kicking participant:', error);
+    }
+  });
+
   // ── État caméra d'un participant → relayer au streamer ── TÂCHE-003
   socket.on('participant-cam-state', ({ roomId, isCamOff }) => {
     try {
@@ -288,6 +301,54 @@ function setupLiveRoomHandlers(io, socket) {
       socket.to(roomId).emit('streamer-mic-state', { isMuted });
     } catch (error) {
       console.error('Error relaying mic state:', error);
+    }
+  });
+
+  // ── Envoyer un cadeau ──
+  socket.on('send-gift', ({ roomId, giftId, giftEmoji, giftName, giftValue, recipientSocketId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room) return;
+
+      const isStreamer = room.streamerSocketId === socket.id;
+      const viewerInfo = room.viewers.get(socket.id);
+      const participantInfo = room.participants.get(socket.id);
+      const senderInfo = viewerInfo || participantInfo;
+      const senderName = isStreamer ? room.displayName : (senderInfo?.displayName || 'Anonyme');
+
+      let finalRecipientSocketId;
+      let recipientName;
+      let recipientType;
+
+      if (isStreamer) {
+        // Le streamer peut offrir uniquement à un participant (protection anti-triche : pas à lui-même)
+        const participant = room.participants.get(recipientSocketId);
+        if (!participant) return;
+        finalRecipientSocketId = recipientSocketId;
+        recipientName = participant.displayName;
+        recipientType = 'participant';
+      } else {
+        // Viewer/Participant offre toujours au streamer
+        finalRecipientSocketId = room.streamerSocketId;
+        recipientName = room.displayName;
+        recipientType = 'streamer';
+      }
+
+      io.to(roomId).emit('gift-received', {
+        senderName,
+        recipientName,
+        recipientSocketId: finalRecipientSocketId,
+        giftId,
+        giftEmoji,
+        giftName,
+        giftValue: giftValue || 1,
+        recipientType,
+        timestamp: Date.now()
+      });
+
+      console.log(`Gift ${giftId} (×${giftValue}) : ${senderName} → ${recipientName} [${roomId}]`);
+    } catch (error) {
+      console.error('Error sending gift:', error);
     }
   });
 
@@ -409,6 +470,7 @@ function getActiveRooms(mode) {
         mode: room.mode,
         title: room.title,
         tags: room.tags,
+        description: room.description || '',
         viewerCount: room.viewers.size,
         participantCount: room.participants.size,
         createdAt: room.createdAt

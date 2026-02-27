@@ -1608,4 +1608,89 @@ Suite directe de la Session 19. Correctifs UX sur la page LivePublic, nettoyage 
 - Build : `Compiled with warnings` — 3 warnings pré-existants non liés à ce travail (App.js `t` unused, Matches.js hook deps, Profile.js `FiMapPin`)
 - TÂCHE-021 (EN ATTENTE) : Bouton FAB dans LiveCompetition + LiveEvent quand ces pages seront créées
 
+---
+
+## Session 21 : Compétitions + Thématiques (27 Février 2026)
+**Date** : 27 Février 2026
+**Branche** : `claude-work`
+**Commits** : `1c95cd1` (7 fixes T6+T2+T7), en cours (TÂCHE-022 + TÂCHE-023)
+**Status** : En cours 🔄
+
+### Contexte
+Suite de la Session 20. Corrections de bugs (T6 header LiveSurprise, T2 PiP cam-off, T7 filtre langues Surprise) puis refonte complète de LiveCompetition et LiveEvent.
+
+### Ce qui a été fait
+
+#### Commit 1c95cd1 — 7 correctifs (T6 + T2 + T7)
+
+**T6 — LiveSurprise : header fixe manquant**
+- `LiveSurprise.css` : ajout `.lspr-header` (fixed, glassmorphism blur), padding-top sur `.lspr-start-screen` et `.lspr-searching-screen`
+
+**T2 — LiveViewer : PiP camera-off**
+- `LiveViewer.js` : section PiP affiche photo de profil ou initiale quand `isCamOff = true`
+- `LiveViewer.css` : classe `.lv-cam-off-cover` (overlay 100%, photo centrée, fond noir)
+
+**T7 — LiveSurprise : filtre langue**
+- `LiveSurprise.js` : état `selectedLanguages`, initialisation depuis `i18n.language + user.languages`, UI checkbox `.lspr-lang-chip`, envoi `languages` dans `join-surprise-queue`
+- `surprise.js` (backend) : stockage langues dans filters depuis profil user, `findPartner()` vérifie intersection de langues avant appairage
+- `LiveSurprise.css` : `.lspr-lang-checkboxes`, `.lspr-lang-chip`, `.lspr-lang-chip.selected`
+- 5 locales : clé `liveSurprise.filterLanguages`
+
+#### TÂCHE-022 — LiveCompetition : Refonte card grid
+
+**Fichiers** : `LiveCompetition.js`, `LiveCompetition.css`, `locales/*.json`
+
+- **LiveCompetition.js** : réécriture complète. Suppression du home screen (icône + features). Ajout `CompStreamCard` (photo, timer, badge LIVE, viewers, avatar, favoris), search bar toggle, FAB `.start-live-fab-comp`, refresh 30s silencieux, restauration `isStreaming` depuis `user.isLive && user.liveMode === 'competition'`, `handleToggleFavorite` + toast.
+- **LiveCompetition.css** : réécriture. FAB ambre (`background: linear-gradient(135deg, #F59E0B, #EF4444)`), overrides `.live-badge`, `.streamer-avatar`, `.empty-state svg` en ambre. Classes globales LivePublic.css réutilisées sans redéfinition.
+- **i18n** : objet `liveCompetition` (15 clés) dans fr/en/it/de/es. Clé `filterLanguages` ajoutée à `liveSurprise`.
+
+#### TÂCHE-023 — LiveEvent : Thèmes + Sélecteur pré-live
+
+**Fichiers** : `LiveEvent.js`, `LiveEvent.css`, `LiveStream.js`, `LiveStream.css`, `locales/*.json`
+
+- **LiveEvent.js** : architecture 2 écrans (`screen: 'themeSelection' | 'liveList'`). Constante `EVENT_THEMES` exportée (8 thèmes : music/gaming/sport/cuisine/beauty/travel/art/discussion). Écran 1 : grille `.le-theme-grid` de ThemeCards colorées (emoji + label, fond color-mix, hover élévation). Écran 2 : `EventStreamCard` avec `--le-theme-color` CSS prop, FAB couleur inline, search, favoris, refresh 30s. Filtrage client-side par `stream.tags.includes(selectedTheme.id)`. Restauration `isStreaming` (mode='event').
+- **LiveEvent.css** : `.le-theme-grid` (2 → 4 cols @768px), `.le-theme-card` (color-mix hover), `.start-live-fab-event`, `.le-empty-emoji`, overrides via `--le-theme-color`.
+- **LiveStream.js** : prop `theme` ajoutée, état `selectedEventTheme`, constante `EVENT_THEMES` locale. Sélecteur chips affiché dans pre-live quand `mode === 'event'`. Tag theme envoyé dans `create-live-room`.
+- **LiveStream.css** : `.ls-theme-selector`, `.ls-theme-chips`, `.ls-theme-chip`, `.ls-theme-chip.active` (color-mix via `--theme-color`).
+- **i18n** : objet `liveEvent` (17 clés + `themes` 8 entrées) dans fr/en/it/de/es.
+
+### Notes techniques
+- Pas de circular import : EVENT_THEMES défini localement dans LiveEvent.js ET LiveStream.js séparément.
+- `color-mix()` CSS pour fonds de thème dynamiques.
+- Classes globales `.streams-grid`, `.stream-card` héritées de LivePublic.css (CSS global non-modulaire).
+
+---
+
+## Session 22 : Live Interface Controls + LiveSurprise Filters (27 Février 2026)
+**Date** : 27 Février 2026
+**Branche** : `claude-work`
+**Commits** : `2a6147e` (TÂCHE-024), en cours (TÂCHE-025)
+**Status** : Terminée ✅
+
+### Ce qui a été fait
+
+#### TÂCHE-024 — Contrôles participant Live + Kick + Repositionnement Quitter
+
+**Fichiers** : `LiveStream.js`, `LiveStream.css`, `LiveViewer.js`, `liveRoom.js`, `locales/*.json`
+
+- **LiveStream.js** : État `hiddenParticipants` (Set<socketId>) pour masquage local flux vidéo. Bouton X sur carte participant → `hiddenParticipants.add(socketId)` (local, pas d'expulsion). Bouton mic (orange si muet) sur carte participant. Bouton Kick (`FiSlash`) dans le panel spectateurs → `streamer-kick-participant` socket emit. Bouton Quitter déplacé en `ls-top-bar` comme `.ls-top-quit` (X simple, pas rouge). Bouton rouge `.stop-stream` retiré de la barre du bas.
+- **LiveStream.css** : Controls participant `opacity: 1` (visible mobile). `.ls-participant-ctrl-btn.mic-btn.muted` orange. `.ls-participant-ctrl-btn.hide-btn` gris sombre. `.ls-kick-btn` transparent, rouge au hover. `.ls-top-quit` transparent, X blanc.
+- **LiveViewer.js** : Listener `kicked-from-room` → toast erreur + cleanup + `leave-live-room` + `onLeave()` après 1.2s.
+- **liveRoom.js** : Handler `streamer-kick-participant` → `io.to(participantSocketId).emit('kicked-from-room')`. Cleanup délégué au participant via `leave-live-room`.
+- **i18n** : 5 clés dans 5 locales (`liveStream.hideParticipant/kickParticipant/participantKicked/stopStream`, `liveViewer.kickedFromRoom`).
+
+#### TÂCHE-025 — LiveSurprise : Timer sélectionnable + filtre genre + résumé paramètres
+
+**Fichiers** : `LiveSurprise.js`, `LiveSurprise.css`, `surprise.js`, `locales/*.json`
+
+- **surprise.js** (backend) : `timerDuration: filters.timer || 3` dans `surpriseQueue.set()`. `gender: 'any'` par défaut dans `defaultFilters`. `findPartner()` : vérification égalité timer obligatoire + compatibilité genre bidirectionnelle (je dois accepter leur genre ET ils doivent accepter le mien).
+- **LiveSurprise.js** : `TIMER_OPTIONS = [3, 5, 8, 10]`. États `selectedTimer` (3) + `selectedGender` ('any') + `selectedTimerRef` (ref pour closures socket). `handleStart` : `activeFilters` inclut `timer + gender`, `timerDuration: selectedTimer`. `handleExpandSearch` supprimé. Timer hardcodé à `3` corrigé partout via `selectedTimerRef.current`. Panel filtres : chips timer + chips genre. Résumé paramètres actifs au-dessus du bouton Démarrer. Timeout banner : "Recommencer" (mêmes filtres) + "Modifier les filtres" (retour start + `setShowFilters(true)`). `FiGlobe` retiré des imports. `lspr-start-timer-hint` supprimé.
+- **LiveSurprise.css** : `.lspr-timer-chips/chip`, `.lspr-gender-chips/chip`, `.lspr-params-summary/label/badges`, `.lspr-param-badge`, `.lspr-timeout-actions`, `.lspr-retry-btn`, `.lspr-adjust-btn`. Ancien `.lspr-expand-btn` remplacé.
+- **i18n** : 9 nouvelles clés dans 5 locales (`filterTimer`, `timerMin`, `filterGender`, `gender_any/man/woman`, `paramsLabel`, `adjustFilters`, `retrySearch`). `timerHint` + `expandSearch` supprimés. `timeoutMsg` rendu générique (sans mention pays).
+
+### Notes techniques
+- Matching timer = égalité stricte (`entry.timerDuration !== myTimerDuration`). Genre bidirectionnel : A refuse si B ne correspond pas à son filtre ET B refuse si A ne correspond pas au sien.
+- `selectedTimerRef` est nécessaire car `partner-skipped`, `partner-disconnected` et `handleDecision` sont dans des closures socket créées au montage → ne capturent pas les mises à jour d'état.
+- Langue toujours pré-remplie (`selectedLanguages` initialisé depuis `i18n.language + user.languages`) → minimum garanti même si le streamer modifie ses filtres.
+
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.

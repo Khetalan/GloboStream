@@ -7,13 +7,23 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
-  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
 import './LiveViewer.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+// Catalogue des cadeaux disponibles
+const GIFTS = [
+  { id: 'rose',    emoji: '🌹', name: 'Rose',     value: 1   },
+  { id: 'kiss',    emoji: '💋', name: 'Bisou',    value: 5   },
+  { id: 'heart',   emoji: '❤️', name: 'Cœur',     value: 10  },
+  { id: 'star',    emoji: '⭐', name: 'Étoile',   value: 20  },
+  { id: 'crown',   emoji: '👑', name: 'Couronne', value: 50  },
+  { id: 'diamond', emoji: '💎', name: 'Diamant',  value: 100 },
+];
 
 // Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
 const PEER_CONFIG = {
@@ -53,7 +63,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
   const [viewers, setViewers] = useState([]);
-  const [gifts] = useState([]);
+  const [giftScore, setGiftScore] = useState(0);
+  const [showGiftPanel, setShowGiftPanel] = useState(false);
+  const [showJoinRulesModal, setShowJoinRulesModal] = useState(false);
+  const [joinRulesAccepted, setJoinRulesAccepted] = useState(false);
 
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -124,6 +137,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         username: 'System',
         text: t('liveStream.userLeft', { name: displayName }),
         isSystem: true,
+        isJoinEvent: true,
         isOwn: false,
         photoUrl: null
       }]);
@@ -191,9 +205,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Message chat — TÂCHE-017 : photoUrl
-    socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+    socket.on('live-chat-message', ({ username, text, lang, timestamp, photoUrl: msgPhotoUrl }) => {
       const info = viewersInfoRef.current.get(username);
-      const photoUrl = info?.photoUrl || null;
+      const photoUrl = msgPhotoUrl || info?.photoUrl || null;
       const userId = info?.userId || null;
       setMessages(prev => [...prev, {
         id: `msg-${timestamp}-${Math.random()}`,
@@ -254,6 +268,23 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     // NOUVEAU: Le streamer coupe son propre micro
     socket.on('streamer-mic-state', ({ isMuted }) => {
       setIsStreamerMuted(isMuted);
+    });
+
+    // Expulsé du live par le streamer — TÂCHE-024
+    socket.on('kicked-from-room', () => {
+      toast.error(t('liveViewer.kickedFromRoom'));
+      hasLeftRef.current = true;
+      cleanup();
+      socket.emit('leave-live-room', { roomId });
+      setTimeout(() => onLeave(), 1200);
+    });
+
+    // Cadeau envoyé/reçu dans le salon
+    socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji }) => {
+      if (recipientType === 'streamer') {
+        setGiftScore(prev => prev + 1);
+      }
+      toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
     });
 
     return () => {
@@ -437,6 +468,20 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     onLeave();
   }, [roomId, onLeave]);
 
+  // Envoyer un cadeau au streamer (viewer/participant)
+  const handleSendGift = useCallback((gift) => {
+    if (!socketRef.current) return;
+    socketRef.current.emit('send-gift', {
+      roomId,
+      giftId: gift.id,
+      giftEmoji: gift.emoji,
+      giftName: gift.name,
+      giftValue: gift.value
+    });
+    setShowGiftPanel(false);
+    toast.success(t('liveGifts.sent'));
+  }, [roomId, t]);
+
   const toggleUiVisibility = useCallback(() => {
     setIsUiVisible(prev => !prev);
   }, []);
@@ -505,13 +550,26 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       {/* Preview locale si participant — en dehors de lv-video-section pour z-index correct */}
       {isParticipant && localStream && (
         <div className="lv-local-preview">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="lv-local-video"
-          />
+          {isCamOff ? (
+            <div className="lv-cam-off-cover">
+              {(() => {
+                const primaryPhoto = user?.photos?.find(p => p.isPrimary) || user?.photos?.[0];
+                return primaryPhoto?.url ? (
+                  <img src={getPhotoUrl(primaryPhoto.url)} alt="" />
+                ) : (
+                  <span>{(user?.displayName || user?.firstName || '?').charAt(0).toUpperCase()}</span>
+                );
+              })()}
+            </div>
+          ) : (
+            <video
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
+              className="lv-local-video"
+            />
+          )}
         </div>
       )}
 
@@ -536,7 +594,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                     <FiEye /> {viewerCount}
                   </button>
                   <button className="lv-gift-count" onClick={(e) => { e.stopPropagation(); setActiveStatsTab('gifts'); setShowStatsPanel(true); }}>
-                    <FiGift /> {gifts.length}
+                    <FiGift /> {giftScore}
                   </button>
                 </div>
               </div>
@@ -606,17 +664,17 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
               </div>
 
               <div className="lv-actions-group">
-                {/* Bouton demander à rejoindre */}
+                {/* Bouton demander à rejoindre — ouvre la modale de règles */}
                 {!isParticipant && (
                   <button
                     className={`lv-join-btn ${joinRequestStatus}`}
-                    onClick={handleRequestJoin}
+                    onClick={() => joinRequestStatus === 'idle' && setShowJoinRulesModal(true)}
                     disabled={joinRequestStatus !== 'idle'}
                   >
                     <FiUserPlus size={20} />
                   </button>
                 )}
-                <button className="lv-control-btn gift-btn">
+                <button className="lv-control-btn gift-btn" onClick={(e) => { e.stopPropagation(); setShowGiftPanel(true); }}>
                   <FiGift size={20} />
                 </button>
               </div>
@@ -639,6 +697,127 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                 </>
               )}
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modale — Règles de participation */}
+      <AnimatePresence>
+        {showJoinRulesModal && (
+          <motion.div
+            className="lv-rules-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="lv-rules-modal"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {/* En-tête */}
+              <div className="lv-rules-header">
+                <FiAlertTriangle size={22} className="lv-rules-header-icon" />
+                <h3>{t('liveViewer.joinRulesTitle')}</h3>
+              </div>
+              <p className="lv-rules-subtitle">{t('liveViewer.joinRulesSubtitle')}</p>
+
+              {/* Liste des règles */}
+              <ul className="lv-rules-list">
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🔞</span>
+                  <span>{t('liveStream.rules.nudity')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🚫</span>
+                  <span>{t('liveStream.rules.racism')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🚫</span>
+                  <span>{t('liveStream.rules.politics')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">🚫</span>
+                  <span>{t('liveStream.rules.religion')}</span>
+                </li>
+                <li className="lv-rule-item">
+                  <span className="lv-rule-icon">⚠️</span>
+                  <span>{t('liveStream.rules.violence')}</span>
+                </li>
+              </ul>
+
+              {/* Case à cocher */}
+              <label className="lv-rules-accept">
+                <input
+                  type="checkbox"
+                  checked={joinRulesAccepted}
+                  onChange={(e) => setJoinRulesAccepted(e.target.checked)}
+                />
+                <span>{t('liveStream.rules.accept')}</span>
+              </label>
+
+              {/* Boutons */}
+              <div className="lv-rules-actions">
+                <button
+                  className="lv-rules-cancel-btn"
+                  onClick={() => { setShowJoinRulesModal(false); setJoinRulesAccepted(false); }}
+                >
+                  {t('liveStream.rules.cancel')}
+                </button>
+                <button
+                  className="lv-rules-confirm-btn"
+                  disabled={!joinRulesAccepted}
+                  onClick={() => { setShowJoinRulesModal(false); handleRequestJoin(); }}
+                >
+                  <FiUserPlus size={16} />
+                  {t('liveViewer.join')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Panel Cadeaux — Viewer/Participant → Streamer */}
+      <AnimatePresence>
+        {showGiftPanel && (
+          <motion.div
+            className="lv-gift-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setShowGiftPanel(false)}
+          >
+            <motion.div
+              className="lv-gift-panel"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="lv-gift-panel-header">
+                <FiGift size={20} className="lv-gift-panel-icon" />
+                <h3>{t('liveGifts.panelTitle')}</h3>
+                <button className="lv-gift-panel-close" onClick={() => setShowGiftPanel(false)}>
+                  <FiX size={16} />
+                </button>
+              </div>
+              <p className="lv-gift-recipient">{t('liveGifts.toStreamer', { name: streamerName })}</p>
+              <div className="lv-gift-grid">
+                {GIFTS.map(gift => (
+                  <button key={gift.id} className="lv-gift-item" onClick={() => handleSendGift(gift)}>
+                    <span className="lv-gift-emoji">{gift.emoji}</span>
+                    <span className="lv-gift-name">{gift.name}</span>
+                    <span className="lv-gift-value">{gift.value}pts</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -703,7 +882,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           <div className="lv-tab-content">
             <div className="lv-stats-total">
               <span className="lv-stats-total-label">{t('liveStream.totalGifts')}</span>
-              <span className="lv-stats-total-value">0</span>
+              <span className="lv-stats-total-value">{giftScore}</span>
             </div>
             <div className="lv-stats-list">
               {/* Liste des cadeaux vide pour l'instant */}
