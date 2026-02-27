@@ -10,6 +10,7 @@ const socketIO = require('socket.io');
 const path = require('path');
 const { setupSurpriseHandlers } = require('./socketHandlers/surprise');
 const { setupLiveRoomHandlers } = require('./socketHandlers/liveRoom');
+const { setupTeamChatHandlers } = require('./socketHandlers/teamChat');
 
 const app = express();
 const server = http.createServer(app);
@@ -66,6 +67,8 @@ const streamRoutes = require('./routes/stream');
 const surpriseRoutes = require('./routes/surprise');
 const moderationRoutes = require('./routes/moderation');
 const liveRoutes = require('./routes/live');
+const competitionRoutes = require('./routes/competitions');
+const teamRoutes = require('./routes/teams');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -78,6 +81,8 @@ app.use('/api/stream', streamRoutes);
 app.use('/api/surprise', surpriseRoutes);
 app.use('/api/live', liveRoutes);
 app.use('/api/moderation', moderationRoutes);
+app.use('/api/competitions', competitionRoutes);
+app.use('/api/teams', teamRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {
@@ -133,6 +138,9 @@ io.on('connection', (socket) => {
 
   // Socket Live Rooms (Public/Competition/Event)
   setupLiveRoomHandlers(io, socket);
+
+  // Socket Team Chat
+  setupTeamChatHandlers(io, socket);
 
   // WebRTC Signaling pour le streaming
   socket.on('offer', (data) => {

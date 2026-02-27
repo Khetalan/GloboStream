@@ -30,6 +30,7 @@ import LivePublic from './pages/LivePublic';
 import LiveCompetition from './pages/LiveCompetition';
 import LiveEvent from './pages/LiveEvent';
 import LiveViewerPage from './pages/LiveViewerPage';
+import TeamPage from './pages/TeamPage';
 
 import ConsentModal from './components/ConsentModal';
 
@@ -164,6 +165,12 @@ function App() {
           <Route path="/stream/competition" element={
             <PrivateRoute>
               <LiveCompetition />
+            </PrivateRoute>
+          } />
+
+          <Route path="/stream/competition/team" element={
+            <PrivateRoute>
+              <TeamPage />
             </PrivateRoute>
           } />
 

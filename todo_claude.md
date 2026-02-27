@@ -1,285 +1,291 @@
-# TODO - Tâches pour Claude (Backend)
+# TODO — Tâches Claude (GloboStream)
 
-> Ce fichier liste les tâches backend nécessaires pour compléter les fonctionnalités implémentées côté frontend par Gemini.
-> Claude doit lire ce fichier à chaque démarrage et traiter les tâches EN ATTENTE.
-
----
-
-## Tâches en attente
-
-### TÂCHE-021 — LiveCompetition + LiveEvent : Bouton Démarrer centré (style Live Publique)
-- **Statut**   : DONE (remplacée et améliorée par TÂCHE-022 + TÂCHE-023)
-- **Ajoutée**  : 26/02/2026
-- **Traitée**  : 27/02/2026 par Claude
-- **Priorité** : BASSE
-- **Résultat** : Intégrée dans la refonte complète des pages LiveCompetition (TÂCHE-022) et LiveEvent (TÂCHE-023).
+> Ce fichier trace l'historique complet des tâches traitées par Claude.
+> Ajouter les nouvelles tâches dans **En attente** en début de session, dans l'ordre d'exécution souhaité.
+> Chaque tâche est rattachée à sa session pour retrouver le contexte dans `claude_session.md`.
 
 ---
 
-## Tâches en attente
+## En attente
 
-*(aucune)*
+*(Aucune tâche en attente)*
 
 ---
 
-## Tâches terminées
+## Terminées
 
-### TÂCHE-025 — LiveSurprise : Timer sélectionnable + filtre genre + résumé paramètres
-- **Statut**   : DONE
-- **Ajoutée**  : 27/02/2026
-- **Traitée**  : 27/02/2026 par Claude
-- **Priorité** : HAUTE
-- **Fichiers** : `frontend/src/pages/LiveSurprise.js`, `frontend/src/pages/LiveSurprise.css`, `backend/socketHandlers/surprise.js`, `frontend/src/locales/*.json`
-- **Résultat** : 4 chips timer (3/5/8/10 min), 3 chips genre (Homme/Femme/N'importe). Résumé paramètres actifs au-dessus du bouton Démarrer. Backend : timer stocké dans surpriseQueue + genre dans defaultFilters + matching timer (égalité obligatoire) + matching genre (bidirectionnel). Timeout banner remplacé : "Recommencer" (mêmes filtres) + "Modifier les filtres" (retour start). Timer hardcodé à 3 corrigé dans partner-skipped/disconnected/handleDecision via selectedTimerRef. i18n : 9 nouvelles clés (5 locales).
+> Ordre : plus récent en haut.
 
-### TÂCHE-024 — Interface Live : Contrôles participant + bouton Kick + repositionnement Quitter
-- **Statut**   : DONE
-- **Ajoutée**  : 27/02/2026
-- **Traitée**  : 27/02/2026 par Claude
-- **Priorité** : HAUTE
-- **Fichiers** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveViewer.js`, `backend/socketHandlers/liveRoom.js`, `frontend/src/locales/*.json`
-- **Résultat** : Boutons mic (orange si muet) + X (masquage local du flux) sur cartes participant. Bouton Kick (FiSlash) dans panel spectateurs pour expulsion réelle. Bouton Quitter (X) déplacé en haut de l'écran (ls-top-bar). Timer hardcodé → selectedTimerRef. i18n : 5 clés (5 locales).
+---
 
-### TÂCHE-022 — LiveCompetition : Refonte card grid (layout LivePublic)
-- **Statut**   : DONE
-- **Ajoutée**  : 27/02/2026
-- **Traitée**  : 27/02/2026 par Claude
-- **Priorité** : HAUTE
-- **Fichiers** : `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/locales/*.json`
-- **Résultat** : Refonte complète. Grille StreamCards (CompStreamCard), FAB ambre (#F59E0B → #EF4444), search bar toggle, favoris, refresh 30s silencieux, empty state trophée, restauration isStreaming. CSS : réutilisation des classes globales LivePublic.css, overrides ambre seulement. i18n : 5 langues (fr/en/it/de/es).
+### ╔══ Session 23 — 27 Fév 2026 ══╗
 
-### TÂCHE-023 — LiveEvent : Sélection de salon + liste de lives
-- **Statut**   : DONE
-- **Ajoutée**  : 27/02/2026
-- **Traitée**  : 27/02/2026 par Claude
-- **Priorité** : HAUTE
-- **Fichiers** : `frontend/src/pages/LiveEvent.js`, `frontend/src/pages/LiveEvent.css`, `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveStream.css`, `frontend/src/locales/*.json`
-- **Résultat** : Deux écrans — picker 8 thèmes colorés (music/gaming/sport/cuisine/beauty/travel/art/discussion) + liste de lives filtrés client-side par tag. EventStreamCard (même pattern que CompStreamCard) avec couleur du thème via --le-theme-color. FAB avec couleur inline. Sélecteur de thème (chips) dans LiveStream.js pre-live screen quand mode='event'. Tag envoyé dans create-live-room emit. i18n : 5 langues + objet themes.
+#### TÂCHE-032 — Frontend Team : page complète 4 onglets
+- **Statut** : DONE
+- **Fichiers** : `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
+- **Résultat** : Page complète 2 états (no-team + team). Écran no-team : formulaire création inline. Écran team : 4 onglets — Membres (liste avatar/nom/badge capitaine + bouton kick), Infos (emoji/nom/desc + édition in-place), Chat (Socket.IO temps réel room `team-{id}`, bulles gauche/droite), Gestion (demandes accept/reject, toggle ouvert/fermé, dissolution). FAB Quitter (non-capitaines). i18n 5 langues (~40 clés).
 
-### TÂCHE-001 — Debug erreur 500 sur GET /api/matches
-- **Statut**   : DONE
-- **Ajoutée**  : 24/02/2026 par Gemini
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/routes/matches.js`, `backend/routes/chat.js`
-- **Description** : L'appel à `GET /api/matches` renvoie une erreur 500 Internal Server Error.
-- **Contexte** : Signalé par l'utilisateur lors de la navigation sur la page Matches.js.
-- **Résultat** : Double-fetch + crash sur `null.getPublicProfile()` quand un user matché est supprimé. Corrigé dans matches.js (filtre null + suppression double-fetch) et chat.js (même filtre sur GET /conversations).
+#### TÂCHE-031 — Backend Team : modèle + routes + socket
+- **Statut** : DONE
+- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `backend/socketHandlers/teamChat.js`, `backend/server.js`
+- **Résultat** : Modèle Team (name/description/color/emoji/captain/members/joinRequests/maxMembers/isOpen/competition). 10 routes CRUD. Socket teamChat : team:join/leave/message/memberOnline/memberOffline. Monté dans server.js.
 
-### TÂCHE-002 — Implémenter le relais de sourdine (mute)
-- **Statut**   : DONE
-- **Ajoutée**  : 24/02/2026 par Gemini
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/socketHandlers/liveRoom.js`
-- **Description** : Écouter l'événement `streamer-toggle-mute-participant` et émettre un événement `force-mute-toggle` vers le `participantSocketId` ciblé.
-- **Résultat** : Handler ajouté ligne 194. Vérification que l'émetteur est bien le streamer.
+#### TÂCHE-030 — LiveCompetition : refonte complète
+- **Statut** : DONE
+- **Fichiers** : `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/App.js`, `frontend/src/locales/*.json`
+- **Résultat** : 2 écrans (rules → liveList). Écran rules : hero trophée, règlement 5 points, sections "En cours"/"À venir" depuis /api/competitions, modal détail AnimatePresence (bottom sheet), bouton "Voir les Lives". Écran liveList : barre filtres, CompStreamCard avec description, 2 boutons fixes (.lc-fab-start ambre + .lc-fab-team). Route /stream/competition/team ajoutée. i18n 5 langues (17 clés).
 
-### TÂCHE-003 — Synchroniser l'état de la caméra des participants
-- **Statut**   : DONE
-- **Ajoutée**  : 24/02/2026 par Gemini
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/socketHandlers/liveRoom.js`
-- **Description** : Écouter l'événement `participant-cam-state` émis par un participant et le relayer au streamer.
-- **Résultat** : Handler ajouté ligne 206. Relaie au streamer avec `participantSocketId: socket.id`.
+#### TÂCHE-029 — Backend Compétitions : modèle DB + CRUD
+- **Statut** : DONE
+- **Fichiers** : `backend/models/Competition.js`, `backend/routes/competitions.js`, `backend/server.js`
+- **Résultat** : Modèle Competition (name/description/rules/prize/status/startDate/endDate/maxTeams/createdBy). CRUD complet, requireAdmin pour POST/PATCH/DELETE. Monté sur /api/competitions.
 
-### TÂCHE-004 — Synchroniser l'état du micro du streamer
-- **Statut**   : DONE
-- **Ajoutée**  : 24/02/2026 par Gemini
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/socketHandlers/liveRoom.js`
-- **Description** : Écouter l'événement `streamer-mic-state` émis par le streamer et le relayer aux spectateurs.
-- **Résultat** : Handler ajouté ligne 221. `socket.to(roomId)` relaie à tous sauf le streamer.
+#### TÂCHE-028 — LiveEvent : refonte complète (thèmes + filtres + compteur + description)
+- **Statut** : DONE
+- **Fichiers** : `frontend/src/pages/LiveEvent.js`, `frontend/src/pages/LiveEvent.css`
+- **Résultat** : Rename gaming→Bricolages/discussion→Commerciales, badge compteur par thème (.le-theme-badge depuis tagCounts), barre filtres Tendance/Alentours/Nouveau/Favoris, description dans les cartes.
 
-### TÂCHE-005 — Envoyer le nom du streamer dans room-info
-- **Statut**   : DONE
-- **Ajoutée**  : 24/02/2026 par Gemini
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/socketHandlers/liveRoom.js`
-- **Description** : Dans l'événement `join-live-room`, ajouter `streamerName` au payload de `room-info`.
-- **Résultat** : `displayName` stocké dans la room à `create-live-room`. Ajouté dans `room-info` comme `streamerName: room.displayName`.
+#### TÂCHE-027 — LiveStream + LivePublic : textarea description + rename thèmes + carte
+- **Statut** : DONE
+- **Fichiers** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveStream.css`
+- **Résultat** : maxLength 150→80, compteur /80 (.ls-description-counter), rename EVENT_THEMES (gaming→bricolage, discussion→commerciales). LivePublic.js/css déjà OK depuis commit 135107e.
 
-### TÂCHE-006 — Implémentation Backend des "Vues" et "Likes reçus"
-- **Statut**   : DONE
-- **Ajoutée**  : 24/02/2026 par Gemini
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/routes/users.js`, `backend/routes/swipe.js`
-- **Description** : Créer `GET /api/users/views` et vérifier/créer `GET /api/swipe/likes-received`.
-- **Résultat** : Les deux endpoints créés. `views` retourne `[]` (tracking non implémenté en DB). `likes-received` cherche les users dont `likes[]` contient l'ID courant.
+#### TÂCHE-026 — Backend Live : description dans room + compteur tags
+- **Statut** : DONE
+- **Fichiers** : `backend/routes/live.js`
+- **Résultat** : tagCounts calculé depuis liveRooms.values() et retourné dans GET /api/live/public. Description déjà stockée dans liveRoom.js depuis commit 135107e.
 
-### TÂCHE-007 — Compteur en ligne temps réel (StreamHub)
-- **Statut**   : DONE
-- **Ajoutée**  : 25/02/2026
-- **Priorité** : NORMALE
-- **Fichiers** : `backend/socketHandlers/liveRoom.js`, `backend/routes/stream.js`, `frontend/src/pages/StreamHub.js`
-- **Résultat** : `getStreamStats()` + `broadcastStreamStats(io)` + `GET /api/stream/stats` + Socket.IO client dans StreamHub.
+---
 
-### TÂCHE-008 — Bugfixes WebRTC (Streamer/Viewer ne se voyaient pas)
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026
-- **Priorité** : HAUTE
-- **Fichiers** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveViewer.js`
-- **Résultat** : Suppression `trickle:false`, ajout `PEER_CONFIG` STUN, race condition `join-live-room` corrigée, double leave et double disconnect corrigés.
+### ╔══ Session 22 — 27 Fév 2026 ══╗
 
-### TÂCHE-009 — Live Surprise : Compteur temps réel de participants
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/socketHandlers/surprise.js`
-- **Description** : Émettre un event `surprise-user-count` avec le nombre de participants actifs à chaque connexion/déconnexion dans la queue Surprise.
-- **Résultat** : Ajout de `broadcastSurpriseCount(io)` dans `surprise.js`. Émet `surprise-user-count { count, inQueue, inSession }` à tous les clients après chaque changement d'état (join, start, skip, decision, disconnect).
+#### TÂCHE-025 — LiveSurprise : Timer sélectionnable + filtre genre + résumé paramètres
+- **Statut** : DONE
+- **Commit** : `60191ef`
+- **Fichiers** : `frontend/src/pages/LiveSurprise.js/css`, `backend/socketHandlers/surprise.js`, `frontend/src/locales/*.json`
+- **Résultat** : 4 chips timer (3/5/8/10 min), 3 chips genre (Homme/Femme/N'importe). Résumé paramètres actifs. Backend : matching timer égalité stricte + genre bidirectionnel. Timeout → "Recommencer" + "Modifier les filtres". i18n 9 clés (5 locales).
 
-### TÂCHE-010 — Live Surprise : Bouton Like = Like profil réel
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/socketHandlers/surprise.js`, `backend/routes/swipe.js`
-- **Description** : Vérifier que la route `POST /api/swipe/like/:userId` est bien accessible depuis le contexte Live Surprise et qu'elle gère la création de match si Like mutuel.
-- **Résultat** : Dans `send-decision`, quand `decision === 'like'`, logique de like complète : ajout dans `likes[]`, détection match mutuel, création match pour les deux users, émission `surprise-match` si match. Payload attendu : `{ partnerUserId, decision, myUserId }`.
+#### TÂCHE-024 — Interface Live : Contrôles participant + bouton Kick + repositionnement Quitter
+- **Statut** : DONE
+- **Commit** : `2a6147e`
+- **Fichiers** : `LiveStream.js/css`, `LiveViewer.js`, `liveRoom.js`, `locales/*.json`
+- **Résultat** : Boutons mic (orange si muet) + X (masquage local) sur cartes participant. Kick (FiSlash) dans panel spectateurs. Bouton Quitter déplacé en ls-top-bar (X blanc). i18n 5 clés (5 locales).
 
-### TÂCHE-011 — Live Surprise : Bouton Skip = retour en file d'attente
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/socketHandlers/surprise.js`
-- **Description** : Écouter l'event `surprise-skip` émis par le client. Mettre fin à la session en cours entre les 2 participants et remettre l'initiateur du Skip dans la queue de matchmaking.
-- **Résultat** : Nouvel event `surprise-skip { userId }`. Notifie le partenaire (`partner-skipped`), nettoie la paire, remet le skipper en file `isSearching: true`, cherche immédiatement un nouveau partenaire.
+---
 
-### TÂCHE-012 — Live Surprise : Corriger connexion WebRTC entre participants
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/socketHandlers/surprise.js`
-- **Description** : Revoir le signaling WebRTC (offer/answer/ICE candidate). Vérifier que trickle ICE est activé côté signal, que les events de signaling sont bien relayés entre les 2 sockets des participants.
-- **Résultat** : Refactoring en `createPair()` : socketId garanti frais à `start-search` (mis à jour avec `socket.id` courant), relay WebRTC `send-signal → receive-signal` inchangé (correct). Ajout `cleanupPair()` symétrique.
+### ╔══ Session 21 — 27 Fév 2026 ══╗
 
-### TÂCHE-013 — Interface Live : Panel spectateurs vide pour les Viewers
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/socketHandlers/liveRoom.js`
-- **Description** : S'assurer que la liste complète des viewers actifs est bien émise au Viewer qui rejoint, et mise à jour à chaque entrée/sortie.
-- **Résultat** : `join-live-room` rendu async + lookup photo DB. `room-info` inclut maintenant `viewers: [{ socketId, userId, displayName, photoUrl }]`. Nouvel event `get-viewers → viewers-list`. Event `viewers-updated` diffusé à toute la room à chaque join/leave.
+#### TÂCHE-023 — LiveEvent : Sélection de salon + liste de lives
+- **Statut** : DONE
+- **Commit** : `5f04cb2`
+- **Fichiers** : `LiveEvent.js/css`, `LiveStream.js/css`, `locales/*.json`
+- **Résultat** : 2 écrans — picker 8 thèmes colorés + liste lives filtrés client-side par tag. EventStreamCard avec --le-theme-color. Sélecteur chips dans LiveStream.js pré-live (mode='event'). i18n 5 langues + objet themes.
 
-### TÂCHE-014 — Interface Live : Message "X a quitté le live"
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Priorité** : HAUTE
-- **Fichiers concernés** : `backend/socketHandlers/liveRoom.js`
-- **Description** : Sur les events `leave-live-room` et `disconnect`, émettre un event `live-user-left` avec `{ displayName, userId }` à tous les membres de la room.
-- **Résultat** : Dans `handleLeaveRoom`, émission de `live-user-left { userId, displayName }` à toute la room avant suppression de la map. Symétrique du message d'entrée existant.
+#### TÂCHE-022 — LiveCompetition : Refonte card grid (layout LivePublic)
+- **Statut** : DONE
+- **Commit** : `5f04cb2`
+- **Fichiers** : `LiveCompetition.js/css`, `locales/*.json`
+- **Résultat** : Réécriture complète. CompStreamCard (photo, timer, LIVE badge, viewers, avatar, favoris), FAB ambre, search bar toggle, refresh 30s silencieux, restauration isStreaming. i18n 5 langues.
 
-### TÂCHE-015 — Matches : Endpoint vérification message déjà envoyé
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Traitée**  : 26/02/2026 par Claude (Phase 2)
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/routes/messageRequests.js`
-- **Description** : Créer `GET /api/message-requests/sent-to/:userId` → vérifie si l'utilisateur courant a déjà envoyé une MessageRequest au `userId` ciblé. Retourne `{ alreadySent: true/false, status: 'pending'|'accepted'|'rejected'|null }`.
-- **Résultat** : Route `GET /sent-to/:userId` ajoutée avant `/check/:recipientId`. Cherche toute MessageRequest (tout statut) entre l'utilisateur courant et le destinataire cible. Retourne `{ success, alreadySent, status }` — status = null si aucune demande.
-
-### TÂCHE-016 — Live Surprise : Filtrage par pays d'origine (par défaut)
-- **Statut**   : DONE
-- **Ajoutée**  : 26/02/2026 par Claude (Test-01)
-- **Traitée**  : 26/02/2026 par Claude (Phase 2)
-- **Priorité** : NORMALE
-- **Fichiers concernés** : `backend/socketHandlers/surprise.js`
-- **Description** : Prioriser le matching avec un utilisateur du même pays. Si aucun utilisateur compatible après 15s, notifier le client pour qu'il élargisse manuellement.
+#### Correctifs T1-T7 — 7 bugs UI
+- **Statut** : DONE
+- **Commit** : `1c95cd1`
+- **Fichiers** : `LiveViewer.css/js`, `LiveStream.js`, `LivePublic.js`, `LiveSurprise.js/css`, `surprise.js`
 - **Résultat** :
-  - `join-surprise-queue` : si `filters.country` absent, utilise `user.location?.country` comme filtre par défaut.
-  - `start-search` : si aucun partenaire compatible trouvé, programme un `setTimeout` 15s qui émet `surprise-search-timeout { filtersUsed }` au client — PAS de fallback mondial automatique. L'utilisateur doit élargir lui-même via les filtres du frontend (TÂCHE-019 Gemini).
-  - `createPair`, `leave-surprise-queue`, `disconnect` : `clearTimeout(entry.timeoutTimer)` pour éviter les memory leaks.
-  - `findPartner` : logique de filtre pays activée automatiquement via les filtres par défaut.
-  - **Event frontend attendu** : `surprise-search-timeout` → afficher bouton "Élargir la recherche mondiale" → re-émettre `start-search` avec `filters = {}`.
+  - **T1** : LiveViewer.css — PiP participant déplacé en top-right
+  - **T2** : LiveViewer.js — cam-off PiP affiche photo profil/initiale (`.lv-cam-off-cover`)
+  - **T3** : LiveStream.js + LiveViewer.js — message "userLeft" centré sans préfixe System: (`isJoinEvent: true`)
+  - **T4** : LiveStream.js + LiveViewer.js — chat `photoUrl` correctement destructuré depuis `live-chat-message`
+  - **T5** : LivePublic.js — useEffect mount restaure `isStreaming` si `user.isLive === true`
+  - **T6** : LiveSurprise.js/css — header fixe glassmorphism (retour + titre + nav) sur écrans start/searching
+  - **T7** : LiveSurprise.js + surprise.js — filtre langues (init depuis i18n+profil, matching backend par intersection)
 
 ---
 
-## Tâches transférées depuis Gemini (26/02/2026)
+### ╔══ Session 20 — 26 Fév 2026 ══╗
 
-Ces tâches ont été transférées depuis `todo_gemini.md` le 26/02/2026 quand Gemini a été retiré du projet. Claude prend maintenant en charge le frontend complètement.
+#### LivePublic FAB + StreamHub + Legal/RGPD + Watermark
+- **Statut** : DONE
+- **Commits** : `6ed44d7`, `4d59566`, `3a950df`, `58294ed`
+- **Fichiers** : `LivePublic.js/css`, `StreamHub.js/css`, `Legal.js/css`, `ConsentModal.js/css`, `App.js`, `Settings.js`, `locales/*.json`
+- **Résultat** :
+  - LivePublic : `.start-live-fab` centré (bottom: 80px, border-radius: 50px), padding-bottom 80→160px
+  - StreamHub : retrait bouton FAB fixe, inversion ordre catégories, renommage Événement → Thématiques
+  - `Legal.js` : page 3 onglets (CGU/Confidentialité/Mentions légales), route `/legal` publique
+  - `ConsentModal.js` : modale bloquante RGPD, persistance `globostream_consent_v1` localStorage
+  - Watermark : `.ls-watermark` + `.lv-watermark` (8 derniers chars userId, opacity 0.18, pointer-events none)
+  - i18n : objet `legal` (9 clés) dans 5 langues
 
-### TÂCHE-010 — Live Surprise : Bouton "Message" remplace "Next" + ouvre panel
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
-- **Résultat** : Bouton FiMessageCircle ajouté dans la bottom bar (entre cam et skip). Click → panel slide-up (AnimatePresence) avec textarea 300 chars, compteur, bouton Envoyer → POST /api/message-requests/send/:userId. Confirmation verte 2s puis fermeture auto. Clés i18n : liveSurprise.sendMessage, messageTo, messagePlaceholder, send, sending, messageSent.
+---
 
-### TÂCHE-011 — Live Surprise : Compteur de participants affiché dans l'UI
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
-- **Résultat** : Écoute de l'event surprise-user-count { count }. Badge "🔴 X en ligne" affiché en haut (position absolute, centré) sur les écrans start et searching. Se met à jour en temps réel.
+### ╔══ Sessions 17-18 — 26 Fév 2026 ══╗
 
-### TÂCHE-012 — StreamHub : Bouton "Démarrer" centré + plus gros
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/pages/StreamHub.js, frontend/src/pages/StreamHub.css
-- **Résultat** : Bouton `.btn-start-live-fixed` ajouté (position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 200). Padding 16px 32px, font 1.05rem, border-radius 50px. Navigue vers /stream/surprise.
+#### Système cadeaux + description live + timer StreamCard
+- **Statut** : DONE
+- **Commit** : `135107e`
+- **Fichiers** : `liveRoom.js`, `routes/live.js`, `LiveStream.js/css`, `LiveViewer.js/css`, `LivePublic.js`
+- **Résultat** : Panel cadeaux côté streamer (→ participants) et viewer (→ streamer). `giftScore` temps réel. Textarea description (maxLength 150) dans pré-live, émise dans `create-live-room`. Routes live.js retournent données réelles depuis liveRooms. Timer elapsed 1s dans StreamCard. `.stream-description` affiché si renseigné.
 
-### TÂCHE-013 — StreamHub : Bulles des catégories = Nb Streamers + Nb Spectateurs
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/pages/StreamHub.js, frontend/src/pages/StreamHub.css
-- **Résultat** : liveStats initialisé avec `{ streamers:0, viewers:0, total:0 }` par catégorie. footer affiche "X streamers · Y spectateurs" si actifs, sinon "Personne en ligne". Clés i18n streamers/viewers/noOne ajoutées dans 5 langues.
+#### Améliorations UI LiveStream & LiveViewer
+- **Statut** : DONE
+- **Commit** : `302ef18`
+- **Fichiers** : `LiveStream.js/css`, `LiveViewer.js`, `locales/*.json`
+- **Résultat** : Modal règles de diffusion (streamer) avec checkbox obligatoire. Modal règles participation (viewer). Panel chat slide-up + bouton "Écrire". Noms participants tronqués. i18n : `liveStream.writeBtn`, `liveStream.rules.*` (9 clés), `liveViewer.joinRulesTitle/Subtitle` (5 langues).
 
-### TÂCHE-014 — Live Publique : Carte Streamer redesign
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/pages/LivePublic.js, frontend/src/pages/LivePublic.css
-- **Résultat** : StreamCard redesigné — avatar 36px→52px. Affiche uniquement Nom/âge et viewers/timer sous format compact (.stream-meta). Viewers masqués si 0. Tags et distance retirés du rendu. Calcul âge depuis birthDate.
+---
 
-### TÂCHE-015 — Interface Live : Badge spectateurs en temps réel
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/components/LiveStream.js, LiveStream.css, LiveViewer.js, LiveViewer.css
-- **Résultat** : Listener `viewers-updated { viewerCount, viewers }` ajouté dans les deux composants. Sync viewerCount + liste viewers en temps réel.
+### ╔══ Session 19 — 26 Fév 2026 (Frontend ex-Gemini, tâches G-010 → G-020) ══╗
 
-### TÂCHE-016 — Interface Live : Clic sur nom spectateur → profil public
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/components/LiveStream.js, LiveViewer.js
-- **Résultat** : useNavigate ajouté dans les deux composants. Viewer rows dans le panel stats cliquables → navigate(`/profile/${v.userId}`). Classe `.clickable` avec hover. Affichage photo viewer dans le panel si photoUrl disponible.
+> Ces tâches ont été transférées depuis `todo_gemini.md` le 26/02/2026 quand Gemini a été retiré du projet.
+> Le préfixe G- distingue la numérotation Gemini de la numérotation Claude.
 
-### TÂCHE-017 — Interface Live : Photo du spectateur dans le chat
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/components/LiveStream.js, LiveStream.css, LiveViewer.js, LiveViewer.css
-- **Résultat** : `viewersInfoRef` Map (displayName → { userId, photoUrl }) mise à jour via viewers-updated/viewer-joined. Chat messages incluent photoUrl + userId. Avatar 28px dans chaque message non-système. CSS `.ls-chat-avatar`, `.ls-chat-content` ajoutés.
+#### G-020 — Live Surprise : Toggle micro + caméra
+- **Statut** : DONE (déjà implémenté avant transfert)
+- **Fichiers** : `LiveSurprise.js/css`
+- **Résultat** : toggleMic/toggleCam dans la bottom bar avec classe `off` si désactivé.
 
-### TÂCHE-018 — Interface Live : Message "X a quitté le live"
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : NORMALE
-- **Fichiers** : frontend/src/components/LiveStream.js, LiveViewer.js
-- **Résultat** : Listener `live-user-left { displayName }` dans les deux composants. Message système ajouté dans le chat. Clé i18n `liveStream.userLeft` ajoutée dans 5 langues.
+#### G-019 — Live Surprise : UI de filtrage
+- **Statut** : DONE
+- **Fichiers** : `LiveSurprise.js/css`
+- **Résultat** : Bouton "Filtres" → panel AnimatePresence (pays + âge min/max). Filtres envoyés à `join-surprise-queue`/`start-search`. Listener `surprise-search-timeout` → banner "Élargir la recherche mondiale". i18n 5 langues.
 
-### TÂCHE-019 — Live Surprise : UI de filtrage
-- **Statut**   : DONE
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : BASSE
-- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
-- **Résultat** : Bouton "Filtres" toggle sur écran start → AnimatePresence panel (pays + âge min/max). handleStart passe les filtres actifs à join-surprise-queue et start-search. Listener `surprise-search-timeout` → banner avec bouton "Élargir la recherche mondiale" → re-émet sans filtres. Clés i18n complètes dans 5 langues.
+#### G-018 — Interface Live : Message "X a quitté le live"
+- **Statut** : DONE
+- **Fichiers** : `LiveStream.js`, `LiveViewer.js`
+- **Résultat** : Listener `live-user-left { displayName }` → message système dans le chat. Clé `liveStream.userLeft` (5 langues).
 
-### TÂCHE-020 — Live Surprise : Boutons de contrôle (micro + caméra)
-- **Statut**   : DONE (déjà implémenté)
-- **Transférée** : 26/02/2026 depuis todo_gemini.md
-- **Traitée**  : 26/02/2026 par Claude
-- **Priorité** : BASSE
-- **Fichiers** : frontend/src/pages/LiveSurprise.js, frontend/src/pages/LiveSurprise.css
-- **Résultat** : toggleMic et toggleCam déjà présents dans LiveSurprise.js. Boutons FiMic/FiMicOff et FiVideo/FiVideoOff dans la bottom bar avec classe `off` si désactivé.
+#### G-017 — Interface Live : Photo du spectateur dans le chat
+- **Statut** : DONE
+- **Fichiers** : `LiveStream.js/css`, `LiveViewer.js/css`
+- **Résultat** : `viewersInfoRef` Map (displayName → { userId, photoUrl }). Avatar 28px (`.ls-chat-avatar`) dans chaque message non-système.
+
+#### G-016 — Interface Live : Clic sur nom spectateur → profil public
+- **Statut** : DONE
+- **Fichiers** : `LiveStream.js`, `LiveViewer.js`
+- **Résultat** : Rows spectateurs cliquables → `navigate('/profile/:userId')`. Classe `.clickable` avec hover.
+
+#### G-015 — Interface Live : Badge spectateurs en temps réel
+- **Statut** : DONE
+- **Fichiers** : `LiveStream.js`, `LiveViewer.js`
+- **Résultat** : Listener `viewers-updated { viewerCount, viewers }`. Sync viewerCount + liste viewers en temps réel.
+
+#### G-014 — Live Publique : Carte Streamer redesign
+- **Statut** : DONE
+- **Fichiers** : `LivePublic.js/css`
+- **Résultat** : Avatar 52px, nom/âge + viewers/timer compact. Tags et distance retirés. Calcul âge depuis birthDate.
+
+#### G-013 — StreamHub : Bulles catégories = Streamers + Spectateurs
+- **Statut** : DONE
+- **Fichiers** : `StreamHub.js/css`
+- **Résultat** : Footer cartes "X streamers · Y spectateurs". i18n `streamers/viewers/noOne` (5 langues).
+
+#### G-012 — StreamHub : Bouton Démarrer centré + plus gros
+- **Statut** : DONE
+- **Fichiers** : `StreamHub.js/css`
+- **Résultat** : `.btn-start-live-fixed` (fixed, bottom: 80px, centré, padding 16px 32px, border-radius 50px).
+
+#### G-011 — Live Surprise : Compteur participants en ligne
+- **Statut** : DONE
+- **Fichiers** : `LiveSurprise.js/css`
+- **Résultat** : Listener `surprise-user-count { count }` → badge "🔴 X en ligne" sur écrans start/searching.
+
+#### G-010 — Live Surprise : Bouton Message + panel envoi
+- **Statut** : DONE
+- **Fichiers** : `LiveSurprise.js/css`
+- **Résultat** : FiMessageCircle → panel slide-up (textarea 300 chars). `POST /api/message-requests/send/:userId`. Confirmation verte 2s. i18n 6 clés (5 langues).
+
+---
+
+### ╔══ Sessions 14-18 — 24-26 Fév 2026 (Backend Test-01 + Phase 2) ══╗
+
+#### TÂCHE-016 — Live Surprise : Filtrage par pays d'origine
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/surprise.js`
+- **Résultat** : `join-surprise-queue` utilise `user.location.country` par défaut. Timeout 15s → `surprise-search-timeout` (pas de fallback auto). `clearTimeout` sur leave/disconnect.
+
+#### TÂCHE-015 — Matches : Endpoint vérification message déjà envoyé
+- **Statut** : DONE
+- **Fichiers** : `backend/routes/messageRequests.js`
+- **Résultat** : Route `GET /sent-to/:userId` → `{ success, alreadySent, status }`.
+
+#### TÂCHE-014 — Interface Live : Message "X a quitté le live" (backend)
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`
+- **Résultat** : `handleLeaveRoom` émet `live-user-left { userId, displayName }` à toute la room.
+
+#### TÂCHE-013 — Interface Live : Panel spectateurs pour les Viewers
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`
+- **Résultat** : `join-live-room` async + lookup photo DB. `room-info` inclut `viewers: [{ socketId, userId, displayName, photoUrl }]`. `viewers-updated` diffusé à chaque join/leave.
+
+#### TÂCHE-012 — Live Surprise : Corriger connexion WebRTC
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/surprise.js`
+- **Résultat** : Refactoring `createPair()` avec socketId frais. Relay `send-signal → receive-signal`. `cleanupPair()` symétrique.
+
+#### TÂCHE-011 — Live Surprise : Skip = retour en file d'attente
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/surprise.js`
+- **Résultat** : `surprise-skip { userId }` → notifie partenaire, nettoie paire, skipper remis en file.
+
+#### TÂCHE-010 — Live Surprise : Bouton Like = Like profil réel + match
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/surprise.js`
+- **Résultat** : `send-decision` avec `like` → ajout `likes[]`, détection match mutuel, émission `surprise-match`.
+
+#### TÂCHE-009 — Live Surprise : Compteur temps réel de participants
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/surprise.js`
+- **Résultat** : `broadcastSurpriseCount(io)` → `surprise-user-count { count, inQueue, inSession }` après chaque changement.
+
+#### TÂCHE-008 — Bugfixes WebRTC (Streamer/Viewer ne se voyaient pas)
+- **Statut** : DONE
+- **Fichiers** : `LiveStream.js`, `LiveViewer.js`
+- **Résultat** : Suppression `trickle:false`, ajout STUN config, race condition `join-live-room` corrigée, double leave/disconnect corrigés.
+
+#### TÂCHE-007 — Compteur en ligne temps réel (StreamHub)
+- **Statut** : DONE
+- **Fichiers** : `liveRoom.js`, `routes/stream.js`, `StreamHub.js`
+- **Résultat** : `getStreamStats()` + `broadcastStreamStats(io)` + `GET /api/stream/stats` + Socket.IO client StreamHub.
+
+#### TÂCHE-006 — Backend : Vues profil + Likes reçus
+- **Statut** : DONE
+- **Fichiers** : `backend/routes/users.js`, `backend/routes/swipe.js`
+- **Résultat** : `GET /api/users/views` et `GET /api/swipe/likes-received` créés.
+
+#### TÂCHE-005 — Envoyer le nom du streamer dans room-info
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`
+- **Résultat** : `displayName` stocké à `create-live-room`, retourné dans `room-info` comme `streamerName`.
+
+#### TÂCHE-004 — Synchroniser l'état du micro du streamer
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`
+- **Résultat** : Handler `streamer-mic-state` → `socket.to(roomId)` relaie à tous les viewers.
+
+#### TÂCHE-003 — Synchroniser l'état de la caméra des participants
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`
+- **Résultat** : Handler `participant-cam-state` → relaie au streamer avec `participantSocketId: socket.id`.
+
+#### TÂCHE-002 — Relais de sourdine (mute)
+- **Statut** : DONE
+- **Fichiers** : `backend/socketHandlers/liveRoom.js`
+- **Résultat** : Handler `streamer-toggle-mute-participant` → émet `force-mute-toggle` vers le `participantSocketId`.
+
+#### TÂCHE-001 — Debug erreur 500 sur GET /api/matches
+- **Statut** : DONE
+- **Fichiers** : `backend/routes/matches.js`, `backend/routes/chat.js`
+- **Résultat** : Crash `null.getPublicProfile()` quand user matché supprimé. Filtres null ajoutés dans matches.js et chat.js.
+
+---
+
+### ╔══ Sessions 1-13 — Fév 2026 (Fondations) ══╗
+
+#### Sessions 1-3 — Tests + ESLint + i18n
+- **Statut** : DONE
+- **Résultat** : 84 fonctionnalités backend testées, 9 bugs auth/users corrigés, 36 warnings ESLint supprimés, i18n configuré (react-i18next, 5 langues, ~650 chaînes). Build validé (183 KB JS + 14 KB CSS).
+
+#### Sessions 4-13 — Développement initial (Gemini)
+- **Statut** : DONE (archivé dans `todo_gemini.md`)
+- **Résultat** : Architecture frontend React, pages Swipe/Matches/Chat/Profile/Settings/Support/Stream/LiveSurprise/LivePublic/LiveStream/LiveViewer, WebRTC, Socket.IO, Passport OAuth, modération, responsive mobile-first 768px.
