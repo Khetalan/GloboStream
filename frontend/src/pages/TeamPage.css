@@ -953,17 +953,6 @@
   border-radius: 4px 16px 16px 16px;
 }
 
-/* Ligne footer (avatar me + heure) */
-.team-msg-footer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.team-msg-me .team-msg-footer {
-  flex-direction: row-reverse;
-}
-
 .team-msg-time {
   font-size: 0.65rem;
   color: var(--text-secondary);

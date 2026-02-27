@@ -896,42 +896,27 @@ const TeamPage = () => {
             )}
             {messages.map((msg, i) => {
               const isMe = msg.senderId === myUserId;
-              const sender = myTeam.members.find(
-                m => m.user._id === msg.senderId
-              )?.user;
+              const sender = isMe
+                ? myTeam.members.find(m => m.user._id === myUserId)?.user
+                : myTeam.members.find(m => m.user._id === msg.senderId)?.user;
               const avatarUrl = sender ? getAvatar(sender) : null;
+              const authorName = isMe ? t('team.me') : getUserName(sender);
               return (
                 <div key={i} className={`team-msg ${isMe ? 'team-msg-me' : 'team-msg-other'}`}>
-                  {/* Avatar + nom à gauche pour messages reçus */}
-                  {!isMe && (
-                    <div className="team-msg-meta">
-                      <div className="team-msg-avatar">
-                        {avatarUrl
-                          ? <img src={avatarUrl} alt={getUserName(sender)} />
-                          : <div className="team-avatar-placeholder">{getUserName(sender)?.charAt(0)}</div>
-                        }
-                      </div>
-                      <span className="team-msg-author">{getUserName(sender)}</span>
+                  {/* Meta : avatar + nom + heure — AU DESSUS du message */}
+                  <div className={`team-msg-meta ${isMe ? 'me' : ''}`}>
+                    <div className="team-msg-avatar">
+                      {avatarUrl
+                        ? <img src={avatarUrl} alt={authorName} />
+                        : <div className="team-avatar-placeholder">{authorName?.charAt(0)}</div>
+                      }
                     </div>
-                  )}
-                  <div className="team-msg-bubble">{msg.text}</div>
-                  <div className="team-msg-footer">
-                    {/* Avatar + nom à droite pour messages envoyés */}
-                    {isMe && (
-                      <div className="team-msg-meta me">
-                        <span className="team-msg-author">{t('team.me')}</span>
-                        <div className="team-msg-avatar">
-                          {getAvatar(myTeam.members.find(m => m.user._id === myUserId)?.user)
-                            ? <img src={getAvatar(myTeam.members.find(m => m.user._id === myUserId)?.user)} alt="" />
-                            : <div className="team-avatar-placeholder">{getUserName(myTeam.members.find(m => m.user._id === myUserId)?.user)?.charAt(0)}</div>
-                          }
-                        </div>
-                      </div>
-                    )}
+                    <span className="team-msg-author">{authorName}</span>
                     <span className="team-msg-time">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
+                  <div className="team-msg-bubble">{msg.text}</div>
                 </div>
               );
             })}
