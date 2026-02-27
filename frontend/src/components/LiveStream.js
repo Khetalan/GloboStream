@@ -62,6 +62,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
 
   // États live
   const [participants, setParticipants] = useState([]);
+  const [hiddenParticipants, setHiddenParticipants] = useState(new Set());
   const [, setLocalStream] = useState(null);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
@@ -631,6 +632,17 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     toast.success(newMuteState ? t('liveStream.participantMuted', { name: participant.name }) : t('liveStream.participantUnmuted', { name: participant.name }));
   }, [t]);
 
+  // Expulser un spectateur du live (streamer uniquement) — TÂCHE-024
+  const handleKickViewer = useCallback((viewer) => {
+    if (!socketRef.current || !roomIdRef.current) return;
+    socketRef.current.emit('streamer-kick-participant', {
+      roomId: roomIdRef.current,
+      participantSocketId: viewer.socketId,
+    });
+    setViewers(prev => prev.filter(v => v.socketId !== viewer.socketId));
+    toast.success(t('liveStream.participantKicked', { name: viewer.name }));
+  }, [t]);
+
   // Envoyer un cadeau à un participant (streamer uniquement)
   const handleSendGift = useCallback((gift, participant) => {
     if (!socketRef.current || !roomIdRef.current || !participant) return;
@@ -853,33 +865,54 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   const streamerPhoto = user.photos?.find(p => p.isPrimary)?.url || user.photos?.[0]?.url;
 
   const renderParticipantCards = () => {
-    return participants.map((p, i) => (
-      <div key={p.socketId || i} className="ls-video-card user">
-        <div className="ls-video-placeholder">
-          {p.isCamOff ? (
-            <div className="ls-video-placeholder cam-off">
-              {p.photoUrl ? (
-                <img src={p.photoUrl} alt={p.name} className="ls-cam-off-photo" />
-              ) : (
-                <div className="ls-cam-off-avatar">{p.name.charAt(0)}</div>
-              )}
-              <div className="ls-cam-off-name">{p.name}</div>
-            </div>
-          ) : (
-            p.stream ? <ParticipantVideo stream={p.stream} /> : <FiVideo size={32} />
+    return participants.map((p, i) => {
+      // Carte masquée localement par le streamer
+      if (hiddenParticipants.has(p.socketId)) return null;
+
+      return (
+        <div key={p.socketId || i} className="ls-video-card user">
+          <div className="ls-video-placeholder">
+            {p.isCamOff ? (
+              <div className="ls-video-placeholder cam-off">
+                {p.photoUrl ? (
+                  <img src={p.photoUrl} alt={p.name} className="ls-cam-off-photo" />
+                ) : (
+                  <div className="ls-cam-off-avatar">{p.name.charAt(0)}</div>
+                )}
+                <div className="ls-cam-off-name">{p.name}</div>
+              </div>
+            ) : (
+              p.stream ? <ParticipantVideo stream={p.stream} /> : <FiVideo size={32} />
+            )}
+          </div>
+          <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
+          <div className="ls-participant-controls">
+            {/* Micro : icône dynamique selon état muté */}
+            <button
+              className={`ls-participant-ctrl-btn mic-btn ${p.isMutedByStreamer ? 'muted' : ''}`}
+              onClick={(e) => { e.stopPropagation(); handleToggleMuteParticipant(p); }}
+              title={p.isMutedByStreamer ? t('liveStream.unmuteParticipant') : t('liveStream.muteParticipant')}
+            >
+              {p.isMutedByStreamer ? <FiMicOff size={14} /> : <FiMic size={14} />}
+            </button>
+            {/* X : masquer la carte localement (le participant reste dans le live) */}
+            <button
+              className="ls-participant-ctrl-btn hide-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setHiddenParticipants(prev => new Set([...prev, p.socketId]));
+              }}
+              title={t('liveStream.hideParticipant')}
+            >
+              <FiX size={14} />
+            </button>
+          </div>
+          {p.isMutedByStreamer && (
+            <div className="ls-mic-muted"><FiMicOff size={13} /></div>
           )}
         </div>
-        <div className="ls-video-label">{p.name || `User ${i + 1}`}</div>
-        <div className="ls-participant-controls">
-          <button className="ls-participant-ctrl-btn" onClick={() => handleToggleMuteParticipant(p)} title={p.isMutedByStreamer ? t('liveStream.unmuteParticipant') : t('liveStream.muteParticipant')}>
-            <FiMicOff size={14} />
-          </button>
-        </div>
-        {p.isMutedByStreamer && (
-          <div className="ls-mic-muted"><FiMicOff size={13} /></div>
-        )}
-      </div>
-    ));
+      );
+    });
   };
 
   return (
@@ -949,6 +982,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                   </button>
                 </div>
               </div>
+              {/* Bouton quitter — déplacé depuis la barre du bas — TÂCHE-024 */}
+              <button
+                className="ls-top-quit"
+                onClick={(e) => { e.stopPropagation(); handleQuit(); }}
+                title={t('liveStream.stopStream')}
+              >
+                <FiX size={20} />
+              </button>
             </div>
 
             {/* Chat — TÂCHE-017 : photo spectateur */}
@@ -1056,9 +1097,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                 <button className={`ls-control-btn ${isCamOff ? 'off' : ''}`} onClick={toggleCam}>
                   {isCamOff ? <FiVideoOff size={20} /> : <FiVideo size={20} />}
                 </button>
-                <button className="ls-control-btn stop-stream" onClick={handleQuit}>
-                  <FiX size={20} />
-                </button>
+                {/* stop-stream déplacé dans ls-top-bar — TÂCHE-024 */}
               </div>
             </div>
           </motion.div>
@@ -1115,6 +1154,14 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                       <div className="ls-stats-badge">{v.joinedAt}</div>
                     </div>
                   </div>
+                  {/* Bouton Kick — streamer uniquement */}
+                  <button
+                    className="ls-kick-btn"
+                    onClick={(e) => { e.stopPropagation(); handleKickViewer(v); }}
+                    title={t('liveStream.kickParticipant')}
+                  >
+                    <FiSlash size={14} />
+                  </button>
                 </div>
               ))}
             </div>

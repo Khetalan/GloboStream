@@ -270,6 +270,15 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       setIsStreamerMuted(isMuted);
     });
 
+    // Expulsé du live par le streamer — TÂCHE-024
+    socket.on('kicked-from-room', () => {
+      toast.error(t('liveViewer.kickedFromRoom'));
+      hasLeftRef.current = true;
+      cleanup();
+      socket.emit('leave-live-room', { roomId });
+      setTimeout(() => onLeave(), 1200);
+    });
+
     // Cadeau envoyé/reçu dans le salon
     socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji }) => {
       if (recipientType === 'streamer') {

@@ -1540,24 +1540,19 @@
   transform-origin: top right;
 }
 
-/* -- Contrôles sur la carte d'un participant (visibles au survol) -- */
+/* -- Contrôles sur la carte d'un participant (toujours visibles — TÂCHE-024) -- */
 .ls-participant-controls {
   position: absolute;
   top: 8px;
   right: 8px;
   display: flex;
   gap: 6px;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
   z-index: 15;
 }
 
-.ls-video-card.user:hover .ls-participant-controls {
-  opacity: 1;
-}
-
 .ls-participant-ctrl-btn {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.55);
   border: none;
   color: #fff;
   width: 28px;
@@ -1570,6 +1565,60 @@
   transition: background-color 0.2s;
 }
 .ls-participant-ctrl-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
+
+/* Micro muté → orange */
+.ls-participant-ctrl-btn.mic-btn.muted {
+  background: rgba(255, 149, 0, 0.8);
+}
+.ls-participant-ctrl-btn.mic-btn.muted:hover {
+  background: rgba(255, 149, 0, 1);
+}
+
+/* Masquer carte → neutre semi-transparent */
+.ls-participant-ctrl-btn.hide-btn {
+  background: rgba(0, 0, 0, 0.45);
+}
+.ls-participant-ctrl-btn.hide-btn:hover {
+  background: rgba(60, 60, 60, 0.9);
+}
+
+/* ── Bouton Kick dans le panel spectateurs ─────────────────── */
+.ls-kick-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 80, 60, 0.65);
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.ls-kick-btn:hover {
+  color: #ff3b30;
+  background: rgba(255, 59, 48, 0.12);
+}
+
+/* ── Bouton quitter en haut à droite (simple X discret) ───── */
+.ls-top-quit {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.ls-top-quit:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* ── Styles partagés pour LiveViewer ──────────────────────── */
 .lv-video-section {

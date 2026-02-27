@@ -449,7 +449,11 @@
     "noJoinRequests": "No pending requests.",
     "requestsButton": "Requests",
     "accept": "Accept",
-    "reject": "Reject"
+    "reject": "Reject",
+    "hideParticipant": "Hide tile",
+    "kickParticipant": "Remove from live",
+    "participantKicked": "{{name}} has been removed from the live",
+    "stopStream": "Leave the live"
   },
   "liveViewer": {
     "roomNotFound": "Room not found",
@@ -468,7 +472,8 @@
     "rejected": "Rejected",
     "joinedLive": "You joined the live!",
     "requestRejected": "Request rejected",
-    "liveEnded": "The live has ended"
+    "liveEnded": "The live has ended",
+    "kickedFromRoom": "You have been removed from the live by the streamer"
   },
   "liveGifts": {
     "panelTitle": "Send a gift",

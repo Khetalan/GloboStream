@@ -447,7 +447,11 @@
     "noJoinRequests": "Aucune demande en attente.",
     "requestsButton": "Demandes",
     "accept": "Accepter",
-    "reject": "Refuser"
+    "reject": "Refuser",
+    "hideParticipant": "Masquer la carte",
+    "kickParticipant": "Expulser du live",
+    "participantKicked": "{{name}} a été expulsé du live",
+    "stopStream": "Quitter le live"
   },
   "liveViewer": {
     "roomNotFound": "Salon introuvable",
@@ -466,7 +470,8 @@
     "rejected": "Refusé",
     "joinedLive": "Vous avez rejoint le live !",
     "requestRejected": "Demande refusée",
-    "liveEnded": "Le live est terminé"
+    "liveEnded": "Le live est terminé",
+    "kickedFromRoom": "Vous avez été expulsé du live par le streamer"
   },
   "liveGifts": {
     "panelTitle": "Envoyer un cadeau",

@@ -449,7 +449,11 @@
     "noJoinRequests": "Nessuna richiesta in sospeso.",
     "requestsButton": "Richieste",
     "accept": "Accetta",
-    "reject": "Rifiuta"
+    "reject": "Rifiuta",
+    "hideParticipant": "Nascondi la scheda",
+    "kickParticipant": "Espelli dal live",
+    "participantKicked": "{{name}} è stato espulso dal live",
+    "stopStream": "Lascia il live"
   },
   "liveViewer": {
     "roomNotFound": "Sala non trovata",
@@ -468,7 +472,8 @@
     "rejected": "Rifiutato",
     "joinedLive": "Ti sei unito alla diretta!",
     "requestRejected": "Richiesta rifiutata",
-    "liveEnded": "La diretta è terminata"
+    "liveEnded": "La diretta è terminata",
+    "kickedFromRoom": "Sei stato espulso dal live dallo streamer"
   },
   "liveGifts": {
     "panelTitle": "Invia un regalo",

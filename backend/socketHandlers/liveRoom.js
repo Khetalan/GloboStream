@@ -265,6 +265,18 @@ function setupLiveRoomHandlers(io, socket) {
     }
   });
 
+  // ── Expulser un spectateur ou participant (streamer uniquement) — TÂCHE-024
+  socket.on('streamer-kick-participant', ({ roomId, participantSocketId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room || room.streamerSocketId !== socket.id) return;
+      // Le participant reçoit l'événement, émet leave-live-room et gère le cleanup
+      io.to(participantSocketId).emit('kicked-from-room', {});
+    } catch (error) {
+      console.error('Error kicking participant:', error);
+    }
+  });
+
   // ── État caméra d'un participant → relayer au streamer ── TÂCHE-003
   socket.on('participant-cam-state', ({ roomId, isCamOff }) => {
     try {

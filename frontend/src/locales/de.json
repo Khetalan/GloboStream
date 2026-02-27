@@ -449,7 +449,11 @@
     "noJoinRequests": "Keine ausstehenden Anfragen.",
     "requestsButton": "Anfragen",
     "accept": "Annehmen",
-    "reject": "Ablehnen"
+    "reject": "Ablehnen",
+    "hideParticipant": "Karte ausblenden",
+    "kickParticipant": "Aus dem Live entfernen",
+    "participantKicked": "{{name}} wurde aus dem Live entfernt",
+    "stopStream": "Live verlassen"
   },
   "liveViewer": {
     "roomNotFound": "Raum nicht gefunden",
@@ -468,7 +472,8 @@
     "rejected": "Abgelehnt",
     "joinedLive": "Du bist dem Livestream beigetreten!",
     "requestRejected": "Anfrage abgelehnt",
-    "liveEnded": "Der Livestream ist beendet"
+    "liveEnded": "Der Livestream ist beendet",
+    "kickedFromRoom": "Du wurdest vom Streamer aus dem Live entfernt"
   },
   "liveGifts": {
     "panelTitle": "Geschenk senden",
