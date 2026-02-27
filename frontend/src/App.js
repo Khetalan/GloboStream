@@ -1,6 +1,5 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -41,7 +40,6 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
-  const { t } = useTranslation();
   return (
     <AuthProvider>
       <Router>

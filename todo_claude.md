@@ -12,6 +12,21 @@
 
 ## Terminées (session en cours)
 
+#### TÂCHE-043 — Corrections ESLint (build warnings)
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Facile
+- **Fichiers** : `frontend/src/App.js`, `frontend/src/pages/Profile.js`, `frontend/src/pages/Matches.js`, `frontend/src/components/LiveStream.js`
+- **Résultat** :
+  - `App.js` : supprimé `useTranslation` import + `const { t }` inutilisés
+  - `Profile.js` : supprimé `FiMapPin` de l'import react-icons
+  - `Matches.js` : ajouté `t` dans les deps du `useCallback` fetchData
+  - `LiveStream.js` : supprimé `handleKeyPress` redondant (inline onKeyPress déjà présent sur l'input). Ajouté `liveDescription, selectedEventTheme` dans les deps de `handleGoLive`
+
+#### FIX — Double ligne catégories emoji picker (après TÂCHE-042)
+- **Statut** : DONE — commits `e2935d0`, `ce0bcce`
+- **Fichiers** : `frontend/src/pages/Chat.css`
+- **Résultat** : `overflow: hidden !important` + `height: var(--epr-category-navigation-button-size, 30px) !important` + `min-height: unset !important` sur `.epr-cat-btn` (Chat + TeamPage). `skinTonesDisabled` ajouté sur Chat EmojiPicker.
+
 #### TÂCHE-042 — Corrections Chat : emoji picker dropdown + input mobile
 - **Statut** : DONE
 - **Modèle** : Sonnet | **Difficulté** : Facile
@@ -33,7 +48,7 @@
 ---
 
 #### TÂCHE-039 — Corrections CSS + Chat + Emoji + maxMembers + Infos Générales
-- **Statut** : IN_PROGRESS
+- **Statut** : DONE
 - **Modèle** : Sonnet | **Difficulté** : Facile-Moyenne
 - **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/pages/TeamPage.js`
 - **Travail** :

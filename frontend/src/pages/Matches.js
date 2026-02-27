@@ -69,7 +69,7 @@ const Matches = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, t]);
 
   useEffect(() => {
     fetchData();

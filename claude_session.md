@@ -1694,3 +1694,52 @@ Suite de la Session 20. Corrections de bugs (T6 header LiveSurprise, T2 PiP cam-
 - Langue toujours pré-remplie (`selectedLanguages` initialisé depuis `i18n.language + user.languages`) → minimum garanti même si le streamer modifie ses filtres.
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
+
+---
+
+## Session 23 : Emoji Picker Chat + Corrections UI + ESLint (27 Février 2026)
+**Date** : 27 Février 2026
+**Branche** : `claude-work`
+**Commits** : `bc60446` (TÂCHE-041), `a1d597e` (TÂCHE-042), `e2935d0` (fix epr-cat-btn), `ce0bcce` (fix height+skinTones), TÂCHE-043 (ESLint)
+**Status** : Terminée ✅
+
+### Ce qui a été fait
+
+#### TÂCHE-040 — Emoji picker dropdown TeamPage
+**Fichiers** : `TeamPage.js`, `TeamPage.css`
+- Remplacement grille 60 emojis par `emoji-picker-react` v4.18.0 en dropdown
+- 7 catégories : Animaux, Nourriture, Voyages, Activités, Objets, Symboles, Drapeaux (sans Smileys/Persos/Mains)
+- `skinTonesDisabled`, `previewConfig={{ showPreview: false }}`, fermeture click-outside
+
+#### TÂCHE-041 — Emoji picker page Chat (/chat — conversations matches)
+**Fichiers** : `Chat.js`, `Chat.css`
+- `EmojiPicker` (toutes catégories) + bouton FiSmile toggle + `skinTonesDisabled`
+- Emoji click → append au message sans fermer le picker
+- `font-family` emoji fallback sur `.message-bubble p` et `.messages-input input`
+
+#### TÂCHE-042 — Corrections Chat : dropdown + input mobile
+**Fichiers** : `Chat.css`, `Chat.js`, `locales/*.json` (×5)
+- Retiré `overflow: hidden` du dropdown (clipping). `borderRadius` sur le composant picker.
+- `min-width: 0` + `.btn-ghost` fixe 36×36px → fix casse input sur petits écrans
+- Placeholder raccourci : "Écrivez..." / "Message..." / "Escribe..." / "Schreiben..." / "Scrivi..."
+
+#### FIX — Double ligne catégories emoji picker (commits `e2935d0`, `ce0bcce`)
+**Fichiers** : `Chat.css`
+- **Cause** : CSS global reset `height: auto` sur `<button>` → les 2 sprites (inactif + actif) du bouton de catégorie deviennent visibles simultanément
+- **Fix** : `overflow: hidden !important` + `height: var(--epr-category-navigation-button-size, 30px) !important` + `min-height: unset !important` sur `.epr-cat-btn` (Chat + TeamPage)
+
+#### TÂCHE-043 — Corrections ESLint build warnings
+**Fichiers** : `App.js`, `Profile.js`, `Matches.js`, `LiveStream.js`
+- `App.js` : supprimé import `useTranslation` + `const { t }` inutilisés
+- `Profile.js` : supprimé `FiMapPin` import inutilisé
+- `Matches.js` : ajouté `t` dans les deps du `useCallback fetchData`
+- `LiveStream.js` : supprimé `handleKeyPress` redondant. Ajouté `liveDescription, selectedEventTheme` dans les deps de `handleGoLive`.
+
+#### Déploiement
+- Merge `claude-work → main` + `git push origin main` + `npm run deploy` → GitHub Pages `https://Khetalan.github.io/GloboStream`
+
+### Notes techniques
+- `emoji-picker-react` v4.x : chaque bouton catégorie = 2 sprites verticaux (inactif + actif). `overflow: hidden` + hauteur fixe = seul le sprite actif est visible. Le CSS global override ces règles → `!important` requis.
+- `handleKeyPress` était défini mais la JSX utilisait déjà un `onKeyPress` inline équivalent → suppression sans régression.
+
+> **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
