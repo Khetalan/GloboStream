@@ -513,7 +513,6 @@
     "connecting": "Connecting...",
     "description": "Meet strangers randomly.",
     "startBtn": "Start",
-    "timerHint": "3 min per call",
     "sessionEnded": "Session ended",
     "doYouLike": "Did you like this profile?",
     "online": "online",
@@ -527,9 +526,17 @@
     "filterCountry": "Country",
     "filterCountryPlaceholder": "e.g. France",
     "filterAge": "Age (min — max)",
-    "timeoutMsg": "No matching profile found in your country.",
-    "expandSearch": "Expand worldwide search",
-    "filterLanguages": "Languages"
+    "timeoutMsg": "No matching profile found with these criteria.",
+    "filterLanguages": "Languages",
+    "filterTimer": "Duration",
+    "timerMin": "min",
+    "filterGender": "Gender",
+    "gender_any": "Anyone",
+    "gender_man": "Man",
+    "gender_woman": "Woman",
+    "paramsLabel": "Current settings",
+    "adjustFilters": "Adjust filters",
+    "retrySearch": "Retry"
   },
   "liveCompetition": {
     "title": "Competition Live",

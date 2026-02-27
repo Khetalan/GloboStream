@@ -276,25 +276,138 @@
   margin: 0;
 }
 
-.lspr-expand-btn {
+/* TÂCHE-025 — Timeout banner : deux boutons */
+.lspr-timeout-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #e4405f, #8b5cf6);
-  border: none;
-  border-radius: 20px;
-  color: white;
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(228, 64, 95, 0.4);
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
 
-.lspr-expand-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(228, 64, 95, 0.55);
+.lspr-retry-btn,
+.lspr-adjust-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lspr-retry-btn {
+  border: 1px solid #e4405f;
+  background: rgba(228, 64, 95, 0.18);
+  color: #fff;
+}
+
+.lspr-retry-btn:hover {
+  background: rgba(228, 64, 95, 0.32);
+}
+
+.lspr-adjust-btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lspr-adjust-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* ── Chips Timer (TÂCHE-025) ──────────────────────────── */
+.lspr-timer-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lspr-timer-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lspr-timer-chip.selected {
+  border-color: #e4405f;
+  color: #fff;
+  background: rgba(228, 64, 95, 0.18);
+}
+
+.lspr-timer-chip:hover {
+  border-color: rgba(228, 64, 95, 0.5);
+  color: #fff;
+}
+
+/* ── Chips Genre (TÂCHE-025) ──────────────────────────── */
+.lspr-gender-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.lspr-gender-chip {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lspr-gender-chip.selected {
+  border-color: #e4405f;
+  color: #fff;
+  background: rgba(228, 64, 95, 0.18);
+}
+
+.lspr-gender-chip:hover {
+  border-color: rgba(228, 64, 95, 0.5);
+  color: #fff;
+}
+
+/* ── Résumé paramètres (TÂCHE-025) ───────────────────── */
+.lspr-params-summary {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.lspr-params-label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lspr-params-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.lspr-param-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.78rem;
 }
 
 /* --- Searching Screen --- */

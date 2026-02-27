@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
 import axios from 'axios';
-import { FiArrowLeft, FiPlay, FiRefreshCw, FiMic, FiMicOff, FiVideo, FiVideoOff, FiX, FiHeart, FiThumbsDown, FiMessageCircle, FiSend, FiSliders, FiGlobe } from 'react-icons/fi';
+import { FiArrowLeft, FiPlay, FiRefreshCw, FiMic, FiMicOff, FiVideo, FiVideoOff, FiX, FiHeart, FiThumbsDown, FiMessageCircle, FiSend, FiSliders } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import './LiveSurprise.css';
@@ -15,6 +15,9 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://globostream.onrender.c
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const LANGUAGES = ['FR', 'EN', 'IT', 'ES', 'DE'];
+
+// TÂCHE-025 — Options de durée du live Surprise
+const TIMER_OPTIONS = [3, 5, 8, 10];
 
 const PEER_CONFIG = {
   iceServers: [
@@ -53,6 +56,12 @@ const LiveSurprise = () => {
 
   // T7 — Filtre langues
   const [selectedLanguages, setSelectedLanguages] = useState([]);
+
+  // TÂCHE-025 — Timer + genre
+  const [selectedTimer, setSelectedTimer] = useState(3);
+  const [selectedGender, setSelectedGender] = useState('any');
+  const selectedTimerRef = useRef(3); // ref pour closures socket
+  useEffect(() => { selectedTimerRef.current = selectedTimer; }, [selectedTimer]);
 
   // Refs
   const localVideoRef  = useRef(null);
@@ -165,9 +174,9 @@ const LiveSurprise = () => {
       setPartner(null);
       setScreen('searching');
       stopTimer();
-      // Reprendre la recherche automatiquement
+      // Reprendre la recherche automatiquement (TÂCHE-025 — timer via ref)
       if (user?._id) {
-        socket.emit('start-search', { userId: user._id, timerDuration: 3 });
+        socket.emit('start-search', { userId: user._id, timerDuration: selectedTimerRef.current });
       }
     });
 
@@ -178,7 +187,7 @@ const LiveSurprise = () => {
       setScreen('searching');
       stopTimer();
       if (user?._id) {
-        socket.emit('start-search', { userId: user._id, timerDuration: 3 });
+        socket.emit('start-search', { userId: user._id, timerDuration: selectedTimerRef.current });
       }
     });
 
@@ -242,20 +251,17 @@ const LiveSurprise = () => {
       country: filters.country.trim() || undefined,
       ageMin: filters.ageMin !== 18 ? filters.ageMin : undefined,
       ageMax: filters.ageMax !== 99 ? filters.ageMax : undefined,
-      languages: selectedLanguages.length > 0 ? selectedLanguages : undefined
+      languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
+      timer: selectedTimer,    // TÂCHE-025
+      gender: selectedGender,  // TÂCHE-025
     };
     socket.emit('join-surprise-queue', { userId: user._id, filters: activeFilters });
-    socket.emit('start-search', { userId: user._id, timerDuration: 3, filters: activeFilters });
-  }, [user, filters, selectedLanguages]);
-
-  // TÂCHE-019 — Élargir la recherche mondiale
-  const handleExpandSearch = useCallback(() => {
-    setSearchTimedOut(false);
-    const socket = socketRef.current;
-    if (!socket || !user?._id) return;
-    socket.emit('join-surprise-queue', { userId: user._id, filters: {} });
-    socket.emit('start-search', { userId: user._id, timerDuration: 3, filters: {} });
-  }, [user]);
+    socket.emit('start-search', {
+      userId: user._id,
+      timerDuration: selectedTimer, // TÂCHE-025 — était hardcodé à 3
+      filters: activeFilters
+    });
+  }, [user, filters, selectedLanguages, selectedTimer, selectedGender]);
 
   const handleSkip = useCallback(() => {
     stopTimer();
@@ -279,9 +285,9 @@ const LiveSurprise = () => {
     cleanupPeer();
     setPartner(null);
     setScreen('searching');
-    // Reprendre la recherche automatiquement
+    // Reprendre la recherche automatiquement (TÂCHE-025 — timer via ref)
     if (socketRef.current && user?._id) {
-      socketRef.current.emit('start-search', { userId: user._id, timerDuration: 3 });
+      socketRef.current.emit('start-search', { userId: user._id, timerDuration: selectedTimerRef.current });
     }
   }, [stopTimer, cleanupPeer, user, partner]);
 
@@ -430,7 +436,6 @@ const LiveSurprise = () => {
                         onChange={() => {
                           setSelectedLanguages(prev => {
                             if (prev.includes(lang)) {
-                              // Empêcher de décocher la dernière langue
                               if (prev.length <= 1) return prev;
                               return prev.filter(l => l !== lang);
                             }
@@ -443,13 +448,60 @@ const LiveSurprise = () => {
                   ))}
                 </div>
               </div>
+
+              {/* TÂCHE-025 — Filtre timer */}
+              <div className="lspr-filter-row">
+                <label>{t('liveSurprise.filterTimer') || 'Durée'}</label>
+                <div className="lspr-timer-chips">
+                  {TIMER_OPTIONS.map(min => (
+                    <button
+                      key={min}
+                      className={`lspr-timer-chip ${selectedTimer === min ? 'selected' : ''}`}
+                      onClick={() => setSelectedTimer(min)}
+                    >
+                      {min} {t('liveSurprise.timerMin') || 'min'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* TÂCHE-025 — Filtre genre */}
+              <div className="lspr-filter-row">
+                <label>{t('liveSurprise.filterGender') || 'Genre'}</label>
+                <div className="lspr-gender-chips">
+                  {['any', 'man', 'woman'].map(g => (
+                    <button
+                      key={g}
+                      className={`lspr-gender-chip ${selectedGender === g ? 'selected' : ''}`}
+                      onClick={() => setSelectedGender(g)}
+                    >
+                      {t(`liveSurprise.gender_${g}`) || g}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <span className="lspr-start-timer-hint">
-          {t('liveSurprise.timerHint') || '3 min par appel'}
-        </span>
+        {/* TÂCHE-025 — Résumé des paramètres actifs */}
+        <div className="lspr-params-summary">
+          <p className="lspr-params-label">{t('liveSurprise.paramsLabel') || 'Paramètres actuels'}</p>
+          <div className="lspr-params-badges">
+            <span className="lspr-param-badge">⏱ {selectedTimer} {t('liveSurprise.timerMin') || 'min'}</span>
+            <span className="lspr-param-badge">
+              {selectedGender === 'any' ? '👤' : selectedGender === 'man' ? '♂' : '♀'}
+              {' '}{t(`liveSurprise.gender_${selectedGender}`) || selectedGender}
+            </span>
+            <span className="lspr-param-badge">🌐 {selectedLanguages.join(' · ')}</span>
+            {(filters.ageMin !== 18 || filters.ageMax !== 99) && (
+              <span className="lspr-param-badge">🎂 {filters.ageMin}–{filters.ageMax}</span>
+            )}
+            {filters.country && (
+              <span className="lspr-param-badge">📍 {filters.country}</span>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -467,7 +519,7 @@ const LiveSurprise = () => {
       </div>
       <p>{t('liveSurprise.searching') || 'Recherche en cours...'}</p>
 
-      {/* TÂCHE-019 — Timeout : bouton Élargir */}
+      {/* TÂCHE-025 — Timeout : proposer de recommencer ou modifier les filtres */}
       <AnimatePresence>
         {searchTimedOut && (
           <motion.div
@@ -477,12 +529,24 @@ const LiveSurprise = () => {
             exit={{ opacity: 0 }}
           >
             <p className="lspr-timeout-msg">
-              {t('liveSurprise.timeoutMsg') || 'Aucun profil compatible trouvé dans votre pays.'}
+              {t('liveSurprise.timeoutMsg') || 'Aucun profil compatible trouvé.'}
             </p>
-            <button className="lspr-expand-btn" onClick={handleExpandSearch}>
-              <FiGlobe size={18} />
-              {t('liveSurprise.expandSearch') || 'Élargir la recherche mondiale'}
-            </button>
+            <div className="lspr-timeout-actions">
+              <button
+                className="lspr-retry-btn"
+                onClick={() => { setSearchTimedOut(false); handleStart(); }}
+              >
+                <FiRefreshCw size={16} />
+                {t('liveSurprise.retrySearch') || 'Recommencer'}
+              </button>
+              <button
+                className="lspr-adjust-btn"
+                onClick={() => { setSearchTimedOut(false); setScreen('start'); setShowFilters(true); }}
+              >
+                <FiSliders size={16} />
+                {t('liveSurprise.adjustFilters') || 'Modifier les filtres'}
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

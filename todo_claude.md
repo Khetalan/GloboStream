@@ -24,6 +24,22 @@
 
 ## Tâches terminées
 
+### TÂCHE-025 — LiveSurprise : Timer sélectionnable + filtre genre + résumé paramètres
+- **Statut**   : DONE
+- **Ajoutée**  : 27/02/2026
+- **Traitée**  : 27/02/2026 par Claude
+- **Priorité** : HAUTE
+- **Fichiers** : `frontend/src/pages/LiveSurprise.js`, `frontend/src/pages/LiveSurprise.css`, `backend/socketHandlers/surprise.js`, `frontend/src/locales/*.json`
+- **Résultat** : 4 chips timer (3/5/8/10 min), 3 chips genre (Homme/Femme/N'importe). Résumé paramètres actifs au-dessus du bouton Démarrer. Backend : timer stocké dans surpriseQueue + genre dans defaultFilters + matching timer (égalité obligatoire) + matching genre (bidirectionnel). Timeout banner remplacé : "Recommencer" (mêmes filtres) + "Modifier les filtres" (retour start). Timer hardcodé à 3 corrigé dans partner-skipped/disconnected/handleDecision via selectedTimerRef. i18n : 9 nouvelles clés (5 locales).
+
+### TÂCHE-024 — Interface Live : Contrôles participant + bouton Kick + repositionnement Quitter
+- **Statut**   : DONE
+- **Ajoutée**  : 27/02/2026
+- **Traitée**  : 27/02/2026 par Claude
+- **Priorité** : HAUTE
+- **Fichiers** : `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveViewer.js`, `backend/socketHandlers/liveRoom.js`, `frontend/src/locales/*.json`
+- **Résultat** : Boutons mic (orange si muet) + X (masquage local du flux) sur cartes participant. Bouton Kick (FiSlash) dans panel spectateurs pour expulsion réelle. Bouton Quitter (X) déplacé en haut de l'écran (ls-top-bar). Timer hardcodé → selectedTimerRef. i18n : 5 clés (5 locales).
+
 ### TÂCHE-022 — LiveCompetition : Refonte card grid (layout LivePublic)
 - **Statut**   : DONE
 - **Ajoutée**  : 27/02/2026

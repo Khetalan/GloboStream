@@ -513,7 +513,6 @@
     "connecting": "Conectando...",
     "description": "Conoce extraños aleatoriamente.",
     "startBtn": "Comenzar",
-    "timerHint": "3 min por llamada",
     "sessionEnded": "Sesión terminada",
     "doYouLike": "¿Te gustó este perfil?",
     "online": "en línea",
@@ -527,9 +526,17 @@
     "filterCountry": "País",
     "filterCountryPlaceholder": "ej. Francia",
     "filterAge": "Edad (mín — máx)",
-    "timeoutMsg": "No se encontró ningún perfil compatible en tu país.",
-    "expandSearch": "Ampliar búsqueda mundial",
-    "filterLanguages": "Idiomas"
+    "timeoutMsg": "No se encontró ningún perfil compatible con estos criterios.",
+    "filterLanguages": "Idiomas",
+    "filterTimer": "Duración",
+    "timerMin": "min",
+    "filterGender": "Género",
+    "gender_any": "Cualquiera",
+    "gender_man": "Hombre",
+    "gender_woman": "Mujer",
+    "paramsLabel": "Ajustes actuales",
+    "adjustFilters": "Ajustar filtros",
+    "retrySearch": "Reintentar"
   },
   "liveCompetition": {
     "title": "Live Competición",

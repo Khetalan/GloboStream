@@ -513,7 +513,6 @@
     "connecting": "Connessione in corso...",
     "description": "Incontra sconosciuti a caso.",
     "startBtn": "Inizia",
-    "timerHint": "3 min per chiamata",
     "sessionEnded": "Sessione terminata",
     "doYouLike": "Ti è piaciuto questo profilo?",
     "online": "online",
@@ -527,9 +526,17 @@
     "filterCountry": "Paese",
     "filterCountryPlaceholder": "es. Francia",
     "filterAge": "Età (min — max)",
-    "timeoutMsg": "Nessun profilo compatibile trovato nel tuo paese.",
-    "expandSearch": "Espandi la ricerca mondiale",
-    "filterLanguages": "Lingue"
+    "timeoutMsg": "Nessun profilo compatibile trovato con questi criteri.",
+    "filterLanguages": "Lingue",
+    "filterTimer": "Durata",
+    "timerMin": "min",
+    "filterGender": "Genere",
+    "gender_any": "Chiunque",
+    "gender_man": "Uomo",
+    "gender_woman": "Donna",
+    "paramsLabel": "Impostazioni attuali",
+    "adjustFilters": "Modifica filtri",
+    "retrySearch": "Riprova"
   },
   "liveCompetition": {
     "title": "Live Competizione",

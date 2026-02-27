@@ -51,13 +51,18 @@ function setupSurpriseHandlers(io, socket) {
         defaultFilters.languages = user.languages.map(l => l.toUpperCase());
       }
 
+      // TÂCHE-025 — Genre : 'any' par défaut si non fourni
+      if (!defaultFilters.gender) {
+        defaultFilters.gender = 'any';
+      }
+
       surpriseQueue.set(userId, {
         socketId:      socket.id,
         userInfo:      userInfo,
         timestamp:     Date.now(),
-        timerDuration: 3,
+        timerDuration: filters.timer || 3, // TÂCHE-025 — timer choisi par le streamer (défaut 3 min)
         isSearching:   false,
-        filters:       defaultFilters, // { country, ageMin, ageMax, languages }
+        filters:       defaultFilters, // { country, ageMin, ageMax, languages, gender, timer }
         timeoutTimer: null             // TÂCHE-016 : timer 15s → notifie le client (pas de fallback auto)
       });
 
@@ -280,27 +285,44 @@ function cleanupPair(socketId) {
   if (partnerSocketId) activePairs.delete(partnerSocketId);
 }
 
-// ── Trouver un partenaire compatible dans la file ── TÂCHE-016
-// filters.country : filtre pays (par défaut = pays d'origine de l'utilisateur)
-// Appelé sans filtre (filters = {}) pour le fallback après 15s
+// ── Trouver un partenaire compatible dans la file ── TÂCHE-016 / TÂCHE-025
+// filters.country   : filtre pays (par défaut = pays d'origine de l'utilisateur)
+// filters.gender    : TÂCHE-025 — 'any' | 'man' | 'woman'
+// Matching timer    : TÂCHE-025 — les deux doivent avoir la même durée choisie
 function findPartner(userId, filters = {}) {
+  const myEntry = surpriseQueue.get(userId);
+  const myGender = myEntry?.userInfo?.gender;
+  const myTimerDuration = myEntry?.timerDuration || 3;
+
   for (const [candidateId, entry] of surpriseQueue.entries()) {
     if (candidateId === userId) continue;
     if (!entry.isSearching) continue;
 
-    // Filtrage par pays si précisé (TÂCHE-016)
+    // ── Pays (TÂCHE-016) ─────────────────────────────
     if (filters.country && entry.userInfo.country &&
         filters.country !== entry.userInfo.country) {
       continue;
     }
 
-    // T7 — Filtrage par langue : au moins 1 langue en commun
+    // ── Langue (T7) — au moins 1 langue en commun ───
     const myLangs = filters.languages;
     const theirLangs = entry.filters?.languages;
     if (myLangs && myLangs.length > 0 && theirLangs && theirLangs.length > 0) {
-      const hasCommonLang = myLangs.some(l => theirLangs.includes(l));
-      if (!hasCommonLang) continue;
+      if (!myLangs.some(l => theirLangs.includes(l))) continue;
     }
+
+    // ── Timer (TÂCHE-025) — durée identique obligatoire
+    if (entry.timerDuration !== myTimerDuration) continue;
+
+    // ── Genre (TÂCHE-025) — compatibilité bidirectionnelle
+    const myGenderPref    = filters.gender || 'any';
+    const theirGenderPref = entry.filters?.gender || 'any';
+    const theirGender     = entry.userInfo.gender;
+
+    // Je dois accepter leur genre
+    if (myGenderPref !== 'any' && theirGender && myGenderPref !== theirGender) continue;
+    // Ils doivent accepter mon genre
+    if (theirGenderPref !== 'any' && myGender && theirGenderPref !== myGender) continue;
 
     return candidateId;
   }

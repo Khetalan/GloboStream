@@ -1659,4 +1659,38 @@ Suite de la Session 20. Corrections de bugs (T6 header LiveSurprise, T2 PiP cam-
 - `color-mix()` CSS pour fonds de thème dynamiques.
 - Classes globales `.streams-grid`, `.stream-card` héritées de LivePublic.css (CSS global non-modulaire).
 
+---
+
+## Session 22 : Live Interface Controls + LiveSurprise Filters (27 Février 2026)
+**Date** : 27 Février 2026
+**Branche** : `claude-work`
+**Commits** : `2a6147e` (TÂCHE-024), en cours (TÂCHE-025)
+**Status** : Terminée ✅
+
+### Ce qui a été fait
+
+#### TÂCHE-024 — Contrôles participant Live + Kick + Repositionnement Quitter
+
+**Fichiers** : `LiveStream.js`, `LiveStream.css`, `LiveViewer.js`, `liveRoom.js`, `locales/*.json`
+
+- **LiveStream.js** : État `hiddenParticipants` (Set<socketId>) pour masquage local flux vidéo. Bouton X sur carte participant → `hiddenParticipants.add(socketId)` (local, pas d'expulsion). Bouton mic (orange si muet) sur carte participant. Bouton Kick (`FiSlash`) dans le panel spectateurs → `streamer-kick-participant` socket emit. Bouton Quitter déplacé en `ls-top-bar` comme `.ls-top-quit` (X simple, pas rouge). Bouton rouge `.stop-stream` retiré de la barre du bas.
+- **LiveStream.css** : Controls participant `opacity: 1` (visible mobile). `.ls-participant-ctrl-btn.mic-btn.muted` orange. `.ls-participant-ctrl-btn.hide-btn` gris sombre. `.ls-kick-btn` transparent, rouge au hover. `.ls-top-quit` transparent, X blanc.
+- **LiveViewer.js** : Listener `kicked-from-room` → toast erreur + cleanup + `leave-live-room` + `onLeave()` après 1.2s.
+- **liveRoom.js** : Handler `streamer-kick-participant` → `io.to(participantSocketId).emit('kicked-from-room')`. Cleanup délégué au participant via `leave-live-room`.
+- **i18n** : 5 clés dans 5 locales (`liveStream.hideParticipant/kickParticipant/participantKicked/stopStream`, `liveViewer.kickedFromRoom`).
+
+#### TÂCHE-025 — LiveSurprise : Timer sélectionnable + filtre genre + résumé paramètres
+
+**Fichiers** : `LiveSurprise.js`, `LiveSurprise.css`, `surprise.js`, `locales/*.json`
+
+- **surprise.js** (backend) : `timerDuration: filters.timer || 3` dans `surpriseQueue.set()`. `gender: 'any'` par défaut dans `defaultFilters`. `findPartner()` : vérification égalité timer obligatoire + compatibilité genre bidirectionnelle (je dois accepter leur genre ET ils doivent accepter le mien).
+- **LiveSurprise.js** : `TIMER_OPTIONS = [3, 5, 8, 10]`. États `selectedTimer` (3) + `selectedGender` ('any') + `selectedTimerRef` (ref pour closures socket). `handleStart` : `activeFilters` inclut `timer + gender`, `timerDuration: selectedTimer`. `handleExpandSearch` supprimé. Timer hardcodé à `3` corrigé partout via `selectedTimerRef.current`. Panel filtres : chips timer + chips genre. Résumé paramètres actifs au-dessus du bouton Démarrer. Timeout banner : "Recommencer" (mêmes filtres) + "Modifier les filtres" (retour start + `setShowFilters(true)`). `FiGlobe` retiré des imports. `lspr-start-timer-hint` supprimé.
+- **LiveSurprise.css** : `.lspr-timer-chips/chip`, `.lspr-gender-chips/chip`, `.lspr-params-summary/label/badges`, `.lspr-param-badge`, `.lspr-timeout-actions`, `.lspr-retry-btn`, `.lspr-adjust-btn`. Ancien `.lspr-expand-btn` remplacé.
+- **i18n** : 9 nouvelles clés dans 5 locales (`filterTimer`, `timerMin`, `filterGender`, `gender_any/man/woman`, `paramsLabel`, `adjustFilters`, `retrySearch`). `timerHint` + `expandSearch` supprimés. `timeoutMsg` rendu générique (sans mention pays).
+
+### Notes techniques
+- Matching timer = égalité stricte (`entry.timerDuration !== myTimerDuration`). Genre bidirectionnel : A refuse si B ne correspond pas à son filtre ET B refuse si A ne correspond pas au sien.
+- `selectedTimerRef` est nécessaire car `partner-skipped`, `partner-disconnected` et `handleDecision` sont dans des closures socket créées au montage → ne capturent pas les mises à jour d'état.
+- Langue toujours pré-remplie (`selectedLanguages` initialisé depuis `i18n.language + user.languages`) → minimum garanti même si le streamer modifie ses filtres.
+
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
