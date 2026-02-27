@@ -379,7 +379,7 @@ const TeamPage = () => {
   if (loading) {
     return (
       <div className="team-page">
-        <TeamHeader onBack={() => navigate('/stream/competition')} />
+        <TeamHeader onBack={() => navigate('/stream/competition', { state: { screen: 'liveList' } })} />
         <div className="team-loading">
           <div className="loading"></div>
         </div>
@@ -453,7 +453,7 @@ const TeamPage = () => {
   if (!myTeam) {
     return (
       <div className="team-page">
-        <TeamHeader onBack={() => navigate('/stream/competition')} />
+        <TeamHeader onBack={() => navigate('/stream/competition', { state: { screen: 'liveList' } })} />
 
         <div className="team-no-team">
           <span className="team-no-team-emoji">🏆</span>
@@ -516,7 +516,7 @@ const TeamPage = () => {
 
   return (
     <div className="team-page">
-      <TeamHeader onBack={() => navigate('/stream/competition')} teamName={myTeam.name} />
+      <TeamHeader onBack={() => navigate('/stream/competition', { state: { screen: 'liveList' } })} teamName={myTeam.name} />
 
       {/* Barre d'onglets */}
       <div className="team-tabs">

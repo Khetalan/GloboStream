@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -17,11 +17,13 @@ import './LiveCompetition.css';
 
 const LiveCompetition = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { t } = useTranslation();
 
   // Écrans : rules (page explicative) → liveList (liste des lives)
-  const [screen, setScreen] = useState('rules');
+  // Si on revient depuis TeamPage, on atterrit directement sur liveList
+  const [screen, setScreen] = useState(location.state?.screen || 'rules');
   const [isStreaming, setIsStreaming] = useState(false);
 
   // Concours (depuis API)
