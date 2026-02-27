@@ -12,6 +12,7 @@ import {
 import Navigation from '../components/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { getPhotoUrl } from '../utils/photoUrl';
+import EmojiPicker, { Categories } from 'emoji-picker-react';
 import './TeamPage.css';
 
 const TABS = ['members', 'info', 'chat', 'manage'];
@@ -70,6 +71,8 @@ const TeamPage = () => {
   const [onlineMembers, setOnlineMembers] = useState([]);
   const chatBottomRef = useRef(null);
   const socketRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const myUserId = user?._id || user?.id;
   const isCaptain = myTeam && myUserId &&
@@ -136,6 +139,18 @@ const TeamPage = () => {
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Fermer le picker emoji au clic en dehors
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handleClickOutside = (e) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
 
   const fetchCompetitions = useCallback(async () => {
     try {
@@ -983,27 +998,38 @@ const TeamPage = () => {
               <div className="team-edit-form">
                 {/* Emoji picker */}
                 <label className="team-label">{t('team.emojiLabel')}</label>
-                <div className="team-emoji-picker">
-                  {[
-                    '🏆','🥇','🎖️','🏅','🎗️','🎪',
-                    '⚽','🏀','🎾','🏐','🎱','🏈',
-                    '⚡','🔥','💥','✨','🌟','💫',
-                    '💎','💍','👑','🎯','🎰','🎲',
-                    '🦁','🐯','🦊','🐺','🦅','🦋',
-                    '🐉','🦄','🦈','🐻','🦝','🦎',
-                    '🚀','⚔️','🛡️','🗡️','🏹','🪃',
-                    '🌈','❄️','🌊','🌪️','☄️','🌙',
-                    '🎮','🕹️','🎸','🥊','🎯','🧩',
-                    '💪','🤜','👊','🤝','✊','🙌'
-                  ].map(em => (
-                    <button
-                      key={em}
-                      className={`team-emoji-btn ${editEmoji === em ? 'selected' : ''}`}
-                      onClick={() => setEditEmoji(em)}
-                    >
-                      {em}
-                    </button>
-                  ))}
+                <div className="team-emoji-trigger-wrapper" ref={emojiPickerRef}>
+                  <button
+                    type="button"
+                    className="team-emoji-trigger-btn"
+                    onClick={() => setShowEmojiPicker(prev => !prev)}
+                  >
+                    <span className="team-emoji-trigger-current">{editEmoji || '🏆'}</span>
+                    <span className="team-emoji-trigger-label">{t('team.changeEmoji')}</span>
+                  </button>
+                  {showEmojiPicker && (
+                    <div className="team-emoji-picker-dropdown">
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                          setEditEmoji(emojiData.emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                        skinTonesDisabled
+                        height={340}
+                        width="100%"
+                        previewConfig={{ showPreview: false }}
+                        categories={[
+                          { category: Categories.ANIMALS_NATURE, name: 'Animaux & Nature' },
+                          { category: Categories.FOOD_DRINK, name: 'Nourriture & Boisson' },
+                          { category: Categories.TRAVEL_PLACES, name: 'Voyages & Lieux' },
+                          { category: Categories.ACTIVITIES, name: 'Activités' },
+                          { category: Categories.OBJECTS, name: 'Objets' },
+                          { category: Categories.SYMBOLS, name: 'Symboles' },
+                          { category: Categories.FLAGS, name: 'Drapeaux' },
+                        ]}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <label className="team-label">{t('team.nameLabel')}</label>

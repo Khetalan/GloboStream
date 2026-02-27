@@ -946,6 +946,7 @@
     "onlineCount": "{{count}} online",
     "me": "Io",
     "emojiLabel": "Logo del team",
+    "changeEmoji": "Clicca per cambiare l'emoji…",
     "tagLabel": "TAG del team (3-5 lettere)",
     "transferCaptain": "Trasferisci il comando",
     "selectNewCaptain": "Scegli il nuovo capitano",
