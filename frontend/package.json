@@ -25,6 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "prebuild": "node -e \"try{require('fs').rmSync('node_modules/.cache/.eslintcache')}catch(e){}\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
