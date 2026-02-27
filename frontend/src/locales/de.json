@@ -954,7 +954,10 @@
     "confirmTransferBtn": "Übertragung bestätigen",
     "transferred": "Führung übertragen",
     "transferError": "Fehler bei der Übertragung",
-    "selectMember": "Mitglied auswählen"
+    "selectMember": "Mitglied auswählen",
+    "generalInfo": "Allgemeine Informationen",
+    "generalInfoEmpty": "Noch keine allgemeinen Informationen.",
+    "generalInfoPlaceholder": "Allgemeine Informationen des Teams schreiben (Strategie, Ziele, interne Regeln…)"
   },
   "legal": {
     "title": "Rechtliche Hinweise",

@@ -53,6 +53,11 @@ const TeamPage = () => {
   const [showTransfer, setShowTransfer] = useState(false);
   const [transferTarget, setTransferTarget] = useState('');
 
+  // Édition Infos Générales
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [editInfoText, setEditInfoText] = useState('');
+  const [savingInfo, setSavingInfo] = useState(false);
+
   // Listing équipes (rejoindre)
   const [showTeamList, setShowTeamList] = useState(false);
   const [availableTeams, setAvailableTeams] = useState([]);
@@ -263,6 +268,20 @@ const TeamPage = () => {
       toast.error(t('team.saveError'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveGeneralInfo = async () => {
+    try {
+      setSavingInfo(true);
+      const res = await axios.patch(`/api/teams/${myTeam._id}`, { generalInfo: editInfoText });
+      setMyTeam(prev => ({ ...prev, generalInfo: res.data.team.generalInfo }));
+      setEditingInfo(false);
+      toast.success(t('team.saved'));
+    } catch (err) {
+      toast.error(t('team.saveError'));
+    } finally {
+      setSavingInfo(false);
     }
   };
 
@@ -643,6 +662,56 @@ const TeamPage = () => {
             )}
           </div>
 
+          {/* Bulle Informations Générales */}
+          <div className="team-general-info-card">
+            <div className="team-general-info-header">
+              <p className="team-general-info-title">{t('team.generalInfo')}</p>
+              {(isCaptain || isOfficer) && !editingInfo && (
+                <button
+                  className="btn btn-ghost team-edit-icon-btn"
+                  onClick={() => {
+                    setEditInfoText(myTeam.generalInfo || '');
+                    setEditingInfo(true);
+                  }}
+                >
+                  <FiEdit2 />
+                </button>
+              )}
+            </div>
+
+            {editingInfo ? (
+              <div className="team-general-info-edit">
+                <textarea
+                  className="team-textarea"
+                  value={editInfoText}
+                  maxLength={500}
+                  rows={4}
+                  placeholder={t('team.generalInfoPlaceholder')}
+                  onChange={(e) => setEditInfoText(e.target.value)}
+                />
+                <div className="team-general-info-actions">
+                  <button
+                    className="btn btn-ghost"
+                    onClick={() => setEditingInfo(false)}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleSaveGeneralInfo}
+                    disabled={savingInfo}
+                  >
+                    {savingInfo ? t('common.loading') : t('common.save')}
+                  </button>
+                </div>
+              </div>
+            ) : myTeam.generalInfo ? (
+              <p className="team-general-info-text">{myTeam.generalInfo}</p>
+            ) : (
+              <p className="team-general-info-empty">{t('team.generalInfoEmpty')}</p>
+            )}
+          </div>
+
           {/* Section concours */}
           <div className="team-entries-section">
             <div className="team-entries-header">
@@ -930,7 +999,18 @@ const TeamPage = () => {
                 {/* Emoji picker */}
                 <label className="team-label">{t('team.emojiLabel')}</label>
                 <div className="team-emoji-picker">
-                  {['🏆','⚡','🔥','💎','🦁','🐺','🦅','🌟','🎯','🛡️','⚔️','🎮'].map(em => (
+                  {[
+                    '🏆','🥇','🎖️','🏅','🎗️','🎪',
+                    '⚽','🏀','🎾','🏐','🎱','🏈',
+                    '⚡','🔥','💥','✨','🌟','💫',
+                    '💎','💍','👑','🎯','🎰','🎲',
+                    '🦁','🐯','🦊','🐺','🦅','🦋',
+                    '🐉','🦄','🦈','🐻','🦝','🦎',
+                    '🚀','⚔️','🛡️','🗡️','🏹','🪃',
+                    '🌈','❄️','🌊','🌪️','☄️','🌙',
+                    '🎮','🕹️','🎸','🥊','🎯','🧩',
+                    '💪','🤜','👊','🤝','✊','🙌'
+                  ].map(em => (
                     <button
                       key={em}
                       className={`team-emoji-btn ${editEmoji === em ? 'selected' : ''}`}

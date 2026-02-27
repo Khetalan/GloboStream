@@ -11,10 +11,6 @@
 
 /* ── Header ───────────────────────────────────────────────── */
 .team-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(20px);
@@ -37,10 +33,6 @@
 
 /* ── Barre d'onglets ──────────────────────────────────────── */
 .team-tabs {
-  position: fixed;
-  top: 57px;
-  left: 0;
-  right: 0;
   z-index: 90;
   display: flex;
   background: var(--bg-primary);
@@ -108,7 +100,7 @@
 
 /* ── Contenu principal ────────────────────────────────────── */
 .team-content {
-  padding: 128px 16px 100px;
+  padding: 8px;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
@@ -865,13 +857,9 @@
 .team-chat-wrapper {
   display: flex;
   flex-direction: column;
-  position: fixed;
-  top: 108px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-width: 600px;
-  margin: 0 auto;
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
 }
 
 .team-chat-messages {
@@ -881,6 +869,10 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin: 8px;
 }
 
 .team-chat-empty {
@@ -1289,13 +1281,62 @@
   margin: 0;
 }
 
+/* ── Infos Générales (onglet Infos) ───────────────────────── */
+.team-general-info-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.team-general-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.team-general-info-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #F59E0B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.team-general-info-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.team-general-info-empty {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.team-general-info-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-general-info-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 /* ── 768px+ ───────────────────────────────────────────────── */
 @media (min-width: 768px) {
   .team-content {
-    padding-top: 140px;
-  }
-
-  .team-chat-wrapper {
-    top: 120px;
+    padding: 8px 16px;
   }
 }

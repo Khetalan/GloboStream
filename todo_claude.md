@@ -8,78 +8,68 @@
 
 ## En attente
 
-#### TÂCHE-033 — Phase 1 : Corrections UX/CSS TeamPage
-- **Statut** : DONE
-- **Modèle** : Sonnet | **Difficulté** : Facile
-- **Fichiers** : `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `backend/models/Team.js`
+#### TÂCHE-039 — Corrections CSS + Chat + Emoji + maxMembers + Infos Générales
+- **Statut** : IN_PROGRESS
+- **Modèle** : Sonnet | **Difficulté** : Facile-Moyenne
+- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/pages/TeamPage.js`
 - **Travail** :
-  - Retirer `<Navigation />` du bas de TeamPage (navigation-container) — NE PAS toucher le hamburger du header
-  - Ajuster `top` barre onglets + `padding-top` contenu (header 56 + tabs 48 + 20)
-  - Espace au-dessus de "/30 membres" (`padding-top: 16px` sur `.team-member-count`)
-  - Espace au-dessus de "ACCES" dans Gestion (`padding-top` premier `.team-section`)
-  - Fix ancre input chat (recalcul après retrait nav bas)
-  - `maxMembers` : `max: 5 → 30, default: 30`
-
-#### TÂCHE-034 — Phase 2 : Listing équipes + système de candidatures *(NOUVEAU)*
-- **Statut** : DONE
-- **Modèle** : Sonnet | **Difficulté** : Moyenne
-- **Fichiers** : `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
-- **Travail** :
-  - Écran sans équipe : 2 boutons (Créer + Rejoindre)
-  - Vue listing équipes : cartes (emoji/nom/desc/X membres/statut) + bouton "Postuler"
-  - Fetch `GET /api/teams` au clic sur "Rejoindre", état `requestSentIds`
-  - Onglet Membres : bulle de candidatures au-dessus de la liste
-    - Tous les membres voient les noms des candidats
-    - Captain/Officers voient les boutons ✓/✗
-
-#### TÂCHE-035 — Phase 3 : Système de grades membres (officer/nouveau)
-- **Statut** : DONE
-- **Modèle** : Sonnet | **Difficulté** : Moyenne
-- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
-- **Travail** :
-  - Backend : enum roles `['captain', 'officer', 'member', 'nouveau']`, default `'nouveau'`
-  - Backend : route `PATCH /:id/member/:userId/role` avec vérif rang
-  - Frontend : boutons dynamiques par rang (Captain: promo officer/rétro/kick ; Officer: promo nouveau→membre)
-  - Badges colorés : captain=ambre, officer=argent, membre=bleu, nouveau=gris
-
-#### TÂCHE-036 — Phase 4 : Informations Concours (onglet Infos redesign)
-- **Statut** : DONE
-- **Modèle** : Opus | **Difficulté** : Complexe
-- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
-- **Travail** :
-  - Backend : champ `competitionEntries [{ competition, participants×5, instructions }]` max 3
-  - Backend : routes `POST/PATCH/DELETE /:id/entries/:entryId`
-  - Frontend : Infos tab redesign — Carte 1 (Team, lecture seule) + Bulles concours (max 3)
-  - Frontend : panel bottom sheet AnimatePresence (sélect concours, 5 membres, instructions)
-  - Édition Nom/Desc déménage dans Gestion
-
-#### TÂCHE-037 — Phase 5 : Chat améliorations
-- **Statut** : DONE
-- **Modèle** : Sonnet | **Difficulté** : Moyenne
-- **Fichiers** : `backend/socketHandlers/teamChat.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
-- **Travail** :
-  - Socket : Map `teamOnlineUsers` → émet `team:onlineUsers` à chaque join/disconnect
-  - Frontend : barre horizontale membres connectés sous tabs (chat uniquement)
-  - Frontend : messages avec avatar + nom (gauche=reçus, droite=envoyés)
-  - Fix ancre input chat (bottom 0 après retrait nav)
-
-#### TÂCHE-038 — Phase 6 : Gestion avancée (TAG couleur + Transfert capitaine)
-- **Statut** : DONE
-- **Modèle** : Sonnet | **Difficulté** : Moyenne
-- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/locales/*.json`
-- **Travail** :
-  - Backend : `tag (maxlength:5)` + `tagColor (default:'#6366F1')` dans Team.js
-  - Backend : route `POST /:id/transfer/:userId` (transfer capitaine)
-  - Frontend Gestion : carte identité (emoji/nom/desc/TAG badge coloré) + panel édition
-    - Champs : Nom, Description, Emoji (grille picker), TAG (3-5 chars) + 8 swatches couleur
-  - Frontend Gestion : modal transfert capitaine (liste membres + confirmation)
-  - LiveCompetition : badge `[TAG]` avec `tagColor` sur StreamCards
+  - **[Team.js]** Ajouter champ `generalInfo: { type: String, maxlength: 500, default: '' }`
+  - **[routes/teams.js]** GET `/mine` : si `maxMembers < 30` → forcer 30 + save
+  - **[routes/teams.js]** PATCH `/:id` : autoriser `generalInfo` dans les champs modifiables
+  - **[TeamPage.css]** `.team-header` : retirer uniquement `position / top / left / right`
+  - **[TeamPage.css]** `.team-tabs` : retirer uniquement `position / top / left / right`
+  - **[TeamPage.css]** `.team-content` : `padding → 8px` (uniforme)
+  - **[TeamPage.css]** `.team-chat-wrapper` : retirer `position: fixed / top / bottom / left / right / max-width / margin` → `flex: 1; overflow: hidden; width: 100%`
+  - **[TeamPage.css]** `.team-chat-messages` : ajouter bulle visuelle (background + border-radius)
+  - **[TeamPage.css]** Styles `.team-general-info-card` (bulle Infos Générales)
+  - **[TeamPage.js]** Emoji picker : 12 → ~60 emojis mobile, grid scrollable 6 colonnes
+  - **[TeamPage.js]** Bulle Infos Générales (onglet Infos, entre identité et concours) : lecture + édition inline Captain/Officers → PATCH `{ generalInfo }`
 
 ---
 
 ## Terminées
 
 > Ordre : plus récent en haut.
+
+---
+
+### ╔══ Session 24 — 27 Fév 2026 ══╗
+
+#### TÂCHE-038 — Phase 6 : Gestion avancée (TAG couleur + Transfert capitaine)
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/locales/*.json`
+- **Résultat** : `tag` + `tagColor` dans Team.js. Route transfer capitaine. Gestion : carte identité + panel édition (emoji grille, TAG, swatches couleur). Modal transfert capitaine. Badge `[TAG]` avec tagColor sur StreamCards LiveCompetition.
+
+#### TÂCHE-037 — Phase 5 : Chat améliorations
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `backend/socketHandlers/teamChat.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
+- **Résultat** : Map `teamOnlineUsers` → `team:onlineUsers` temps réel. Barre membres connectés sous tabs. Messages avec avatar + nom (gauche=reçus, droite=envoyés). Input chat ancré en bas.
+
+#### TÂCHE-036 — Phase 4 : Informations Concours (onglet Infos redesign)
+- **Statut** : DONE
+- **Modèle** : Opus | **Difficulté** : Complexe
+- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
+- **Résultat** : `competitionEntries [{ competition, participants×5, instructions }]` max 3. Routes POST/PATCH/DELETE entries. Panel bottom sheet : sélect concours + 5 membres + instructions. Bulles concours lisibles par tous. Édition Nom/Desc déménagée dans Gestion.
+
+#### TÂCHE-035 — Phase 3 : Système de grades membres (officer/nouveau)
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `backend/models/Team.js`, `backend/routes/teams.js`, `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
+- **Résultat** : Enum roles `['captain', 'officer', 'member', 'nouveau']`. Route PATCH `/:id/member/:userId/role` avec vérif rang. Boutons dynamiques par rang. Badges colorés.
+
+#### TÂCHE-034 — Phase 2 : Listing équipes + système de candidatures
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `frontend/src/locales/*.json`
+- **Résultat** : Écran sans équipe : 2 boutons (Créer + Rejoindre). Vue listing équipes avec cartes + bouton Postuler. Bulle candidatures dans onglet Membres.
+
+#### TÂCHE-033 — Phase 1 : Corrections UX/CSS TeamPage
+- **Statut** : DONE
+- **Modèle** : Sonnet | **Difficulté** : Facile
+- **Fichiers** : `frontend/src/pages/TeamPage.js`, `frontend/src/pages/TeamPage.css`, `backend/models/Team.js`
+- **Résultat** : Retrait `<Navigation />` bas de page. Ajustement barre onglets + padding contenu. `maxMembers` max:30, default:30. Espacement membres et section Gestion.
 
 ---
 

@@ -88,6 +88,12 @@ const teamSchema = new mongoose.Schema({
     min: 2,
     max: 30
   },
+  // Informations générales de l'équipe (modifiable par captain/officers)
+  generalInfo: {
+    type: String,
+    maxlength: 500,
+    default: ''
+  },
   // TAG équipe visible sur les StreamCards (3-5 lettres majuscules)
   tag: {
     type: String,

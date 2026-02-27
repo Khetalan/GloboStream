@@ -29,12 +29,21 @@ router.get('/mine', async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const team = await Team.findOne({ 'members.user': userId })
-      .populate('captain', 'displayName firstName photos isVerified')
-      .populate('members.user', 'displayName firstName photos isVerified')
-      .populate('competition', 'name status')
-      .populate('competitionEntries.competition', 'name status startDate endDate')
-      .populate('competitionEntries.participants', 'displayName firstName photos');
+    const team = await Team.findOne({ 'members.user': userId });
+
+    // Correction silencieuse des anciens documents avec maxMembers < 30
+    if (team && team.maxMembers < 30) {
+      team.maxMembers = 30;
+      await team.save();
+    }
+
+    if (team) {
+      await team.populate('captain', 'displayName firstName photos isVerified');
+      await team.populate('members.user', 'displayName firstName photos isVerified');
+      await team.populate('competition', 'name status');
+      await team.populate('competitionEntries.competition', 'name status startDate endDate');
+      await team.populate('competitionEntries.participants', 'displayName firstName photos');
+    }
 
     res.json({ success: true, team: team || null });
   } catch (error) {
@@ -100,25 +109,41 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/teams/:id - Modifier une équipe (capitaine seulement)
+// PATCH /api/teams/:id - Modifier une équipe (capitaine + officiers pour generalInfo)
 router.patch('/:id', async (req, res) => {
   try {
     const userId = req.user._id;
     const team = await Team.findById(req.params.id);
 
     if (!team) return res.status(404).json({ error: 'Équipe non trouvée' });
-    if (team.captain.toString() !== userId.toString()) {
-      return res.status(403).json({ error: 'Réservé au capitaine' });
+
+    const isCaptain = team.captain.toString() === userId.toString();
+    const callerMember = team.members.find(m => m.user.toString() === userId.toString());
+    const isOfficer = callerMember?.role === 'officer';
+
+    if (!isCaptain && !isOfficer) {
+      return res.status(403).json({ error: 'Réservé au capitaine ou officier' });
     }
 
-    const { name, description, color, emoji, isOpen, tag, tagColor } = req.body;
-    if (name !== undefined) team.name = name.trim();
-    if (description !== undefined) team.description = description.trim();
-    if (color !== undefined) team.color = color;
-    if (emoji !== undefined) team.emoji = emoji;
-    if (isOpen !== undefined) team.isOpen = isOpen;
-    if (tag !== undefined) team.tag = tag.toUpperCase().trim().slice(0, 5);
-    if (tagColor !== undefined) team.tagColor = tagColor;
+    // Champs réservés au capitaine uniquement
+    if (!isCaptain) {
+      const captainOnly = ['name', 'description', 'color', 'emoji', 'isOpen', 'tag', 'tagColor'];
+      if (captainOnly.some(f => req.body[f] !== undefined)) {
+        return res.status(403).json({ error: 'Réservé au capitaine' });
+      }
+    }
+
+    const { name, description, color, emoji, isOpen, tag, tagColor, generalInfo } = req.body;
+    if (isCaptain) {
+      if (name !== undefined) team.name = name.trim();
+      if (description !== undefined) team.description = description.trim();
+      if (color !== undefined) team.color = color;
+      if (emoji !== undefined) team.emoji = emoji;
+      if (isOpen !== undefined) team.isOpen = isOpen;
+      if (tag !== undefined) team.tag = tag.toUpperCase().trim().slice(0, 5);
+      if (tagColor !== undefined) team.tagColor = tagColor;
+    }
+    if (generalInfo !== undefined) team.generalInfo = generalInfo.trim().slice(0, 500);
 
     await team.save();
     res.json({ success: true, team });

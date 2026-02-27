@@ -952,7 +952,10 @@
     "confirmTransferBtn": "Confirmer le transfert",
     "transferred": "Commandement transféré",
     "transferError": "Erreur lors du transfert",
-    "selectMember": "Sélectionnez un membre"
+    "selectMember": "Sélectionnez un membre",
+    "generalInfo": "Informations générales",
+    "generalInfoEmpty": "Aucune information générale pour le moment.",
+    "generalInfoPlaceholder": "Rédigez les informations générales de l'équipe (stratégie, objectifs, règles internes…)"
   },
   "legal": {
     "title": "Informations légales",

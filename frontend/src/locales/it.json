@@ -954,7 +954,10 @@
     "confirmTransferBtn": "Conferma trasferimento",
     "transferred": "Comando trasferito",
     "transferError": "Errore nel trasferimento",
-    "selectMember": "Seleziona un membro"
+    "selectMember": "Seleziona un membro",
+    "generalInfo": "Informazioni generali",
+    "generalInfoEmpty": "Nessuna informazione generale per ora.",
+    "generalInfoPlaceholder": "Scrivi le informazioni generali del team (strategia, obiettivi, regole interne…)"
   },
   "legal": {
     "title": "Informazioni legali",
