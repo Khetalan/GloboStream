@@ -402,6 +402,15 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
+/* Fix emoji-picker-react : les boutons catégorie doivent masquer l'état inactif */
+.chat-emoji-picker-dropdown .epr-cat-btn {
+  overflow: hidden !important;
+}
+/* Fix même problème dans TeamPage */
+.team-emoji-picker-dropdown .epr-cat-btn {
+  overflow: hidden !important;
+}
+
 .chat-emoji-toggle.active {
   color: var(--primary);
 }
