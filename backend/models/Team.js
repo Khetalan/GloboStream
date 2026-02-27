@@ -42,8 +42,8 @@ const teamSchema = new mongoose.Schema({
     },
     role: {
       type: String,
-      enum: ['captain', 'member'],
-      default: 'member'
+      enum: ['captain', 'officer', 'member', 'nouveau'],
+      default: 'nouveau'
     },
     joinedAt: {
       type: Date,
@@ -61,11 +61,43 @@ const teamSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  // Inscriptions aux concours (max 3)
+  competitionEntries: [{
+    competition: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Competition',
+      required: true
+    },
+    participants: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    instructions: {
+      type: String,
+      maxlength: 500,
+      default: ''
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   maxMembers: {
     type: Number,
-    default: 5,
+    default: 30,
     min: 2,
-    max: 5
+    max: 30
+  },
+  // TAG équipe visible sur les StreamCards (3-5 lettres majuscules)
+  tag: {
+    type: String,
+    maxlength: 5,
+    default: '',
+    trim: true
+  },
+  tagColor: {
+    type: String,
+    default: '#6366F1'
   },
   isOpen: {
     type: Boolean,

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  FiArrowLeft, FiSearch, FiX, FiHeart, FiEye, FiPlay
+  FiArrowLeft, FiSearch, FiX, FiHeart, FiEye, FiPlay,
+  FiTrendingUp, FiMapPin, FiClock, FiUsers, FiCalendar, FiInfo
 } from 'react-icons/fi';
 import { BsFillTrophyFill } from 'react-icons/bs';
 import Navigation from '../components/Navigation';
@@ -18,12 +20,29 @@ const LiveCompetition = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
 
+  // Écrans : rules (page explicative) → liveList (liste des lives)
+  const [screen, setScreen] = useState('rules');
   const [isStreaming, setIsStreaming] = useState(false);
+
+  // Concours (depuis API)
+  const [competitions, setCompetitions] = useState([]);
+  const [loadingCompetitions, setLoadingCompetitions] = useState(true);
+  const [selectedCompetition, setSelectedCompetition] = useState(null);
+
+  // Lives
   const [liveStreams, setLiveStreams] = useState([]);
   const [filteredStreams, setFilteredStreams] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('trending');
+
+  const tabs = [
+    { id: 'trending',  label: t('livePublic.tabTrending'),  icon: FiTrendingUp },
+    { id: 'nearby',    label: t('livePublic.tabNearby'),    icon: FiMapPin },
+    { id: 'new',       label: t('livePublic.tabNew'),       icon: FiClock },
+    { id: 'favorites', label: t('livePublic.tabFavorites'), icon: FiHeart },
+  ];
 
   // Restaurer le live si le streamer recharge la page
   useEffect(() => {
@@ -33,23 +52,71 @@ const LiveCompetition = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Charger les concours (écran explicatif)
   useEffect(() => {
-    loadLiveStreams();
+    const fetchCompetitions = async () => {
+      try {
+        setLoadingCompetitions(true);
+        const response = await axios.get('/api/competitions');
+        setCompetitions(response.data.competitions || []);
+      } catch (error) {
+        console.error('Error loading competitions:', error);
+      } finally {
+        setLoadingCompetitions(false);
+      }
+    };
+    fetchCompetitions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Refresh silencieux 30s
+  const loadLiveStreams = useCallback(async (filter) => {
+    try {
+      setLoading(true);
+      const currentFilter = filter || activeFilter;
+      const response = await axios.get('/api/live/public', {
+        params: {
+          mode: 'competition',
+          filter: currentFilter,
+          userLat: user?.location?.coordinates?.[1],
+          userLon: user?.location?.coordinates?.[0]
+        }
+      });
+      setLiveStreams(response.data.streams || []);
+    } catch (error) {
+      console.error('Error loading competition streams:', error);
+      toast.error(t('liveCompetition.loadError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [t, activeFilter, user]);
+
+  // Charger les lives quand on entre dans liveList
   useEffect(() => {
+    if (screen === 'liveList') {
+      loadLiveStreams(activeFilter);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, activeFilter]);
+
+  // Refresh silencieux 30s sur la liste
+  useEffect(() => {
+    if (screen !== 'liveList') return;
     const interval = setInterval(async () => {
       try {
         const response = await axios.get('/api/live/public', {
-          params: { mode: 'competition' }
+          params: {
+            mode: 'competition',
+            filter: activeFilter,
+            userLat: user?.location?.coordinates?.[1],
+            userLon: user?.location?.coordinates?.[0]
+          }
         });
         setLiveStreams(response.data.streams || []);
       } catch { /* silencieux */ }
     }, 30000);
     return () => clearInterval(interval);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, activeFilter]);
 
   // Filtre search
   useEffect(() => {
@@ -65,21 +132,6 @@ const LiveCompetition = () => {
     ));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, liveStreams]);
-
-  const loadLiveStreams = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/live/public', {
-        params: { mode: 'competition' }
-      });
-      setLiveStreams(response.data.streams || []);
-    } catch (error) {
-      console.error('Error loading competition streams:', error);
-      toast.error(t('liveCompetition.loadError'));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleJoinStream = (streamId) => {
     navigate(`/stream/watch/live-${streamId}`);
@@ -109,6 +161,13 @@ const LiveCompetition = () => {
     }
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+  };
+
   // Interface streamer
   if (isStreaming) {
     return (
@@ -121,10 +180,171 @@ const LiveCompetition = () => {
     );
   }
 
+  // ── Écran explicatif ───────────────────────────────────────
+  if (screen === 'rules') {
+    const activeCompetitions   = competitions.filter(c => c.status === 'active');
+    const upcomingCompetitions = competitions.filter(c => c.status === 'upcoming');
+
+    return (
+      <div className="live-comp-container">
+        <div className="live-comp-header">
+          <button className="btn btn-ghost" onClick={() => navigate('/stream')}>
+            <FiArrowLeft />
+          </button>
+          <h1>{t('liveCompetition.title')}</h1>
+          <Navigation />
+        </div>
+
+        <div className="live-comp-content lc-rules-content">
+          {/* Icône trophée */}
+          <div className="lc-rules-hero">
+            <div className="lc-trophy-icon">
+              <BsFillTrophyFill size={40} />
+            </div>
+            <h2 className="lc-rules-title">{t('liveCompetition.rulesTitle')}</h2>
+            <p className="lc-rules-subtitle">{t('liveCompetition.rulesSubtitle')}</p>
+          </div>
+
+          {/* Règlement général */}
+          <div className="lc-rules-card">
+            <h3 className="lc-section-title">
+              <FiInfo /> {t('liveCompetition.rulesSection')}
+            </h3>
+            <ul className="lc-rules-list">
+              <li>{t('liveCompetition.rule1')}</li>
+              <li>{t('liveCompetition.rule2')}</li>
+              <li>{t('liveCompetition.rule3')}</li>
+              <li>{t('liveCompetition.rule4')}</li>
+              <li>{t('liveCompetition.rule5')}</li>
+            </ul>
+          </div>
+
+          {/* Concours en cours */}
+          {!loadingCompetitions && activeCompetitions.length > 0 && (
+            <div className="lc-competitions-section">
+              <h3 className="lc-section-title">
+                <span className="lc-status-dot active"></span>
+                {t('liveCompetition.inProgress')}
+              </h3>
+              {activeCompetitions.map(comp => (
+                <button
+                  key={comp._id}
+                  className="lc-competition-card lc-competition-active"
+                  onClick={() => setSelectedCompetition(comp)}
+                >
+                  <span className="lc-comp-name">{comp.name}</span>
+                  {comp.endDate && (
+                    <span className="lc-comp-date">
+                      <FiCalendar /> {t('liveCompetition.until')} {formatDate(comp.endDate)}
+                    </span>
+                  )}
+                  <FiInfo className="lc-comp-info-icon" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Concours à venir */}
+          {!loadingCompetitions && upcomingCompetitions.length > 0 && (
+            <div className="lc-competitions-section">
+              <h3 className="lc-section-title">
+                <span className="lc-status-dot upcoming"></span>
+                {t('liveCompetition.upcoming')}
+              </h3>
+              {upcomingCompetitions.map(comp => (
+                <button
+                  key={comp._id}
+                  className="lc-competition-card lc-competition-upcoming"
+                  onClick={() => setSelectedCompetition(comp)}
+                >
+                  <span className="lc-comp-name">{comp.name}</span>
+                  {comp.startDate && (
+                    <span className="lc-comp-date">
+                      <FiCalendar /> {t('liveCompetition.startingOn')} {formatDate(comp.startDate)}
+                    </span>
+                  )}
+                  <FiInfo className="lc-comp-info-icon" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Aucun concours */}
+          {!loadingCompetitions && competitions.length === 0 && (
+            <p className="lc-no-competitions">{t('liveCompetition.noCompetitions')}</p>
+          )}
+        </div>
+
+        {/* Bouton Voir les Lives */}
+        <button
+          className="lc-see-lives-btn"
+          onClick={() => setScreen('liveList')}
+        >
+          <FiEye />
+          <span>{t('liveCompetition.seeLives')}</span>
+        </button>
+
+        {/* Modal détail concours */}
+        <AnimatePresence>
+          {selectedCompetition && (
+            <motion.div
+              className="lc-modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedCompetition(null)}
+            >
+              <motion.div
+                className="lc-modal-card"
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0,  opacity: 1 }}
+                exit={{ y: 60,   opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="lc-modal-header">
+                  <h3>{selectedCompetition.name}</h3>
+                  <button
+                    className="btn btn-ghost"
+                    onClick={() => setSelectedCompetition(null)}
+                  >
+                    <FiX />
+                  </button>
+                </div>
+                {selectedCompetition.description && (
+                  <p className="lc-modal-desc">{selectedCompetition.description}</p>
+                )}
+                {selectedCompetition.prize && (
+                  <p className="lc-modal-prize">
+                    🏆 {selectedCompetition.prize}
+                  </p>
+                )}
+                {(selectedCompetition.startDate || selectedCompetition.endDate) && (
+                  <p className="lc-modal-dates">
+                    <FiCalendar />
+                    {selectedCompetition.startDate && formatDate(selectedCompetition.startDate)}
+                    {selectedCompetition.startDate && selectedCompetition.endDate && ' → '}
+                    {selectedCompetition.endDate && formatDate(selectedCompetition.endDate)}
+                  </p>
+                )}
+                {selectedCompetition.rules && (
+                  <div className="lc-modal-rules">
+                    <h4>{t('liveCompetition.rulesSection')}</h4>
+                    <p>{selectedCompetition.rules}</p>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // ── Écran liste des lives ──────────────────────────────────
   return (
     <div className="live-comp-container">
       <div className="live-comp-header">
-        <button className="btn btn-ghost" onClick={() => navigate('/stream')}>
+        <button className="btn btn-ghost" onClick={() => setScreen('rules')}>
           <FiArrowLeft />
         </button>
         <h1>{t('liveCompetition.title')}</h1>
@@ -139,12 +359,21 @@ const LiveCompetition = () => {
         </div>
       </div>
 
-      {/* Bouton flottant Démarrer */}
-      <button className="start-live-fab-comp" onClick={() => setIsStreaming(true)}>
-        <FiPlay />
-        <span>{t('liveCompetition.startBtn')}</span>
-      </button>
+      {/* Barre de filtres */}
+      <div className="tabs-container">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`tab-btn ${activeFilter === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveFilter(tab.id)}
+          >
+            <tab.icon />
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
 
+      {/* Barre de recherche */}
       {showSearch && (
         <div className="search-bar">
           <FiSearch className="search-icon" />
@@ -163,7 +392,19 @@ const LiveCompetition = () => {
         </div>
       )}
 
-      <div className="live-comp-content">
+      {/* Deux boutons fixes en bas : Démarrer + Team */}
+      <div className="lc-bottom-actions">
+        <button className="lc-fab-start" onClick={() => setIsStreaming(true)}>
+          <FiPlay />
+          <span>{t('liveCompetition.startBtn')}</span>
+        </button>
+        <button className="lc-fab-team" onClick={() => navigate('/stream/competition/team')}>
+          <FiUsers />
+          <span>{t('liveCompetition.teamBtn')}</span>
+        </button>
+      </div>
+
+      <div className="live-comp-content lc-list-content">
         {loading ? (
           <div className="loading-state">
             <div className="loading"></div>
@@ -268,6 +509,14 @@ const CompStreamCard = ({ stream, onJoin, onToggleFavorite }) => {
           </div>
 
           <div className="streamer-details">
+            {stream.team?.tag && (
+              <span
+                className="lc-team-tag-badge"
+                style={{ backgroundColor: stream.team.tagColor || '#6366F1' }}
+              >
+                [{stream.team.tag}]
+              </span>
+            )}
             <p className="streamer-name">
               {nameAge}
               {stream.streamer.isVerified && (

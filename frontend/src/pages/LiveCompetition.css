@@ -438,6 +438,18 @@
   padding-top: 116px;
 }
 
+/* ── Badge TAG équipe sur StreamCard ──────────────────────── */
+.lc-team-tag-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-bottom: 3px;
+  letter-spacing: 0.04em;
+}
+
 /* ── 768px+ ───────────────────────────────────────────────── */
 @media (min-width: 768px) {
   .live-comp-content {
