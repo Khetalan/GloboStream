@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
 import axios from 'axios';
-import { FiPlay, FiRefreshCw, FiMic, FiMicOff, FiVideo, FiVideoOff, FiX, FiHeart, FiThumbsDown, FiMessageCircle, FiSend, FiSliders, FiGlobe } from 'react-icons/fi';
+import { FiArrowLeft, FiPlay, FiRefreshCw, FiMic, FiMicOff, FiVideo, FiVideoOff, FiX, FiHeart, FiThumbsDown, FiMessageCircle, FiSend, FiSliders, FiGlobe } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import Navigation from '../components/Navigation';
 import './LiveSurprise.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://globostream.onrender.com';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+const LANGUAGES = ['FR', 'EN', 'IT', 'ES', 'DE'];
 
 const PEER_CONFIG = {
   iceServers: [
@@ -20,8 +24,9 @@ const PEER_CONFIG = {
 };
 
 const LiveSurprise = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // État de navigation
   const [screen, setScreen] = useState('start'); // start | searching | videocall | decision
@@ -45,6 +50,9 @@ const LiveSurprise = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ country: '', ageMin: 18, ageMax: 99 });
   const [searchTimedOut, setSearchTimedOut] = useState(false);
+
+  // T7 — Filtre langues
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
 
   // Refs
   const localVideoRef  = useRef(null);
@@ -77,6 +85,15 @@ const LiveSurprise = () => {
     return () => {
       if (stream) stream.getTracks().forEach(track => track.stop());
     };
+  }, []);
+
+  // T7 — Initialiser les langues sélectionnées : langue du site + langues du profil
+  useEffect(() => {
+    const siteLang = (i18n.language || 'fr').split('-')[0].toUpperCase();
+    const profileLangs = (user?.languages || []).map(l => l.toUpperCase());
+    const union = [...new Set([siteLang, ...profileLangs])].filter(l => LANGUAGES.includes(l));
+    setSelectedLanguages(union.length > 0 ? union : ['FR']);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Attacher le stream local après chaque changement d'écran ──
@@ -224,11 +241,12 @@ const LiveSurprise = () => {
     const activeFilters = overrideFilters || {
       country: filters.country.trim() || undefined,
       ageMin: filters.ageMin !== 18 ? filters.ageMin : undefined,
-      ageMax: filters.ageMax !== 99 ? filters.ageMax : undefined
+      ageMax: filters.ageMax !== 99 ? filters.ageMax : undefined,
+      languages: selectedLanguages.length > 0 ? selectedLanguages : undefined
     };
     socket.emit('join-surprise-queue', { userId: user._id, filters: activeFilters });
     socket.emit('start-search', { userId: user._id, timerDuration: 3, filters: activeFilters });
-  }, [user, filters]);
+  }, [user, filters, selectedLanguages]);
 
   // TÂCHE-019 — Élargir la recherche mondiale
   const handleExpandSearch = useCallback(() => {
@@ -397,6 +415,32 @@ const LiveSurprise = () => {
                     value={filters.ageMax}
                     onChange={(e) => setFilters(prev => ({ ...prev, ageMax: Number(e.target.value) }))}
                   />
+                </div>
+              </div>
+
+              {/* T7 — Filtre langues */}
+              <div className="lspr-filter-row">
+                <label>{t('liveSurprise.filterLanguages') || 'Langues'}</label>
+                <div className="lspr-lang-checkboxes">
+                  {LANGUAGES.map(lang => (
+                    <label key={lang} className={`lspr-lang-chip ${selectedLanguages.includes(lang) ? 'selected' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLanguages.includes(lang)}
+                        onChange={() => {
+                          setSelectedLanguages(prev => {
+                            if (prev.includes(lang)) {
+                              // Empêcher de décocher la dernière langue
+                              if (prev.length <= 1) return prev;
+                              return prev.filter(l => l !== lang);
+                            }
+                            return [...prev, lang];
+                          });
+                        }}
+                      />
+                      {lang}
+                    </label>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -614,6 +658,16 @@ const LiveSurprise = () => {
   // ── Rendu principal ──────────────────────────────────────────
   return (
     <div className="lspr-container">
+      {/* Header fixe — visible sur start et searching uniquement */}
+      {(screen === 'start' || screen === 'searching') && (
+        <div className="lspr-header">
+          <button className="btn btn-ghost lspr-back-btn" onClick={() => navigate('/stream')}>
+            <FiArrowLeft size={20} />
+          </button>
+          <span className="lspr-header-title">GloboStream</span>
+          <Navigation />
+        </div>
+      )}
       {screen === 'start'     && renderStartScreen()}
       {screen === 'searching' && renderSearchingScreen()}
       {(screen === 'videocall' || screen === 'decision') && renderVideoCallScreen()}

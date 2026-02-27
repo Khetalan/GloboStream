@@ -187,6 +187,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
         username: 'System',
         text: t('liveStream.userLeft', { name: displayName }),
         isSystem: true,
+        isJoinEvent: true,
         isOwn: false,
         photoUrl: null
       }]);
@@ -284,9 +285,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
     });
 
     // Message chat reçu — TÂCHE-017 : photoUrl
-    socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+    socket.on('live-chat-message', ({ username, text, lang, timestamp, photoUrl: msgPhotoUrl }) => {
       const info = viewersInfoRef.current.get(username);
-      const photoUrl = info?.photoUrl || null;
+      const photoUrl = msgPhotoUrl || info?.photoUrl || null;
       const userId = info?.userId || null;
       setMessages(prev => [...prev, {
         id: `msg-${timestamp}-${Math.random()}`,

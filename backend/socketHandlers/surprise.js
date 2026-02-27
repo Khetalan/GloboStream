@@ -46,13 +46,18 @@ function setupSurpriseHandlers(io, socket) {
         defaultFilters.country = user.location.country;
       }
 
+      // T7 — Langues par défaut depuis le profil si non fournies
+      if (!defaultFilters.languages && user.languages && user.languages.length > 0) {
+        defaultFilters.languages = user.languages.map(l => l.toUpperCase());
+      }
+
       surpriseQueue.set(userId, {
         socketId:      socket.id,
         userInfo:      userInfo,
         timestamp:     Date.now(),
         timerDuration: 3,
         isSearching:   false,
-        filters:       defaultFilters, // { country, ageMin, ageMax }
+        filters:       defaultFilters, // { country, ageMin, ageMax, languages }
         timeoutTimer: null             // TÂCHE-016 : timer 15s → notifie le client (pas de fallback auto)
       });
 
@@ -287,6 +292,14 @@ function findPartner(userId, filters = {}) {
     if (filters.country && entry.userInfo.country &&
         filters.country !== entry.userInfo.country) {
       continue;
+    }
+
+    // T7 — Filtrage par langue : au moins 1 langue en commun
+    const myLangs = filters.languages;
+    const theirLangs = entry.filters?.languages;
+    if (myLangs && myLangs.length > 0 && theirLangs && theirLangs.length > 0) {
+      const hasCommonLang = myLangs.some(l => theirLangs.includes(l));
+      if (!hasCommonLang) continue;
     }
 
     return candidateId;

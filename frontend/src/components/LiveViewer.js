@@ -137,6 +137,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         username: 'System',
         text: t('liveStream.userLeft', { name: displayName }),
         isSystem: true,
+        isJoinEvent: true,
         isOwn: false,
         photoUrl: null
       }]);
@@ -204,9 +205,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Message chat — TÂCHE-017 : photoUrl
-    socket.on('live-chat-message', ({ username, text, lang, timestamp }) => {
+    socket.on('live-chat-message', ({ username, text, lang, timestamp, photoUrl: msgPhotoUrl }) => {
       const info = viewersInfoRef.current.get(username);
-      const photoUrl = info?.photoUrl || null;
+      const photoUrl = msgPhotoUrl || info?.photoUrl || null;
       const userId = info?.userId || null;
       setMessages(prev => [...prev, {
         id: `msg-${timestamp}-${Math.random()}`,
@@ -540,13 +541,26 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       {/* Preview locale si participant — en dehors de lv-video-section pour z-index correct */}
       {isParticipant && localStream && (
         <div className="lv-local-preview">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="lv-local-video"
-          />
+          {isCamOff ? (
+            <div className="lv-cam-off-cover">
+              {(() => {
+                const primaryPhoto = user?.photos?.find(p => p.isPrimary) || user?.photos?.[0];
+                return primaryPhoto?.url ? (
+                  <img src={getPhotoUrl(primaryPhoto.url)} alt="" />
+                ) : (
+                  <span>{(user?.displayName || user?.firstName || '?').charAt(0).toUpperCase()}</span>
+                );
+              })()}
+            </div>
+          ) : (
+            <video
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
+              className="lv-local-video"
+            />
+          )}
         </div>
       )}
 

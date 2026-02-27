@@ -21,6 +21,14 @@ const LivePublic = () => {
   // État : navigation entre liste et interface live
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Restaurer l'interface live si le streamer recharge la page pendant son live
+  useEffect(() => {
+    if (user?.isLive) {
+      setIsStreaming(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [activeTab, setActiveTab] = useState('trending');
   const [liveStreams, setLiveStreams] = useState([]);
   const [filteredStreams, setFilteredStreams] = useState([]);
