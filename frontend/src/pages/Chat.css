@@ -373,6 +373,7 @@
   word-wrap: break-word;
   line-height: 1.5;
   font-size: 0.95rem;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
 }
 
 .message-time {
@@ -384,6 +385,27 @@
 
 .message.own .message-time {
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Emoji picker (Chat page) ─────────────────────────────── */
+.chat-input-area {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chat-emoji-picker-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 300;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.chat-emoji-toggle.active {
+  color: var(--primary);
 }
 
 /* ── Input ─────────────────────────────────────────────────── */
@@ -408,6 +430,7 @@
   font-size: 1rem;
   transition: var(--transition);
   min-height: 44px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
 }
 
 .messages-input input:focus {
