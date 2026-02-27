@@ -6,9 +6,9 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
-import { 
+import {
   FiArrowLeft, FiHeart, FiEdit2, FiCamera, FiX, FiCheck, FiCalendar,
-  FiMapPin, FiStar, FiAward
+  FiStar, FiAward
 } from 'react-icons/fi';
 import LocationPicker from '../components/LocationPicker';
 import { getPhotoUrl } from '../utils/photoUrl';

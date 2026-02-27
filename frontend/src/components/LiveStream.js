@@ -38,13 +38,13 @@ const PEER_CONFIG = {
 // Thèmes disponibles pour le mode event (partagé avec LiveEvent.js)
 const EVENT_THEMES = [
   { id: 'music',      label: 'Musique',    emoji: '🎵', color: '#8b5cf6' },
-  { id: 'gaming',     label: 'Gaming',     emoji: '🎮', color: '#3b82f6' },
+  { id: 'bricolage',  label: 'Bricolages', emoji: '🔧', color: '#78716c' },
   { id: 'sport',      label: 'Sport',      emoji: '🏋️', color: '#10b981' },
   { id: 'cuisine',    label: 'Cuisine',    emoji: '🍳', color: '#f59e0b' },
   { id: 'beauty',     label: 'Beauté',     emoji: '💄', color: '#ec4899' },
   { id: 'travel',     label: 'Voyage',     emoji: '✈️', color: '#06b6d4' },
   { id: 'art',        label: 'Art',        emoji: '🎨', color: '#f97316' },
-  { id: 'discussion', label: 'Discussion', emoji: '💬', color: '#6b7280' },
+  { id: 'commerciales', label: 'Commerciales', emoji: '💼', color: '#0ea5e9' },
 ];
 
 /**
@@ -429,12 +429,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     setChatInput('');
   }, [chatInput, streamerName, i18n.language]);
 
-  const handleKeyPress = useCallback((e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  }, [handleSendMessage]);
-
   // Toggle micro
   const toggleMic = useCallback(() => {
     if (localStreamRef.current) {
@@ -489,7 +483,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       console.error('Error starting live:', error);
       toast.error(t('liveStream.startError'));
     }
-  }, [streamerName, mode, user, t]);
+  }, [streamerName, mode, user, t, liveDescription, selectedEventTheme]);
 
   // Quitter le live
   const handleQuit = useCallback(async () => {
@@ -717,9 +711,10 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
             placeholder={t('liveStream.descriptionPlaceholder')}
             value={liveDescription}
             onChange={(e) => setLiveDescription(e.target.value)}
-            maxLength={150}
+            maxLength={80}
             rows={2}
           />
+          <span className="ls-description-counter">{liveDescription.length}/80</span>
           {mode === 'event' && (
             <div className="ls-theme-selector">
               <label className="ls-theme-selector-label">
