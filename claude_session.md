@@ -1608,4 +1608,55 @@ Suite directe de la Session 19. Correctifs UX sur la page LivePublic, nettoyage 
 - Build : `Compiled with warnings` — 3 warnings pré-existants non liés à ce travail (App.js `t` unused, Matches.js hook deps, Profile.js `FiMapPin`)
 - TÂCHE-021 (EN ATTENTE) : Bouton FAB dans LiveCompetition + LiveEvent quand ces pages seront créées
 
+---
+
+## Session 21 : Compétitions + Thématiques (27 Février 2026)
+**Date** : 27 Février 2026
+**Branche** : `claude-work`
+**Commits** : `1c95cd1` (7 fixes T6+T2+T7), en cours (TÂCHE-022 + TÂCHE-023)
+**Status** : En cours 🔄
+
+### Contexte
+Suite de la Session 20. Corrections de bugs (T6 header LiveSurprise, T2 PiP cam-off, T7 filtre langues Surprise) puis refonte complète de LiveCompetition et LiveEvent.
+
+### Ce qui a été fait
+
+#### Commit 1c95cd1 — 7 correctifs (T6 + T2 + T7)
+
+**T6 — LiveSurprise : header fixe manquant**
+- `LiveSurprise.css` : ajout `.lspr-header` (fixed, glassmorphism blur), padding-top sur `.lspr-start-screen` et `.lspr-searching-screen`
+
+**T2 — LiveViewer : PiP camera-off**
+- `LiveViewer.js` : section PiP affiche photo de profil ou initiale quand `isCamOff = true`
+- `LiveViewer.css` : classe `.lv-cam-off-cover` (overlay 100%, photo centrée, fond noir)
+
+**T7 — LiveSurprise : filtre langue**
+- `LiveSurprise.js` : état `selectedLanguages`, initialisation depuis `i18n.language + user.languages`, UI checkbox `.lspr-lang-chip`, envoi `languages` dans `join-surprise-queue`
+- `surprise.js` (backend) : stockage langues dans filters depuis profil user, `findPartner()` vérifie intersection de langues avant appairage
+- `LiveSurprise.css` : `.lspr-lang-checkboxes`, `.lspr-lang-chip`, `.lspr-lang-chip.selected`
+- 5 locales : clé `liveSurprise.filterLanguages`
+
+#### TÂCHE-022 — LiveCompetition : Refonte card grid
+
+**Fichiers** : `LiveCompetition.js`, `LiveCompetition.css`, `locales/*.json`
+
+- **LiveCompetition.js** : réécriture complète. Suppression du home screen (icône + features). Ajout `CompStreamCard` (photo, timer, badge LIVE, viewers, avatar, favoris), search bar toggle, FAB `.start-live-fab-comp`, refresh 30s silencieux, restauration `isStreaming` depuis `user.isLive && user.liveMode === 'competition'`, `handleToggleFavorite` + toast.
+- **LiveCompetition.css** : réécriture. FAB ambre (`background: linear-gradient(135deg, #F59E0B, #EF4444)`), overrides `.live-badge`, `.streamer-avatar`, `.empty-state svg` en ambre. Classes globales LivePublic.css réutilisées sans redéfinition.
+- **i18n** : objet `liveCompetition` (15 clés) dans fr/en/it/de/es. Clé `filterLanguages` ajoutée à `liveSurprise`.
+
+#### TÂCHE-023 — LiveEvent : Thèmes + Sélecteur pré-live
+
+**Fichiers** : `LiveEvent.js`, `LiveEvent.css`, `LiveStream.js`, `LiveStream.css`, `locales/*.json`
+
+- **LiveEvent.js** : architecture 2 écrans (`screen: 'themeSelection' | 'liveList'`). Constante `EVENT_THEMES` exportée (8 thèmes : music/gaming/sport/cuisine/beauty/travel/art/discussion). Écran 1 : grille `.le-theme-grid` de ThemeCards colorées (emoji + label, fond color-mix, hover élévation). Écran 2 : `EventStreamCard` avec `--le-theme-color` CSS prop, FAB couleur inline, search, favoris, refresh 30s. Filtrage client-side par `stream.tags.includes(selectedTheme.id)`. Restauration `isStreaming` (mode='event').
+- **LiveEvent.css** : `.le-theme-grid` (2 → 4 cols @768px), `.le-theme-card` (color-mix hover), `.start-live-fab-event`, `.le-empty-emoji`, overrides via `--le-theme-color`.
+- **LiveStream.js** : prop `theme` ajoutée, état `selectedEventTheme`, constante `EVENT_THEMES` locale. Sélecteur chips affiché dans pre-live quand `mode === 'event'`. Tag theme envoyé dans `create-live-room`.
+- **LiveStream.css** : `.ls-theme-selector`, `.ls-theme-chips`, `.ls-theme-chip`, `.ls-theme-chip.active` (color-mix via `--theme-color`).
+- **i18n** : objet `liveEvent` (17 clés + `themes` 8 entrées) dans fr/en/it/de/es.
+
+### Notes techniques
+- Pas de circular import : EVENT_THEMES défini localement dans LiveEvent.js ET LiveStream.js séparément.
+- `color-mix()` CSS pour fonds de thème dynamiques.
+- Classes globales `.streams-grid`, `.stream-card` héritées de LivePublic.css (CSS global non-modulaire).
+
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.

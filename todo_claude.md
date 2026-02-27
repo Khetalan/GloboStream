@@ -8,15 +8,37 @@
 ## Tâches en attente
 
 ### TÂCHE-021 — LiveCompetition + LiveEvent : Bouton Démarrer centré (style Live Publique)
-- **Statut**   : EN ATTENTE (pages pas encore créées)
+- **Statut**   : DONE (remplacée et améliorée par TÂCHE-022 + TÂCHE-023)
 - **Ajoutée**  : 26/02/2026
+- **Traitée**  : 27/02/2026 par Claude
 - **Priorité** : BASSE
-- **Fichiers concernés** : `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveEvent.js` (à créer)
-- **Description** : Quand les pages LiveCompetition et LiveEvent seront créées, leur ajouter un bouton "Démarrer" avec le même style que le FAB de LivePublic (centré, position fixed, bottom 80px, padding 16px/32px, font 1.05rem, border-radius 50px). Utiliser la couleur propre à chaque mode (pas le rouge #e4405f). Ne pas mettre de bouton fixe dans le StreamHub.
+- **Résultat** : Intégrée dans la refonte complète des pages LiveCompetition (TÂCHE-022) et LiveEvent (TÂCHE-023).
+
+---
+
+## Tâches en attente
+
+*(aucune)*
 
 ---
 
 ## Tâches terminées
+
+### TÂCHE-022 — LiveCompetition : Refonte card grid (layout LivePublic)
+- **Statut**   : DONE
+- **Ajoutée**  : 27/02/2026
+- **Traitée**  : 27/02/2026 par Claude
+- **Priorité** : HAUTE
+- **Fichiers** : `frontend/src/pages/LiveCompetition.js`, `frontend/src/pages/LiveCompetition.css`, `frontend/src/locales/*.json`
+- **Résultat** : Refonte complète. Grille StreamCards (CompStreamCard), FAB ambre (#F59E0B → #EF4444), search bar toggle, favoris, refresh 30s silencieux, empty state trophée, restauration isStreaming. CSS : réutilisation des classes globales LivePublic.css, overrides ambre seulement. i18n : 5 langues (fr/en/it/de/es).
+
+### TÂCHE-023 — LiveEvent : Sélection de salon + liste de lives
+- **Statut**   : DONE
+- **Ajoutée**  : 27/02/2026
+- **Traitée**  : 27/02/2026 par Claude
+- **Priorité** : HAUTE
+- **Fichiers** : `frontend/src/pages/LiveEvent.js`, `frontend/src/pages/LiveEvent.css`, `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveStream.css`, `frontend/src/locales/*.json`
+- **Résultat** : Deux écrans — picker 8 thèmes colorés (music/gaming/sport/cuisine/beauty/travel/art/discussion) + liste de lives filtrés client-side par tag. EventStreamCard (même pattern que CompStreamCard) avec couleur du thème via --le-theme-color. FAB avec couleur inline. Sélecteur de thème (chips) dans LiveStream.js pre-live screen quand mode='event'. Tag envoyé dans create-live-room emit. i18n : 5 langues + objet themes.
 
 ### TÂCHE-001 — Debug erreur 500 sur GET /api/matches
 - **Statut**   : DONE

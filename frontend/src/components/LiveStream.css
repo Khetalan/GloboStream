@@ -68,6 +68,50 @@
   border-color: rgba(255, 255, 255, 0.35);
 }
 
+/* ── Sélecteur de thème (mode event) ─────────────────────── */
+.ls-theme-selector {
+  width: 100%;
+  max-width: 320px;
+  margin: 12px 0;
+}
+
+.ls-theme-selector-label {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 8px;
+}
+
+.ls-theme-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ls-theme-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.ls-theme-chip:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ls-theme-chip.active {
+  border-color: var(--theme-color, #8b5cf6);
+  color: #fff;
+  background: color-mix(in srgb, var(--theme-color, #8b5cf6) 20%, transparent);
+}
+
 .ls-go-live-btn {
   display: flex;
   align-items: center;

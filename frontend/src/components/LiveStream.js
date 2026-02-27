@@ -35,11 +35,23 @@ const PEER_CONFIG = {
   ]
 };
 
+// Thèmes disponibles pour le mode event (partagé avec LiveEvent.js)
+const EVENT_THEMES = [
+  { id: 'music',      label: 'Musique',    emoji: '🎵', color: '#8b5cf6' },
+  { id: 'gaming',     label: 'Gaming',     emoji: '🎮', color: '#3b82f6' },
+  { id: 'sport',      label: 'Sport',      emoji: '🏋️', color: '#10b981' },
+  { id: 'cuisine',    label: 'Cuisine',    emoji: '🍳', color: '#f59e0b' },
+  { id: 'beauty',     label: 'Beauté',     emoji: '💄', color: '#ec4899' },
+  { id: 'travel',     label: 'Voyage',     emoji: '✈️', color: '#06b6d4' },
+  { id: 'art',        label: 'Art',        emoji: '🎨', color: '#f97316' },
+  { id: 'discussion', label: 'Discussion', emoji: '💬', color: '#6b7280' },
+];
+
 /**
  * Composant LiveStream (côté streamer)
  * Flow : montage → getUserMedia → preview → "Go Live" → crée salon Socket.IO → WebRTC peers
  */
-const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }) => {
+const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, theme = null }) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -70,6 +82,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesAccepted, setRulesAccepted] = useState(false);
   const [liveDescription, setLiveDescription] = useState('');
+  const [selectedEventTheme, setSelectedEventTheme] = useState(theme);
 
   // Refs
   const chatRef = useRef(null);
@@ -456,7 +469,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
       socketRef.current.emit('create-live-room', {
         mode: mode,
         title: `Live de ${streamerName}`,
-        tags: ['Rencontres', 'Discussion'],
+        tags: [
+          ...(mode === 'event' && selectedEventTheme ? [selectedEventTheme.id] : []),
+        ],
         userId: user?._id,
         displayName: streamerName,
         description: liveDescription
@@ -693,6 +708,26 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user }
             maxLength={150}
             rows={2}
           />
+          {mode === 'event' && (
+            <div className="ls-theme-selector">
+              <label className="ls-theme-selector-label">
+                {t('liveEvent.chooseTheme')}
+              </label>
+              <div className="ls-theme-chips">
+                {EVENT_THEMES.map(th => (
+                  <button
+                    key={th.id}
+                    type="button"
+                    className={`ls-theme-chip ${selectedEventTheme?.id === th.id ? 'active' : ''}`}
+                    style={{ '--theme-color': th.color }}
+                    onClick={() => setSelectedEventTheme(th)}
+                  >
+                    {th.emoji} {th.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {user?.photos?.length > 0 ? (
             <button className="ls-go-live-btn" onClick={() => setShowRulesModal(true)}>
               <FiPlay size={20} />

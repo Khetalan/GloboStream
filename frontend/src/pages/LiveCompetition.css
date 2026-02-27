@@ -1,5 +1,11 @@
 /* ============================================================
-   LiveCompetition — Écran d'accueil + interface de live
+   LiveCompetition — Card grid + FAB ambre
+   Réutilise les classes globales de LivePublic.css :
+   .streams-grid, .stream-card, .stream-thumbnail, .live-badge,
+   .viewers-count, .stream-duration, .stream-info, .streamer-row,
+   .streamer-avatar, .avatar-placeholder, .streamer-name,
+   .verified-badge, .favorite-btn, .stream-description,
+   .search-bar, .loading-state, .empty-state, .loading
    ============================================================ */
 
 .live-comp-container {
@@ -28,210 +34,67 @@
   color: var(--text-primary);
 }
 
+/* ── FAB Démarrer — gradient ambre compétition ────────────── */
+.start-live-fab-comp {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.45);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.start-live-fab-comp:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 8px 28px rgba(245, 158, 11, 0.6);
+}
+
+.start-live-fab-comp:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
 /* ── Contenu ──────────────────────────────────────────────── */
 .live-comp-content {
   padding-top: 60px;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-bottom: 24px;
+  padding-bottom: 160px;
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 768px;
+  margin: 0 auto;
 }
 
-/* ── Liste des rooms en cours ─────────────────────────────── */
-.live-rooms-section {
-  width: 100%;
-  max-width: 480px;
-  padding: 16px;
-}
-
-.live-rooms-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  margin: 0 0 12px;
-}
-
-.live-rooms-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #EF4444;
-  animation: roomPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes roomPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.live-rooms-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.live-room-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.live-room-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
-.live-room-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+/* ── Override : badge LIVE couleur ambre ──────────────────── */
+.live-comp-container .live-badge {
   background: linear-gradient(135deg, #F59E0B, #EF4444);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
-.live-room-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+/* ── Override : bordure avatar couleur ambre ──────────────── */
+.live-comp-container .streamer-avatar {
+  border-color: #F59E0B;
 }
 
-.live-room-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.live-room-title {
-  font-size: 11px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.live-room-viewers {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
-
-/* ── Écran d'accueil ─────────────────────────────────────── */
-.live-comp-start-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 32px 24px;
-  max-width: 420px;
-  gap: 16px;
-}
-
-.live-comp-icon-wrapper {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #F59E0B, #EF4444);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);
-}
-
-.live-comp-start-screen h2 {
-  font-size: 1.75rem;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.live-comp-description {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ── Features ────────────────────────────────────────────── */
-.live-comp-features {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  margin: 8px 0;
-}
-
-.live-comp-feature {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  text-align: left;
-}
-
-.live-comp-feature svg {
-  flex-shrink: 0;
+/* ── Override : empty state icon couleur ambre ────────────── */
+.live-comp-container .empty-state svg {
   color: #F59E0B;
 }
 
-/* ── Bouton Démarrer ─────────────────────────────────────── */
-.live-comp-start-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 280px;
-  padding: 18px 40px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 60px;
-  background: linear-gradient(135deg, #F59E0B, #EF4444);
-  color: white;
-  font-size: 1.2rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
-}
-
-.live-comp-start-btn svg {
-  font-size: 24px;
-}
-
-.live-comp-start-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 30px rgba(245, 158, 11, 0.5);
-}
-
-.live-comp-start-btn:active {
-  transform: scale(0.97);
-}
-
 /* ── 768px+ ───────────────────────────────────────────────── */
-
+@media (min-width: 768px) {
+  .live-comp-content {
+    padding-top: 80px;
+  }
+}
