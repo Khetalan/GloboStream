@@ -8,20 +8,33 @@
 
 ## En attente
 
-#### TÂCHE-044 — Refonte Interface Live (AJOUT spec)
-- **Statut** : IN PROGRESS — Session 27
-- **Modèle** : Sonnet | **Difficulté** : Complexe
-- **Fichiers** : `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveStream.js`, `frontend/src/pages/LiveTestPage.js`, `frontend/src/pages/LiveTestPage.css`
-- **Description** :
-  - Réécriture complète des grilles CSS (layouts 1-8 selon spec AJOUT)
-  - Architecture JSX : `ls-video-zone` + `ls-chat-zone` conditionnelle (3+ participants)
-  - Chat overlay (1-2 participants) vs zone dédiée (3+ participants)
-  - Suppression layout-9 et wrappers obsolètes
-  - Mise à jour LiveTestPage pour refléter les nouveaux layouts
-
 ---
 
 ## Terminées (session en cours)
+
+#### TÂCHE-044 — Refonte Interface Live (AJOUT spec)
+- **Statut** : DONE — Sessions 27 + 28
+- **Modèle** : Sonnet | **Difficulté** : Complexe
+- **Fichiers** : `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveStream.js`, `frontend/src/pages/LiveTestPage.js`, `frontend/src/pages/LiveTestPage.css`
+- **Résultat** :
+  - Réécriture complète des grilles CSS (layouts 1-8 selon spec AJOUT), suppression layout-9
+  - Architecture JSX : `ls-video-zone` + `ls-chat-zone` conditionnelle (`hasDedicatedChat = participants >= 2`)
+  - Chat overlay (1-2 participants) vs zone dédiée (3+ participants)
+  - Commits : `7846fd8`, `69d287b`, `15b3aef`, `1becf80`, `d7e35aa`
+
+#### TÂCHE-045 — Interface Live : chat inline + badges pays + traduction
+- **Statut** : DONE — Session 28
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveViewer.css`, `frontend/src/components/LiveViewer.js`, `frontend/src/pages/LiveTestPage.js`
+- **Résultat** :
+  - Bouton `lv-send-btn` ajouté dans le chat streamer (inline, fond transparent, couleur accent)
+  - Remplacement du popup `ls-chat-panel` par un `ls-write-btn` inline (`<div>` + `<input>` + `<button>`)
+  - Suppression état `showChatInput` / `showChatPanel` devenus inutiles
+  - Badge pays `ls-country-badge` (pill style) + icône `FiGlobe` (bleu) dans chaque bulle de chat
+  - Structure `ls-chat-meta` : nouveau wrapper flex à droite de la bulle
+  - Centrage vertical complet dans les bulles (`align-items: center` + suppression `align-self: flex-start` sur avatars)
+  - Synchronisation complète LiveStream.js ↔ LiveTestPage.js (vérifiée)
+  - Commits : `bc190ae`, `69776ae`, `4b1f112`
 
 #### TÂCHE-043 — Corrections ESLint (build warnings)
 - **Statut** : DONE

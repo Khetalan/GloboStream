@@ -2,7 +2,7 @@
 
 > **Suivi détaillé de chaque fonctionnalité : état du code, tests effectués, et travail restant**
 
-**Dernière mise à jour** : 28 Février 2026
+**Dernière mise à jour** : 28 Février 2026 (Session 28)
 
 ---
 
@@ -59,6 +59,10 @@
 | **Live** : `srcObject` non nettoyé dans `ParticipantVideo` (memory leak) | `frontend/src/components/LiveStream.js` | Variable locale `video = videoRef.current` + `video.srcObject = null` dans cleanup useEffect |
 | **Live** : messages state croît infiniment (memory leak viewer) | `frontend/src/components/LiveViewer.js` | Cap à 200 messages : `updated.length > 200 ? updated.slice(-200) : updated` |
 | **Live** : socket listeners s'accumulent (memory leak) côté viewer | `frontend/src/components/LiveViewer.js` | `socket.removeAllListeners()` ajouté avant `socket.disconnect()` au démontage |
+| **Live** : `lv-send-btn` absent côté streamer | `LiveStream.css`, `LiveStream.js` | Remplacement du popup `ls-chat-panel` par un `<div class="ls-write-btn">` inline avec `<input>` + `<button class="lv-send-btn">` |
+| **Live** : badge pays et globe de traduction hors de la bulle | `LiveStream.css`, `LiveTestPage.js`, `LiveStream.js` | Nouveau wrapper `ls-chat-meta` (flex, à droite) contenant `ls-country-badge` + `FiGlobe` |
+| **Live** : éléments de la bulle non alignés verticalement | `LiveStream.css`, `LiveViewer.css` | `align-items: center` sur `.ls-chat-message` + suppression `align-self: flex-start` sur `.ls-chat-avatar` |
+| **Live** : `FiEdit2` et `showChatPanel` non utilisés (warning ESLint) | `LiveStream.js` | Import `FiEdit2` supprimé, état `showChatPanel` supprimé |
 
 ---
 

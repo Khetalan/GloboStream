@@ -1867,3 +1867,38 @@ Refonte complète de l'interface des lives selon les specs AJOUT (grilles strict
 - Commit : `7846fd8` — `feat(live): refonte grilles — 8 layouts stricts + chat dédié 3+ participants`
 - Statut : ✅ Terminé
 
+---
+
+## Session 28 — 28 Février 2026
+
+### Objectif
+Interface Live : chat inline, badge pays, icône traduction FiGlobe, centrage vertical bulles. Synchronisation LiveStream.js ↔ LiveTestPage.js.
+
+### Contexte
+- Suite immédiate de la Session 27 (refonte grilles AJOUT)
+- Corrections post-implémentation : layouts 5/7 streamer, has-chat header/footer, icônes participant
+- Transfert de la nouvelle interface dev/live-test → LiveStream.js (production)
+
+### Changements réalisés
+
+**Corrections CSS post-Session 27 :**
+- `LiveStream.css` : restructuration UI `has-chat` (header/footer en flux normal) — commit `69d287b`
+- `LiveStream.css` : streamer centré à 50% de la zone vidéo (layouts 5 et 7) — commit `15b3aef`
+- `LiveStream.css` : icônes participant transparentes + suppression bordure zone vidéo — commit `1becf80`
+- `LiveStream.css` : 3 ajustements UI (bulles chat, icônes, zone vidéo tablette) — commit `d7e35aa`
+
+**Interface Live — chat inline + badges pays + traduction :**
+- `LiveStream.js` : suppression popup `ls-chat-panel`, remplacement par `<div class="ls-write-btn">` inline avec `<input>` + `<button class="lv-send-btn">`
+- `LiveStream.css` : `.lv-send-btn` défini (fond transparent, couleur accent)
+- `LiveTestPage.js` : même restructuration, + `country` field dans FAKE_MESSAGES_POOL, suppression état `showChatInput`
+- `LiveStream.js` + `LiveTestPage.js` : nouveau `ls-chat-meta` (wrapper flex droite) → `ls-country-badge` (pill) + `FiGlobe` bleu size 14
+- `LiveViewer.js` : même structure `ls-chat-meta`, `FiGlobe` remplace l'emoji 🌐
+- `LiveViewer.css` : ajout `.ls-chat-meta`, `.ls-country-badge`, `.ls-translate-btn`
+- `LiveStream.css` + `LiveViewer.css` : `align-items: center` sur `.ls-chat-message`, suppression `align-self: flex-start` + `margin-top: 1px` sur avatars
+
+### Résultat
+- Build : `Compiled successfully` — 0 erreur, 0 warning
+- Commits : `bc190ae`, `69776ae`, `4b1f112`
+- Vérification interface : LiveTestPage.js ↔ LiveStream.js identiques visuellement (vérifié via Explore agent)
+- Statut : ✅ Terminé
+
