@@ -30,6 +30,7 @@ import LiveCompetition from './pages/LiveCompetition';
 import LiveEvent from './pages/LiveEvent';
 import LiveViewerPage from './pages/LiveViewerPage';
 import TeamPage from './pages/TeamPage';
+import LiveTestPage from './pages/LiveTestPage';
 
 import ConsentModal from './components/ConsentModal';
 
@@ -181,6 +182,13 @@ function App() {
           <Route path="/stream/watch/:roomId" element={
             <PrivateRoute>
               <LiveViewerPage />
+            </PrivateRoute>
+          } />
+
+          {/* Zone de test visuel Live (dev only) */}
+          <Route path="/dev/live-test" element={
+            <PrivateRoute>
+              <LiveTestPage />
             </PrivateRoute>
           } />
 
