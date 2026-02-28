@@ -3,6 +3,8 @@
 // Gestion des salons pour Public/Competition/Event
 // =========================================
 
+const { getCountryFlag } = require('../utils/countryFlag');
+
 const liveRooms = new Map();
 // roomId → {
 //   streamerId, streamerSocketId, displayName, mode, title, tags,
@@ -28,21 +30,24 @@ function setupLiveRoomHandlers(io, socket) {
         console.log(`Room zombie nettoyée : ${roomId}`);
       }
 
-      // BUG-1 : Récupérer la photo du streamer pour l'afficher dans le chat
+      // BUG-1 : Récupérer la photo + pays du streamer pour l'afficher dans le chat
       let streamerPhotoUrl = null;
+      let streamerCountryFlag = null;
       try {
         const User = require('../models/User');
-        const streamer = await User.findById(userId).select('photos');
+        const streamer = await User.findById(userId).select('photos location');
         if (streamer?.photos?.length > 0) {
           const primary = streamer.photos.find(p => p.isPrimary) || streamer.photos[0];
           streamerPhotoUrl = primary.url;
         }
+        streamerCountryFlag = getCountryFlag(streamer?.location?.country);
       } catch (e) { /* non-bloquant */ }
 
       liveRooms.set(roomId, {
         streamerId: userId,
         streamerSocketId: socket.id,
         streamerPhotoUrl,
+        streamerCountryFlag,
         displayName: displayName || 'Streamer',
         mode: mode || 'public',
         title: title || 'Live',
@@ -76,18 +81,20 @@ function setupLiveRoomHandlers(io, socket) {
         return;
       }
 
-      // Récupérer la photo de profil pour l'afficher dans le chat live (TÂCHE-017 prep)
+      // Récupérer la photo + pays de profil pour l'afficher dans le chat live (TÂCHE-017 prep)
       let photoUrl = null;
+      let countryFlag = null;
       try {
         const User = require('../models/User');
-        const user = await User.findById(userId).select('photos');
+        const user = await User.findById(userId).select('photos location');
         if (user && user.photos && user.photos.length > 0) {
           const primary = user.photos.find(p => p.isPrimary) || user.photos[0];
           photoUrl = primary.url;
         }
+        countryFlag = getCountryFlag(user?.location?.country);
       } catch (e) { /* non-bloquant */ }
 
-      room.viewers.set(socket.id, { userId, displayName, photoUrl });
+      room.viewers.set(socket.id, { userId, displayName, photoUrl, countryFlag });
       socket.join(roomId);
       socket.liveRoomId = roomId;
       socket.liveRole   = 'viewer';
@@ -195,38 +202,43 @@ function setupLiveRoomHandlers(io, socket) {
     });
   });
 
-  // ── Chat dans le salon ── TÂCHE-017 prep (ajout userId + photoUrl depuis la map)
+  // ── Chat dans le salon ── TÂCHE-017 prep (ajout userId + photoUrl + countryFlag depuis la map)
   socket.on('live-chat', ({ roomId, text, username, lang }) => {
     if (!roomId || !text) return;
 
     const room = liveRooms.get(roomId);
-    let userId  = null;
-    let photoUrl = null;
+    let userId      = null;
+    let photoUrl    = null;
+    let countryFlag = null;
 
     if (room) {
-      // Récupérer userId et photoUrl depuis les maps viewers/participants/streamer
+      // Récupérer userId, photoUrl et countryFlag depuis les maps viewers/participants/streamer
       const viewerInfo      = room.viewers.get(socket.id);
       const participantInfo = room.participants.get(socket.id);
 
       if (viewerInfo) {
-        userId   = viewerInfo.userId;
-        photoUrl = viewerInfo.photoUrl;
+        userId      = viewerInfo.userId;
+        photoUrl    = viewerInfo.photoUrl;
+        countryFlag = viewerInfo.countryFlag || null;
       } else if (participantInfo) {
-        userId   = participantInfo.userId;
-        photoUrl = participantInfo.photoUrl;
+        userId      = participantInfo.userId;
+        photoUrl    = participantInfo.photoUrl;
+        countryFlag = participantInfo.countryFlag || null;
       } else if (room.streamerSocketId === socket.id) {
-        userId = room.streamerId;
-        photoUrl = room.streamerPhotoUrl || null; // BUG-1 fix
+        userId      = room.streamerId;
+        photoUrl    = room.streamerPhotoUrl || null; // BUG-1 fix
+        countryFlag = room.streamerCountryFlag || null;
       }
     }
 
     io.to(roomId).emit('live-chat-message', {
-      username:  username || 'Anonyme',
-      userId:    userId,
-      photoUrl:  photoUrl,
-      text:      text,
-      lang:      lang || 'fr',
-      timestamp: Date.now()
+      username:    username || 'Anonyme',
+      userId:      userId,
+      photoUrl:    photoUrl,
+      countryFlag: countryFlag,
+      text:        text,
+      lang:        lang || 'fr',
+      timestamp:   Date.now()
     });
   });
 

@@ -204,8 +204,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       }
     });
 
-    // Message chat — TÂCHE-017 : photoUrl
-    socket.on('live-chat-message', ({ username, text, lang, timestamp, photoUrl: msgPhotoUrl }) => {
+    // Message chat — TÂCHE-017 : photoUrl + countryFlag
+    socket.on('live-chat-message', ({ username, text, lang, timestamp, photoUrl: msgPhotoUrl, countryFlag }) => {
       const info = viewersInfoRef.current.get(username);
       const photoUrl = msgPhotoUrl || info?.photoUrl || null;
       const userId = info?.userId || null;
@@ -221,7 +221,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           translating: false,
           isOwn: false,
           photoUrl,
-          userId
+          userId,
+          countryFlag: countryFlag || null
         };
         const updated = [...prev, newMsg];
         return updated.length > 200 ? updated.slice(-200) : updated;
