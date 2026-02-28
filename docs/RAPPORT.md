@@ -63,6 +63,9 @@
 | **Live** : badge pays et globe de traduction hors de la bulle | `LiveStream.css`, `LiveTestPage.js`, `LiveStream.js` | Nouveau wrapper `ls-chat-meta` (flex, à droite) contenant `ls-country-badge` + `FiGlobe` |
 | **Live** : éléments de la bulle non alignés verticalement | `LiveStream.css`, `LiveViewer.css` | `align-items: center` sur `.ls-chat-message` + suppression `align-self: flex-start` sur `.ls-chat-avatar` |
 | **Live** : `FiEdit2` et `showChatPanel` non utilisés (warning ESLint) | `LiveStream.js` | Import `FiEdit2` supprimé, état `showChatPanel` supprimé |
+| **Live** : bulle chat Viewer ≠ bulle chat Streamer (pas de fond/radius) | `LiveViewer.css` | `.lv-chat-message` → `padding 6/10px` + `background rgba(255,255,255,0.1)` + `border-radius 14px` + `margin-bottom 4px` |
+| **Live** : Viewer plein écran sur desktop (pas mobile-first) | `LiveViewer.css` | `.lv-container` → `max-width: 768px; margin: 0 auto` |
+| **Live** : badge pays absent dans `live-chat-message` (backend ne l'envoyait pas) | `liveRoom.js`, `LiveStream.js`, `LiveViewer.js` | Nouveau `backend/utils/countryFlag.js` + stockage `countryFlag` à la connexion + inclus dans l'émission socket + destructuré côté frontend |
 
 ---
 

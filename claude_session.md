@@ -1902,3 +1902,34 @@ Interface Live : chat inline, badge pays, icône traduction FiGlobe, centrage ve
 - Vérification interface : LiveTestPage.js ↔ LiveStream.js identiques visuellement (vérifié via Explore agent)
 - Statut : ✅ Terminé
 
+---
+
+## Session 29 — 28 Février 2026
+
+### Objectif
+Correctifs interface Live Viewer (bulle chat, mobile-first, contrôles test page) + activation badge pays dans le vrai Live (backend).
+
+### Changements réalisés
+
+**Correctifs Viewer — TÂCHE-046 :**
+- `LiveViewer.css` : `.lv-chat-message` → fond `rgba(255,255,255,0.1)`, `border-radius: 14px`, `padding: 6px 10px`, `margin-bottom: 4px` (identique `ls-chat-message` côté streamer)
+- `LiveViewer.css` : `.lv-chat-message.is-join-event` → `background: transparent; border-radius: 0` (messages système sans bulle)
+- `LiveViewer.css` : `.lv-container` → `max-width: 768px; margin: 0 auto` (mobile-first, plein écran desktop corrigé)
+- `LiveTestPage.js` : `sendViewerMessage` → ajout `country: msg.country` dans les messages viewer
+- `LiveTestPage.js` : sidebar viewer → boutons **+ Ajouter** / **− Retirer** participants partagés + indicateur **Layout actuel : layout-X**
+- Commit : `dd24a7c`
+
+**Badge pays dans le vrai Live — TÂCHE-047 :**
+- `backend/utils/countryFlag.js` (nouveau) : table 50+ pays (noms FR + EN depuis `LocationPicker.js` + Nominatim) → code ISO → emoji via Regional Indicator Symbols Unicode
+- `liveRoom.js` : `create-live-room` → fetch `location` (+ `photos`) du streamer → stocke `streamerCountryFlag`
+- `liveRoom.js` : `join-live-room` → même fetch → stocke `countryFlag` dans la Map viewers
+- `liveRoom.js` : `accept-join-request` → `countryFlag` déjà présent dans `viewerInfo` copié vers participants
+- `liveRoom.js` : `live-chat` → lit `countryFlag` depuis maps → inclus dans `live-chat-message`
+- `LiveStream.js` + `LiveViewer.js` : handler `live-chat-message` → destructure `countryFlag`, stocké dans chaque message state
+- Commit : `f5846f4`
+
+### Résultat
+- Build : `Compiled successfully` — 0 erreur, 0 warning
+- Commits : `dd24a7c`, `f5846f4`
+- Statut : ✅ Terminé
+

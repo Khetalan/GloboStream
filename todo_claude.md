@@ -12,6 +12,28 @@
 
 ## Terminées (session en cours)
 
+#### TÂCHE-047 — Badge pays activé dans le vrai Live (backend + frontend)
+- **Statut** : DONE — Session 29
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `backend/utils/countryFlag.js` (nouveau), `backend/socketHandlers/liveRoom.js`, `frontend/src/components/LiveStream.js`, `frontend/src/components/LiveViewer.js`
+- **Résultat** :
+  - Utilitaire `countryFlag.js` : 50+ pays (noms FR + EN) → code ISO → emoji drapeau via Regional Indicator Symbols
+  - `liveRoom.js` : stockage `countryFlag` dans rooms/viewers/participants à la connexion, inclus dans `live-chat-message`
+  - `LiveStream.js` + `LiveViewer.js` : handler `live-chat-message` reçoit et stocke `countryFlag`
+  - Commit : `f5846f4`
+
+#### TÂCHE-046 — Correctifs interface Live Viewer (bulle, mobile-first, test page)
+- **Statut** : DONE — Session 29
+- **Modèle** : Sonnet | **Difficulté** : Facile
+- **Fichiers** : `frontend/src/components/LiveViewer.css`, `frontend/src/pages/LiveTestPage.js`
+- **Résultat** :
+  - `LiveViewer.css` : `.lv-chat-message` → bulle avec fond + border-radius (identique `ls-chat-message` streamer)
+  - `LiveViewer.css` : `.lv-chat-message.is-join-event` → fond transparent (pas de bulle sur messages système)
+  - `LiveViewer.css` : `.lv-container` → `max-width: 768px; margin: 0 auto` (mobile-first, plus de plein écran desktop)
+  - `LiveTestPage.js` : `sendViewerMessage` → `country: msg.country` inclus
+  - `LiveTestPage.js` : sidebar viewer → boutons +/- participants + indicateur layout actuel
+  - Commit : `dd24a7c`
+
 #### TÂCHE-044 — Refonte Interface Live (AJOUT spec)
 - **Statut** : DONE — Sessions 27 + 28
 - **Modèle** : Sonnet | **Difficulté** : Complexe
