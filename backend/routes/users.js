@@ -356,4 +356,51 @@ router.post('/location', async (req, res) => {
   }
 });
 
+// ── Blocage utilisateur ───────────────────────────────────────────────────────
+
+// POST /api/users/block/:userId — Bloquer un utilisateur
+router.post('/block/:userId', authMiddleware, async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    if (targetUserId === req.user._id.toString()) {
+      return res.status(400).json({ error: 'Impossible de se bloquer soi-même' });
+    }
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { blockedUsers: targetUserId }
+    });
+    res.json({ success: true, message: 'Utilisateur bloqué' });
+  } catch (error) {
+    console.error('Erreur blocage:', error);
+    res.status(500).json({ error: 'Erreur lors du blocage' });
+  }
+});
+
+// DELETE /api/users/block/:userId — Débloquer un utilisateur
+router.delete('/block/:userId', authMiddleware, async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { blockedUsers: targetUserId }
+    });
+    res.json({ success: true, message: 'Utilisateur débloqué' });
+  } catch (error) {
+    console.error('Erreur déblocage:', error);
+    res.status(500).json({ error: 'Erreur lors du déblocage' });
+  }
+});
+
+// GET /api/users/blocked — Liste des utilisateurs bloqués
+router.get('/blocked', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate('blockedUsers', 'displayName firstName photos location');
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    const blocked = (user.blockedUsers || []).map(u => u.getPublicProfile());
+    res.json({ success: true, blocked });
+  } catch (error) {
+    console.error('Erreur liste bloqués:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération' });
+  }
+});
+
 module.exports = router;

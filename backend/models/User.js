@@ -72,7 +72,13 @@ const userSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     matchedAt: { type: Date, default: Date.now }
   }],
-  
+
+  // Blocages utilisateur
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
+  // Blacklist Live — utilisateurs bannis des lives de cet utilisateur (streamer)
+  liveBlacklist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
   // Préférences de recherche
   preferences: {
     ageRange: {
