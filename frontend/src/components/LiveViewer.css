@@ -222,10 +222,11 @@
 /* pour que z-index: 15 s'applique dans le bon contexte d'empilement.    */
 .lv-local-preview {
   position: absolute;
-  top: 12px;
+  /* Décalé sous la top bar (~68px) pour ne pas chevaucher les badges LIVE/viewers */
+  top: calc(68px + env(safe-area-inset-top));
   right: 12px;
-  width: 100px;
-  height: 140px;
+  width: 90px;
+  height: 126px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -600,9 +601,10 @@
 .lv-stats-panel {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  transform: translateY(-100%);
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  width: 100%;
+  max-width: 768px;
   backdrop-filter: blur(20px);
   background: rgba(15, 15, 15, 0.9);
   border-bottom-left-radius: 16px;
@@ -618,7 +620,7 @@
 }
 
 .lv-stats-panel.visible {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .lv-stats-header {
@@ -1031,8 +1033,29 @@
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 360px) {
   .lv-local-preview {
-    width: 80px;
-    height: 110px;
+    width: 76px;
+    height: 106px;
+  }
+}
+
+/* ── Tablette (481px+) ─────────────────────────────────────── */
+@media (min-width: 481px) {
+  .lv-local-preview {
+    width: 108px;
+    height: 152px;
+  }
+  .lv-bottom-bar {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    gap: 12px;
+  }
+  .lv-chat-section {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+  .lv-control-btn {
+    width: 52px;
+    height: 52px;
   }
 }
 

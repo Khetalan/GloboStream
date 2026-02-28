@@ -675,9 +675,10 @@
 .ls-stats-panel {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  transform: translateY(-100%);
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  width: 100%;
+  max-width: 768px;
   backdrop-filter: blur(20px); /* Glassmorphism */
   background: rgba(15, 15, 15, 0.9); /* Plus transparent */
   border-bottom-left-radius: 16px;
@@ -693,7 +694,7 @@
 }
 
 .ls-stats-panel.visible {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .ls-stats-header {
@@ -1399,9 +1400,10 @@
 .ls-requests-panel {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  transform: translateY(-100%);
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  width: 100%;
+  max-width: 768px;
   -webkit-backdrop-filter: blur(20px); /* Glassmorphism pour compatibilité */
   backdrop-filter: blur(20px); /* Glassmorphism */
   background: rgba(15, 15, 15, 0.9);
@@ -1418,7 +1420,7 @@
 }
 
 .ls-requests-panel.visible {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .ls-requests-header {
@@ -1795,6 +1797,28 @@
     height: 110px;
     top: 6px;
     right: 6px;
+  }
+}
+
+/* ── Tablette (481px+) ─────────────────────────────────────── */
+@media (min-width: 481px) {
+  .ls-video-grid.layout-2 .ls-video-card:nth-child(2) {
+    width: 120px;
+    height: 168px;
+    top: 14px;
+    right: 14px;
+  }
+  .ls-bottom-bar {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .ls-chat-section {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+  .ls-control-btn {
+    width: 52px;
+    height: 52px;
   }
 }
 
