@@ -78,6 +78,16 @@ router.get('/public', async (req, res) => {
       };
     });
 
+    // Calculer le nombre de lives actifs par tag (pour les bulles de thème LiveEvent)
+    const tagCounts = {};
+    for (const room of liveRooms.values()) {
+      if (!mode || room.mode === mode) {
+        for (const tag of (room.tags || [])) {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        }
+      }
+    }
+
     // Filtrer selon l'onglet actif
     let filteredStreams = streams;
 
@@ -113,7 +123,8 @@ router.get('/public', async (req, res) => {
 
     res.json({
       success: true,
-      streams: filteredStreams
+      streams: filteredStreams,
+      tagCounts
     });
 
   } catch (error) {

@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
-  FiArrowLeft, FiSearch, FiX, FiHeart, FiEye, FiPlay
+  FiArrowLeft, FiSearch, FiX, FiHeart, FiEye, FiPlay,
+  FiTrendingUp, FiMapPin, FiClock
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import LiveStream from '../components/LiveStream';
@@ -13,14 +14,14 @@ import { getPhotoUrl } from '../utils/photoUrl';
 import './LiveEvent.css';
 
 export const EVENT_THEMES = [
-  { id: 'music',      label: 'Musique',    emoji: '🎵', color: '#8b5cf6' },
-  { id: 'gaming',     label: 'Gaming',     emoji: '🎮', color: '#3b82f6' },
-  { id: 'sport',      label: 'Sport',      emoji: '🏋️', color: '#10b981' },
-  { id: 'cuisine',    label: 'Cuisine',    emoji: '🍳', color: '#f59e0b' },
-  { id: 'beauty',     label: 'Beauté',     emoji: '💄', color: '#ec4899' },
-  { id: 'travel',     label: 'Voyage',     emoji: '✈️', color: '#06b6d4' },
-  { id: 'art',        label: 'Art',        emoji: '🎨', color: '#f97316' },
-  { id: 'discussion', label: 'Discussion', emoji: '💬', color: '#6b7280' },
+  { id: 'music',        label: 'Musique',      emoji: '🎵', color: '#8b5cf6' },
+  { id: 'bricolage',    label: 'Bricolages',   emoji: '🔧', color: '#78716c' },
+  { id: 'sport',        label: 'Sport',        emoji: '🏋️', color: '#10b981' },
+  { id: 'cuisine',      label: 'Cuisine',      emoji: '🍳', color: '#f59e0b' },
+  { id: 'beauty',       label: 'Beauté',       emoji: '💄', color: '#ec4899' },
+  { id: 'travel',       label: 'Voyage',       emoji: '✈️', color: '#06b6d4' },
+  { id: 'art',          label: 'Art',          emoji: '🎨', color: '#f97316' },
+  { id: 'commerciales', label: 'Commerciales', emoji: '💼', color: '#0ea5e9' },
 ];
 
 const LiveEvent = () => {
@@ -36,6 +37,15 @@ const LiveEvent = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('trending');
+  const [tagCounts, setTagCounts] = useState({});
+
+  const tabs = [
+    { id: 'trending', label: t('livePublic.tabTrending'), icon: FiTrendingUp },
+    { id: 'nearby',   label: t('livePublic.tabNearby'),   icon: FiMapPin },
+    { id: 'new',      label: t('livePublic.tabNew'),       icon: FiClock },
+    { id: 'favorites',label: t('livePublic.tabFavorites'), icon: FiHeart },
+  ];
 
   // Restaurer le live si le streamer recharge la page
   useEffect(() => {
@@ -45,16 +55,33 @@ const LiveEvent = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadLiveStreams = useCallback(async (theme) => {
+  // Fetch tagCounts au montage pour les badges sur les bulles de thème
+  useEffect(() => {
+    const fetchTagCounts = async () => {
+      try {
+        const response = await axios.get('/api/live/public', { params: { mode: 'event' } });
+        setTagCounts(response.data.tagCounts || {});
+      } catch { /* silencieux */ }
+    };
+    fetchTagCounts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadLiveStreams = useCallback(async (theme, filter) => {
     try {
       setLoading(true);
+      const currentFilter = filter || activeFilter;
       const response = await axios.get('/api/live/public', {
-        params: { mode: 'event' }
+        params: {
+          mode: 'event',
+          filter: currentFilter,
+          userLat: user?.location?.coordinates?.[1],
+          userLon: user?.location?.coordinates?.[0]
+        }
       });
       const all = response.data.streams || [];
-      const filtered = theme
-        ? all.filter(s => s.tags?.includes(theme.id))
-        : all;
+      setTagCounts(response.data.tagCounts || {});
+      const filtered = theme ? all.filter(s => s.tags?.includes(theme.id)) : all;
       setLiveStreams(all);
       setFilteredStreams(filtered);
     } catch (error) {
@@ -63,7 +90,15 @@ const LiveEvent = () => {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, activeFilter, user]);
+
+  // Recharger quand le filtre actif change (si on est sur la liste)
+  useEffect(() => {
+    if (screen === 'liveList' && selectedTheme) {
+      loadLiveStreams(selectedTheme, activeFilter);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFilter]);
 
   // Refresh silencieux 30s quand on est sur la liste
   useEffect(() => {
@@ -71,14 +106,21 @@ const LiveEvent = () => {
     const interval = setInterval(async () => {
       try {
         const response = await axios.get('/api/live/public', {
-          params: { mode: 'event' }
+          params: {
+            mode: 'event',
+            filter: activeFilter,
+            userLat: user?.location?.coordinates?.[1],
+            userLon: user?.location?.coordinates?.[0]
+          }
         });
         const all = response.data.streams || [];
+        setTagCounts(response.data.tagCounts || {});
         setLiveStreams(all);
       } catch { /* silencieux */ }
     }, 30000);
     return () => clearInterval(interval);
-  }, [screen, selectedTheme]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, selectedTheme, activeFilter]);
 
   // Filtre search sur la liste courante
   useEffect(() => {
@@ -104,8 +146,9 @@ const LiveEvent = () => {
     setSelectedTheme(theme);
     setSearchQuery('');
     setShowSearch(false);
+    setActiveFilter('trending');
     setScreen('liveList');
-    loadLiveStreams(theme);
+    loadLiveStreams(theme, 'trending');
   };
 
   const handleBackToThemes = () => {
@@ -186,6 +229,9 @@ const LiveEvent = () => {
               >
                 <span className="le-theme-emoji">{theme.emoji}</span>
                 <span className="le-theme-label">{theme.label}</span>
+                {tagCounts[theme.id] > 0 && (
+                  <span className="le-theme-badge">{tagCounts[theme.id]}</span>
+                )}
               </button>
             ))}
           </div>
@@ -243,7 +289,21 @@ const LiveEvent = () => {
         </div>
       )}
 
-      <div className="live-event-content">
+      {/* Barre de filtres */}
+      <div className="tabs-container">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`tab-btn ${activeFilter === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveFilter(tab.id)}
+          >
+            <tab.icon />
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="live-event-content le-list-content">
         {loading ? (
           <div className="loading-state">
             <div className="loading"></div>
