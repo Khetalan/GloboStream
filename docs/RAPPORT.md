@@ -508,12 +508,13 @@ Les 36 warnings ESLint ont été corrigés dans 10 fichiers (Session 14) + 1 war
 11. ~~Corriger bug candidature équipe (joinRequests populate)~~ FAIT (Session 28/02)
 12. ~~Corriger Apple OAuth (email duplicate check)~~ FAIT (commit 6ac5c40)
 13. ~~Modale profil Swipe → carte centrée scrollable~~ FAIT (Session 28/02)
-14. Tester les fonctionnalités WebSocket/temps réel (nécessite 2 clients)
-15. Remplacer les placeholders légaux `[NOM_ÉDITEUR]` et `[EMAIL_CONTACT]` dans Legal.js
-16. Valider le MVP avant passage en Phase 2
+14. ~~Refonte grilles Live (8 layouts stricts + chat dédié)~~ FAIT (Session 27 — commit 7846fd8)
+15. Tester les fonctionnalités WebSocket/temps réel (nécessite 2 clients)
+16. Remplacer les placeholders légaux `[NOM_ÉDITEUR]` et `[EMAIL_CONTACT]` dans Legal.js
+17. Valider le MVP avant passage en Phase 2
 
 ---
 
 **Document** : Rapport GloboStream
-**Version** : 10.0
+**Version** : 10.1
 **Date** : 28 Février 2026

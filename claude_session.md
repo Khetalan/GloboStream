@@ -1857,8 +1857,13 @@ Refonte complète de l'interface des lives selon les specs AJOUT (grilles strict
 - Correction URL LiveTestPage : HashRouter → `http://localhost:3000/#/dev/live-test`
 - Plan approuvé avant implémentation
 
-### Changements prévus
-- `LiveStream.css` : Réécriture layouts 4-8, nouvelle structure `ls-video-zone` / `ls-chat-zone`
-- `LiveStream.js` : Restructuration JSX + `hasDedicatedChat` + `layoutClass` max 8
-- `LiveTestPage.js` + `LiveTestPage.css` : Mise à jour pour les 8 nouveaux layouts
+### Changements réalisés
+- `LiveStream.css` : Réécriture layouts 4-8, nouvelle structure `ls-video-zone` / `ls-chat-zone`, suppression layout-9/ls-participants-bottom/row2
+- `LiveStream.js` : Restructuration JSX + `hasDedicatedChat` + `layoutClass` max 8, chat conditionnel overlay/dédié
+- `LiveTestPage.js` : Synchronisé avec la nouvelle architecture, boutons layouts 1-8
+
+### Résultat
+- Build : `Compiled successfully` — 0 erreur, 0 warning
+- Commit : `7846fd8` — `feat(live): refonte grilles — 8 layouts stricts + chat dédié 3+ participants`
+- Statut : ✅ Terminé
 
