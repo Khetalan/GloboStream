@@ -40,6 +40,7 @@ router.get('/mine', async (req, res) => {
     if (team) {
       await team.populate('captain', 'displayName firstName photos isVerified');
       await team.populate('members.user', 'displayName firstName photos isVerified');
+      await team.populate('joinRequests.user', 'displayName firstName photos isVerified');
       await team.populate('competition', 'name status');
       await team.populate('competitionEntries.competition', 'name status startDate endDate');
       await team.populate('competitionEntries.participants', 'displayName firstName photos');
