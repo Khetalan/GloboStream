@@ -1846,3 +1846,19 @@ Tests complets de l'interface Live (streamer + viewer) + corrections de bugs.
 - Build : 0 warning, 0 erreur — 348 KB JS / 26 KB CSS
 - Branche : claude-work — commit en attente
 - Prochaine étape : tests visuels WebRTC en situation réelle
+
+## Session 27 — 28 Février 2026
+
+### Objectif
+Refonte complète de l'interface des lives selon les specs AJOUT (grilles strictes + chat conditionnel).
+
+### Contexte
+- Fichiers specs lus : `AJOUT/Intreface-live-ui-ux.md`, `AJOUT/table-mapping.md`
+- Correction URL LiveTestPage : HashRouter → `http://localhost:3000/#/dev/live-test`
+- Plan approuvé avant implémentation
+
+### Changements prévus
+- `LiveStream.css` : Réécriture layouts 4-8, nouvelle structure `ls-video-zone` / `ls-chat-zone`
+- `LiveStream.js` : Restructuration JSX + `hasDedicatedChat` + `layoutClass` max 8
+- `LiveTestPage.js` + `LiveTestPage.css` : Mise à jour pour les 8 nouveaux layouts
+

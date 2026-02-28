@@ -8,6 +8,17 @@
 
 ## En attente
 
+#### TÂCHE-044 — Refonte Interface Live (AJOUT spec)
+- **Statut** : IN PROGRESS — Session 27
+- **Modèle** : Sonnet | **Difficulté** : Complexe
+- **Fichiers** : `frontend/src/components/LiveStream.css`, `frontend/src/components/LiveStream.js`, `frontend/src/pages/LiveTestPage.js`, `frontend/src/pages/LiveTestPage.css`
+- **Description** :
+  - Réécriture complète des grilles CSS (layouts 1-8 selon spec AJOUT)
+  - Architecture JSX : `ls-video-zone` + `ls-chat-zone` conditionnelle (3+ participants)
+  - Chat overlay (1-2 participants) vs zone dédiée (3+ participants)
+  - Suppression layout-9 et wrappers obsolètes
+  - Mise à jour LiveTestPage pour refléter les nouveaux layouts
+
 ---
 
 ## Terminées (session en cours)

@@ -130,7 +130,8 @@ const LiveTestPage = () => {
 
   // ── Computed ───────────────────────────────────────────────
   const totalCards = 1 + activeParticipants.length;
-  const layoutClass = `layout-${Math.min(totalCards, 9)}`;
+  const layoutClass = `layout-${Math.min(totalCards, 8)}`;
+  const hasDedicatedChat = activeParticipants.length >= 2;
 
   // ── Scroll chat vers le bas ────────────────────────────────
   useEffect(() => {
@@ -266,7 +267,8 @@ const LiveTestPage = () => {
         </button>
         <span className="ltp-header-title">🧪 Live Test</span>
         <span className="ltp-layout-badge">
-          {layoutClass} · {activeParticipants.length}/8 participants
+          {layoutClass} · {activeParticipants.length}/7 invités
+          {hasDedicatedChat ? ' · chat dédié' : ' · chat overlay'}
         </span>
 
         <div className="ltp-header-actions">
@@ -292,101 +294,92 @@ const LiveTestPage = () => {
 
         {/* ── Panneau Streamer ──────────────────────────────── */}
         <div className="ltp-streamer-panel">
-          <div className="ls-container ls-mode-public" style={{ maxWidth: '480px', height: '100%' }}>
+          <div className={`ls-container ls-mode-public${hasDedicatedChat ? ' has-chat' : ''}`} style={{ maxWidth: '480px', height: '100%' }}>
 
-            {/* Grille vidéo */}
-            <div className={`ls-video-grid ${layoutClass}`}>
+            {/* ── Zone vidéo ── */}
+            <div className="ls-video-zone">
 
-              {/* Carte streamer */}
-              <div className="ls-video-card streamer">
-                <div className="ls-video-placeholder" style={{ padding: 0 }}>
-                  {streamerCamOff ? (
-                    <div className="ls-video-placeholder cam-off">
-                      <div className="ls-cam-off-avatar">S</div>
-                      <span className="ls-cam-off-name">Streamer Test</span>
+              {/* Grille vidéo (flat, CSS auto-placement) */}
+              <div className={`ls-video-grid ${layoutClass}`}>
+
+                {/* Carte streamer */}
+                <div className="ls-video-card streamer">
+                  <div className="ls-video-placeholder" style={{ padding: 0 }}>
+                    {streamerCamOff ? (
+                      <div className="ls-video-placeholder cam-off">
+                        <div className="ls-cam-off-avatar">S</div>
+                        <span className="ls-cam-off-name">Streamer Test</span>
+                      </div>
+                    ) : (
+                      <FakeVideoCanvas color="#c0392b" initials="S" />
+                    )}
+                    <div className="ls-watermark">TEST-MODE</div>
+                  </div>
+                  {streamerMuted && (
+                    <div className="ls-mic-muted">
+                      <FiMicOff size={40} />
                     </div>
-                  ) : (
-                    <FakeVideoCanvas color="#c0392b" initials="S" />
                   )}
-                  <div className="ls-watermark">TEST-MODE</div>
                 </div>
-                {streamerMuted && (
-                  <div className="ls-mic-muted">
-                    <FiMicOff size={40} />
+
+                {/* Tous les participants — flat, CSS positionne selon layout */}
+                {renderParticipantCards(activeParticipants)}
+              </div>
+
+              {/* UI Overlay sur la zone vidéo */}
+              <div className="ls-ui-overlay" onClick={(e) => e.stopPropagation()}>
+
+                {/* Top bar */}
+                <div className="ls-top-bar">
+                  <div className="ls-streamer-info">
+                    <span className="ls-streamer-name">Streamer Test</span>
+                    <div className="ls-stats-indicators">
+                      <div className="ls-live-badge">LIVE</div>
+                      <button className="ls-viewer-count"
+                        onClick={() => { setShowStatsPanel(!showStatsPanel); setShowRequestsPanel(false); }}>
+                        <FiEye size={11} /> {viewerCount}
+                      </button>
+                      <button className="ls-gift-count"
+                        onClick={() => { setShowStatsPanel(!showStatsPanel); setActiveStatsTab('gifts'); setShowRequestsPanel(false); }}>
+                        <FiGift size={11} /> 7
+                      </button>
+                    </div>
+                  </div>
+                  <button className="ls-top-quit" onClick={() => navigate(-1)} title="Quitter">
+                    <FiX size={18} />
+                  </button>
+                </div>
+
+                {/* Chat overlay — uniquement layouts 1-2 (sans chat dédié) */}
+                {!hasDedicatedChat && (
+                  <div className="ls-chat-section" ref={chatRef}>
+                    {messages.map(msg => (
+                      msg.isJoin !== undefined ? (
+                        <div key={msg.id} className="ls-chat-message is-join-event">
+                          <div className="ls-chat-body">{msg.text}</div>
+                        </div>
+                      ) : (
+                        <div key={msg.id} className={`ls-chat-message${msg.isOwn ? ' own' : ''}`}>
+                          <div className="ls-chat-avatar">
+                            <div className="ls-chat-avatar-initials"
+                              style={{ background: `linear-gradient(135deg, ${msg.color}88, ${msg.color})` }}>
+                              {msg.user[0]}
+                            </div>
+                          </div>
+                          <div className="ls-chat-content">
+                            <div className="ls-chat-body">
+                              <span className="ls-chat-username"
+                                style={{ color: msg.isOwn ? '#e4405f' : '#ff9500' }}>
+                                {msg.user}
+                              </span>
+                              <span className="ls-chat-text">{msg.text}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    ))}
                   </div>
                 )}
-              </div>
-
-              {/* Participants 1 & 2 (toujours dans la grille principale pour layout 3+) */}
-              {renderParticipantCards(activeParticipants.slice(0, 2))}
-
-              {/* Rangée du bas : participants 3–5 (layouts 4–9) */}
-              {activeParticipants.length >= 3 && (
-                <div className="ls-participants-bottom">
-                  {renderParticipantCards(activeParticipants.slice(2, 5))}
-                </div>
-              )}
-
-              {/* Rangée supplémentaire : participants 6–8 (layouts 7–9) */}
-              {activeParticipants.length >= 6 && (
-                <div className="ls-participants-row2">
-                  {renderParticipantCards(activeParticipants.slice(5, 8))}
-                </div>
-              )}
-            </div>
-
-            {/* UI Overlay */}
-            <div className="ls-ui-overlay" onClick={(e) => e.stopPropagation()}>
-
-              {/* Top bar */}
-              <div className="ls-top-bar">
-                <div className="ls-streamer-info">
-                  <span className="ls-streamer-name">Streamer Test</span>
-                  <div className="ls-stats-indicators">
-                    <div className="ls-live-badge">LIVE</div>
-                    <button className="ls-viewer-count"
-                      onClick={() => { setShowStatsPanel(!showStatsPanel); setShowRequestsPanel(false); }}>
-                      <FiEye size={11} /> {viewerCount}
-                    </button>
-                    <button className="ls-gift-count"
-                      onClick={() => { setShowStatsPanel(!showStatsPanel); setActiveStatsTab('gifts'); setShowRequestsPanel(false); }}>
-                      <FiGift size={11} /> 7
-                    </button>
-                  </div>
-                </div>
-                <button className="ls-top-quit" onClick={() => navigate(-1)} title="Quitter">
-                  <FiX size={18} />
-                </button>
-              </div>
-
-              {/* Chat */}
-              <div className="ls-chat-section" ref={chatRef}>
-                {messages.map(msg => (
-                  msg.isJoin !== undefined ? (
-                    <div key={msg.id} className="ls-chat-message is-join-event">
-                      <div className="ls-chat-body">{msg.text}</div>
-                    </div>
-                  ) : (
-                    <div key={msg.id} className={`ls-chat-message${msg.isOwn ? ' own' : ''}`}>
-                      <div className="ls-chat-avatar">
-                        <div className="ls-chat-avatar-initials"
-                          style={{ background: `linear-gradient(135deg, ${msg.color}88, ${msg.color})` }}>
-                          {msg.user[0]}
-                        </div>
-                      </div>
-                      <div className="ls-chat-content">
-                        <div className="ls-chat-body">
-                          <span className="ls-chat-username"
-                            style={{ color: msg.isOwn ? '#e4405f' : '#ff9500' }}>
-                            {msg.user}
-                          </span>
-                          <span className="ls-chat-text">{msg.text}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                ))}
-              </div>
 
               {/* Chat panel input (slide-up) */}
               {showChatInput && (
@@ -441,8 +434,42 @@ const LiveTestPage = () => {
                     {streamerCamOff ? <FiVideoOff size={18} /> : <FiVideo size={18} />}
                   </button>
                 </div>
+              </div>{/* /ls-bottom-bar */}
+              </div>{/* /ls-ui-overlay */}
+            </div>{/* /ls-video-zone */}
+
+            {/* Zone chat dédiée (3+ participants) */}
+            {hasDedicatedChat && (
+              <div className="ls-chat-zone">
+                <div className="ls-chat-section" ref={chatRef}>
+                  {messages.map(msg => (
+                    msg.isJoin !== undefined ? (
+                      <div key={msg.id} className="ls-chat-message is-join-event">
+                        <div className="ls-chat-body">{msg.text}</div>
+                      </div>
+                    ) : (
+                      <div key={msg.id} className={`ls-chat-message${msg.isOwn ? ' own' : ''}`}>
+                        <div className="ls-chat-avatar">
+                          <div className="ls-chat-avatar-initials"
+                            style={{ background: `linear-gradient(135deg, ${msg.color}88, ${msg.color})` }}>
+                            {msg.user[0]}
+                          </div>
+                        </div>
+                        <div className="ls-chat-content">
+                          <div className="ls-chat-body">
+                            <span className="ls-chat-username"
+                              style={{ color: msg.isOwn ? '#e4405f' : '#ff9500' }}>
+                              {msg.user}
+                            </span>
+                            <span className="ls-chat-text">{msg.text}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Stats Panel */}
             <div className={`ls-stats-panel${showStatsPanel ? ' visible' : ''}`}>
@@ -547,7 +574,7 @@ const LiveTestPage = () => {
           <div className="ltp-section">
             <div className="ltp-section-title">Layouts rapides</div>
             <div className="ltp-layout-grid">
-              {[1,2,3,4,5,6,7,8,9].map(n => (
+              {[1,2,3,4,5,6,7,8].map(n => (
                 <button
                   key={n}
                   className={`ltp-layout-btn${totalCards === n ? ' active' : ''}`}

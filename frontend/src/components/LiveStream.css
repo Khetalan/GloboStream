@@ -398,10 +398,44 @@
   --ls-accent-shadow-hover: 0 6px 28px rgba(34, 197, 94, 0.5);
 }
 
-/* Centrage Mobile First sur Desktop */
+/* ── Zone vidéo (flex child du container) ─────────────────── */
+.ls-video-zone {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
 
+/* Quand chat dédié actif (3+ participants) : zone vidéo prend 58% */
+.ls-container.has-chat .ls-video-zone {
+  flex: 0 0 58%;
+}
 
-/* ── Grille vidéo — Arrière-plan plein écran ─────────────────────────── */
+/* ── Zone chat dédiée (flex child, 3+ participants) ──────── */
+.ls-chat-zone {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #0d0d0d;
+  padding: 6px 14px 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat-section en mode dédié : annuler le positionnement absolu */
+.ls-chat-zone .ls-chat-section {
+  position: static !important;
+  height: auto !important;
+  flex: 1;
+  overflow-y: auto;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  padding: 0 !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* ── Grille vidéo — Arrière-plan plein écran ─────────────── */
 .ls-video-grid {
   position: absolute;
   top: 0;
@@ -416,6 +450,7 @@
   background-color: #000;
   cursor: pointer;
   z-index: 0;
+  transition: grid-template-columns 0.3s ease, grid-template-rows 0.3s ease;
 }
 
 /* On applique les variables de mode au bouton Go Live */
@@ -477,71 +512,58 @@
   grid-row: 2;
 }
 
-/* Layouts 4-9 : streamer (col1 row1-2) + 2 droite + rangées en bas */
-.ls-video-grid.layout-4,
-.ls-video-grid.layout-5,
-.ls-video-grid.layout-6 {
+/* ── Layout 4 : 1+3 — Grille 2×2 égale ──────────────────── */
+.ls-video-grid.layout-4 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: 1fr 1fr;
   gap: 4px;
-  height: 100%;
 }
+/* Aucune priorité — auto-placement CSS */
 
-.ls-video-grid.layout-7,
-.ls-video-grid.layout-8,
-.ls-video-grid.layout-9 {
+/* ── Layout 5 : 1+4 — Streamer 1/3 gauche (full hauteur) ── */
+.ls-video-grid.layout-5 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 4px;
-  height: 100%;
 }
-
-/* Streamer toujours col1 row1-2 pour layouts 4+ */
-.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) .ls-video-card.streamer,
-.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) > .ls-video-card:first-child {
+.ls-video-grid.layout-5 .ls-video-card.streamer {
   grid-column: 1;
   grid-row: 1 / 3;
 }
+/* Invités 2-5 : auto-placés dans cols 2-3, rows 1-2 */
 
-/* 2 cartes à droite du streamer */
-.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) > .ls-video-card.user:nth-child(2) {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.ls-video-grid:is(.layout-4, .layout-5, .layout-6, .layout-7, .layout-8, .layout-9) > .ls-video-card.user:nth-child(3) {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-/* Rangées du bas */
-.ls-participants-bottom {
-  grid-column: 1 / 3;
-  grid-row: 3;
-  display: flex;
+/* ── Layout 6 : 1+5 — Grille 3×2 égale ──────────────────── */
+.ls-video-grid.layout-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr 1fr;
   gap: 4px;
-  width: 100%;
 }
+/* Aucune priorité — auto-placement CSS */
 
-.ls-participants-bottom .ls-video-card {
-  flex: 1;
-  min-width: 0;
-}
-
-.ls-participants-row2 {
-  grid-column: 1 / 3;
-  grid-row: 4;
-  display: flex;
+/* ── Layout 7 : 1+6 — Streamer 1/3 gauche (full hauteur) ── */
+.ls-video-grid.layout-7 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   gap: 4px;
-  width: 100%;
 }
+.ls-video-grid.layout-7 .ls-video-card.streamer {
+  grid-column: 1;
+  grid-row: 1 / 4;
+}
+/* Invités 2-7 : auto-placés dans cols 2-3, rows 1-3 */
 
-.ls-participants-row2 .ls-video-card {
-  flex: 1;
-  min-width: 0;
+/* ── Layout 8 : 1+7 — Grille 4×2 égale ──────────────────── */
+.ls-video-grid.layout-8 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
 }
+/* Aucune priorité — auto-placement CSS */
 
 /* ── Cartes vidéo ──────────────────────────────────────────── */
 .ls-video-card {
@@ -854,8 +876,8 @@
   color: #ff9500;
 }
 
-/* ── UI Overlay (Cinématique) ────────────────────────────── */
-.ls-ui-overlay {
+/* ── UI Overlay (Cinématique) — position absolute dans ls-video-zone ── */
+.ls-ui-overlay, .ls-video-ui {
   position: absolute;
   top: 0;
   left: 0;
@@ -1807,6 +1829,9 @@
     height: 168px;
     top: 14px;
     right: 14px;
+  }
+  .ls-container.has-chat .ls-video-zone {
+    flex: 0 0 62%;
   }
   .ls-bottom-bar {
     padding-left: 1.5rem;

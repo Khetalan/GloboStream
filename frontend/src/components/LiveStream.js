@@ -859,7 +859,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
 
   // ── INTERFACE LIVE COMPLÈTE ──
   const totalCards = 1 + participants.length;
-  const layoutClass = `layout-${Math.min(totalCards, 9)}`;
+  const layoutClass = `layout-${Math.min(totalCards, 8)}`;
+  // Chat dédié sous la zone vidéo à partir de 3 participants (1+2)
+  const hasDedicatedChat = participants.length >= 2;
 
   const formatNumber = (num) => {
     if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
@@ -920,47 +922,50 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   };
 
   return (
-    <div className={`ls-container ls-mode-${mode}`}>
-      {/* Grille vidéo en arrière-plan, cliquable pour toggle l'UI */}
-      <div className={`ls-video-grid ${layoutClass}`} onClick={toggleUiVisibility}>
-        <div className="ls-video-card streamer">
-          <div className="ls-video-placeholder">
-            {/* Le <video> est toujours monté pour éviter de perdre le stream. On le cache simplement. */}
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted={true}
-              playsInline
-              className="ls-local-video"
-              style={{ display: isCamOff ? 'none' : 'block' }}
-            />
-            {/* Watermark protection contre la capture */}
-            {!isCamOff && user?._id && (
-              <div className="ls-watermark">{String(user._id).slice(-8)}</div>
-            )}
-            {isCamOff && (
-              <div className="ls-video-placeholder cam-off">
-                {streamerPhoto ? (
-                  <img src={streamerPhoto} alt={streamerName} className="ls-cam-off-photo" />
-                ) : (
-                  <div className="ls-cam-off-avatar">{streamerName.charAt(0).toUpperCase()}</div>
-                )}
-                <div className="ls-cam-off-name">{streamerName}</div>
+    <div className={`ls-container ls-mode-${mode}${hasDedicatedChat ? ' has-chat' : ''}`}>
+
+      {/* ── Zone vidéo (grille + overlay UI) ── */}
+      <div className="ls-video-zone">
+        {/* Grille vidéo en arrière-plan, cliquable pour toggle l'UI */}
+        <div className={`ls-video-grid ${layoutClass}`} onClick={toggleUiVisibility}>
+          <div className="ls-video-card streamer">
+            <div className="ls-video-placeholder">
+              {/* Le <video> est toujours monté pour éviter de perdre le stream. On le cache simplement. */}
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted={true}
+                playsInline
+                className="ls-local-video"
+                style={{ display: isCamOff ? 'none' : 'block' }}
+              />
+              {/* Watermark protection contre la capture */}
+              {!isCamOff && user?._id && (
+                <div className="ls-watermark">{String(user._id).slice(-8)}</div>
+              )}
+              {isCamOff && (
+                <div className="ls-video-placeholder cam-off">
+                  {streamerPhoto ? (
+                    <img src={streamerPhoto} alt={streamerName} className="ls-cam-off-photo" />
+                  ) : (
+                    <div className="ls-cam-off-avatar">{streamerName.charAt(0).toUpperCase()}</div>
+                  )}
+                  <div className="ls-cam-off-name">{streamerName}</div>
+                </div>
+              )}
+            </div>
+
+            {isMuted && (
+              <div className="ls-mic-muted">
+                <FiMicOff size={13} />
               </div>
             )}
           </div>
 
-          {isMuted && (
-            <div className="ls-mic-muted">
-              <FiMicOff size={13} />
-            </div>
-          )}
+          {renderParticipantCards()}
         </div>
 
-        {renderParticipantCards()}
-      </div>
-
-      {/* Interface Utilisateur (Overlay) */}
+      {/* Interface Utilisateur (Overlay sur ls-video-zone) */}
       <AnimatePresence>
         {isUiVisible && (
           <motion.div
@@ -996,46 +1001,48 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
               </button>
             </div>
 
-            {/* Chat — TÂCHE-017 : photo spectateur */}
-            <div className="ls-chat-section" ref={chatRef}>
-              {messages.map((msg) => (
-                <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''} ${msg.isOwn ? 'own' : ''}`}>
-                  {!msg.isSystem && (
-                    <div className="ls-chat-avatar">
-                      {msg.photoUrl ? (
-                        <img src={getPhotoUrl(msg.photoUrl)} alt={msg.username} />
-                      ) : (
-                        <div className="ls-chat-avatar-initials">{(msg.username || '?').charAt(0).toUpperCase()}</div>
-                      )}
-                    </div>
-                  )}
-                  <div className="ls-chat-content">
-                    <div className="ls-chat-body">
-                      <span className="ls-chat-username">{msg.username} :</span>
-                      <span className="ls-chat-text">{msg.text}</span>
-                      <div className="ls-chat-icons">
-                        {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
-                        {!msg.isSystem && (
-                          <button
-                            className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                            onClick={() => handleTranslateMsg(msg.id)}
-                            title={t('liveStream.translate')}
-                          >
-                            🌐
-                          </button>
+            {/* Chat overlay — uniquement pour 1-2 participants (pas de zone dédiée) */}
+            {!hasDedicatedChat && (
+              <div className="ls-chat-section" ref={chatRef}>
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''} ${msg.isOwn ? 'own' : ''}`}>
+                    {!msg.isSystem && (
+                      <div className="ls-chat-avatar">
+                        {msg.photoUrl ? (
+                          <img src={getPhotoUrl(msg.photoUrl)} alt={msg.username} />
+                        ) : (
+                          <div className="ls-chat-avatar-initials">{(msg.username || '?').charAt(0).toUpperCase()}</div>
                         )}
                       </div>
+                    )}
+                    <div className="ls-chat-content">
+                      <div className="ls-chat-body">
+                        <span className="ls-chat-username">{msg.username} :</span>
+                        <span className="ls-chat-text">{msg.text}</span>
+                        <div className="ls-chat-icons">
+                          {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
+                          {!msg.isSystem && (
+                            <button
+                              className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                              onClick={() => handleTranslateMsg(msg.id)}
+                              title={t('liveStream.translate')}
+                            >
+                              🌐
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {msg.showTranslation && msg.translatedText && (
+                        <div className="ls-translated-text">🌐 {msg.translatedText}</div>
+                      )}
+                      {msg.showTranslation && !msg.translatedText && !msg.translating && (
+                        <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
+                      )}
                     </div>
-                    {msg.showTranslation && msg.translatedText && (
-                      <div className="ls-translated-text">🌐 {msg.translatedText}</div>
-                    )}
-                    {msg.showTranslation && !msg.translatedText && !msg.translating && (
-                      <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
-                    )}
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Panel de saisie du chat (slide-up au-dessus de la barre) */}
             <AnimatePresence>
@@ -1107,8 +1114,54 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
           </motion.div>
         )}
       </AnimatePresence>
+      </div>{/* fin ls-video-zone */}
 
-      {/* Panels (Stats & Requests) - Restent en dehors de l'overlay UI pour être gérés indépendamment */}
+      {/* ── Zone chat dédiée (3+ participants) ── */}
+      {hasDedicatedChat && (
+        <div className="ls-chat-zone">
+          <div className="ls-chat-section" ref={chatRef}>
+            {messages.map((msg) => (
+              <div key={msg.id} className={`ls-chat-message ${msg.isSystem ? 'system' : ''} ${msg.isJoinEvent ? 'is-join-event' : ''} ${msg.isOwn ? 'own' : ''}`}>
+                {!msg.isSystem && (
+                  <div className="ls-chat-avatar">
+                    {msg.photoUrl ? (
+                      <img src={getPhotoUrl(msg.photoUrl)} alt={msg.username} />
+                    ) : (
+                      <div className="ls-chat-avatar-initials">{(msg.username || '?').charAt(0).toUpperCase()}</div>
+                    )}
+                  </div>
+                )}
+                <div className="ls-chat-content">
+                  <div className="ls-chat-body">
+                    <span className="ls-chat-username">{msg.username} :</span>
+                    <span className="ls-chat-text">{msg.text}</span>
+                    <div className="ls-chat-icons">
+                      {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
+                      {!msg.isSystem && (
+                        <button
+                          className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                          onClick={() => handleTranslateMsg(msg.id)}
+                          title={t('liveStream.translate')}
+                        >
+                          🌐
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {msg.showTranslation && msg.translatedText && (
+                    <div className="ls-translated-text">🌐 {msg.translatedText}</div>
+                  )}
+                  {msg.showTranslation && !msg.translatedText && !msg.translating && (
+                    <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Panels (Stats & Requests) - enfants directs de ls-container */}
       {showStatsPanel && (
         <div className="ls-stats-overlay" onClick={() => setShowStatsPanel(false)} />
       )}
