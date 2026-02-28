@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import {
   FiArrowLeft, FiHeart, FiSend, FiImage, FiMoreVertical,
-  FiPhone, FiVideo, FiSearch, FiSmile
+  FiPhone, FiVideo, FiSearch, FiSmile, FiUserX
 } from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -35,6 +35,9 @@ const Chat = () => {
   const typingTimeoutRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showConvMenu, setShowConvMenu] = useState(false);
+  const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false);
+  const convMenuRef = useRef(null);
 
   useEffect(() => {
     // Connexion WebSocket
@@ -152,6 +155,34 @@ const Chat = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Suppression définitive du match + conversation
+  const handleUnmatch = async () => {
+    if (!selectedConversation) return;
+    try {
+      await axios.delete(`/api/matches/${selectedConversation.user.id}`);
+      toast.success(t('matches.unmatchSuccess'));
+      setShowUnmatchConfirm(false);
+      setShowConvMenu(false);
+      setSelectedConversation(null);
+      navigate('/chat');
+      loadConversations();
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
+  };
+
+  // Fermer le menu conversation au clic en dehors
+  useEffect(() => {
+    if (!showConvMenu) return;
+    const handleClickOutside = (e) => {
+      if (convMenuRef.current && !convMenuRef.current.contains(e.target)) {
+        setShowConvMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showConvMenu]);
 
   // Fermer le picker emoji au clic en dehors
   useEffect(() => {
@@ -280,16 +311,30 @@ const Chat = () => {
                     {isTyping && <span className="typing-indicator">{t('chat.typing')}</span>}
                   </div>
                 </div>
-                <div className="header-actions">
+                <div className="header-actions" ref={convMenuRef} style={{ position: 'relative' }}>
                   <button className="btn btn-ghost" title={t('chat.audioCall')}>
                     <FiPhone />
                   </button>
                   <button className="btn btn-ghost" title={t('chat.videoCall')}>
                     <FiVideo />
                   </button>
-                  <button className="btn btn-ghost" title={t('chat.moreOptions')}>
+                  <button
+                    className="btn btn-ghost"
+                    title={t('chat.moreOptions')}
+                    onClick={() => setShowConvMenu(prev => !prev)}
+                  >
                     <FiMoreVertical />
                   </button>
+                  {showConvMenu && (
+                    <div className="conv-menu-dropdown">
+                      <button
+                        className="conv-menu-item danger"
+                        onClick={() => { setShowConvMenu(false); setShowUnmatchConfirm(true); }}
+                      >
+                        <FiUserX /> {t('chat.menuDeleteUnmatch')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -387,6 +432,30 @@ const Chat = () => {
           )}
         </div>
       </div>
+
+      {/* Modal confirmation Unmatch */}
+      {showUnmatchConfirm && (
+        <div className="unmatch-overlay" onClick={() => setShowUnmatchConfirm(false)}>
+          <div className="unmatch-modal" onClick={e => e.stopPropagation()}>
+            <h3>{t('matches.unmatchConfirmTitle')}</h3>
+            <p>{t('matches.unmatchConfirmText')}</p>
+            <div className="unmatch-modal-btns">
+              <button
+                className="btn btn-ghost"
+                onClick={() => setShowUnmatchConfirm(false)}
+              >
+                {t('matches.unmatchCancel')}
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={handleUnmatch}
+              >
+                <FiUserX /> {t('matches.unmatchConfirmBtn')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

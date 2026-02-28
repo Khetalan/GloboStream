@@ -289,7 +289,13 @@
     "likeSuccess": "Profile liked!",
     "likeError": "Error liking profile",
     "messageSent": "Message sent!",
-    "messageError": "Error sending message"
+    "messageError": "Error sending message",
+    "unmatch": "Delete & Unmatch",
+    "unmatchConfirmTitle": "Delete this match?",
+    "unmatchConfirmText": "This action is irreversible. The match and all messages will be permanently deleted.",
+    "unmatchConfirmBtn": "Delete permanently",
+    "unmatchCancel": "Cancel",
+    "unmatchSuccess": "Match deleted"
   },
   "chat": {
     "title": "Messages",
@@ -306,7 +312,8 @@
     "messagePlaceholder": "Message...",
     "loadConversationsError": "Error loading conversations",
     "loadMessagesError": "Error loading messages",
-    "sendError": "Error sending message"
+    "sendError": "Error sending message",
+    "menuDeleteUnmatch": "Delete & Unmatch"
   },
   "support": {
     "title": "Support",

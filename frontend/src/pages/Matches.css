@@ -484,6 +484,52 @@
   width: 100%;
 }
 
+/* Bouton Unmatch */
+.modal-action-btn.unmatch {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  gap: 6px;
+}
+
+.modal-action-btn.unmatch:hover {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+.modal-unmatch-row {
+  margin-top: 8px;
+}
+
+.modal-unmatch-row .modal-action-btn {
+  width: 100%;
+}
+
+/* Confirmation inline Unmatch */
+.modal-unmatch-confirm {
+  margin-top: 12px;
+  padding: 14px;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.modal-unmatch-confirm p {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary, #aaa);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.modal-unmatch-confirm-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-unmatch-confirm-btns .modal-action-btn {
+  flex: 1;
+}
+
 .no-matches {
   text-align: center;
   padding: 60px 20px;

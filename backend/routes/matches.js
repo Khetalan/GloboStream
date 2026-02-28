@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Message = require('../models/Message');
+const MessageRequest = require('../models/MessageRequest');
 const authMiddleware = require('../middleware/auth');
 
 router.use(authMiddleware);
@@ -64,9 +66,26 @@ router.delete('/:userId', async (req, res) => {
       await targetUser.save();
     }
 
+    // Suppression hard : tous les messages entre les deux utilisateurs
+    const currentUserId = req.user._id;
+    await Message.deleteMany({
+      $or: [
+        { sender: currentUserId, recipient: targetUserId },
+        { sender: targetUserId, recipient: currentUserId }
+      ]
+    });
+
+    // Suppression hard : toutes les demandes de message entre les deux utilisateurs
+    await MessageRequest.deleteMany({
+      $or: [
+        { sender: currentUserId, recipient: targetUserId },
+        { sender: targetUserId, recipient: currentUserId }
+      ]
+    });
+
     res.json({
       success: true,
-      message: 'Match retiré avec succès'
+      message: 'Match et conversation supprimés définitivement'
     });
   } catch (error) {
     console.error('Erreur unmatch:', error);

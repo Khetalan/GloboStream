@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { FiMessageCircle, FiUser, FiX, FiHeart, FiMail } from 'react-icons/fi';
+import { FiMessageCircle, FiUser, FiX, FiHeart, FiMail, FiUserX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import Navigation from '../components/Navigation';
 import './Matches.css';
@@ -24,6 +24,9 @@ const Matches = () => {
   const [modalShowMessageForm, setModalShowMessageForm] = useState(false);
   const [modalMessageText, setModalMessageText] = useState('');
   const [modalSendingMessage, setModalSendingMessage] = useState(false);
+
+  // État modal Unmatch
+  const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false);
 
   // Fonction de récupération des données selon l'onglet
   const fetchData = useCallback(async () => {
@@ -94,6 +97,24 @@ const Matches = () => {
     setModalMessageStatus(null);
     setModalShowMessageForm(false);
     setModalMessageText('');
+    setShowUnmatchConfirm(false);
+  };
+
+  // Unmatch définitif
+  const handleUnmatch = async () => {
+    const userId = selectedProfile?.id || selectedProfile?._id;
+    if (!userId) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`/api/matches/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(t('matches.unmatchSuccess'));
+      handleCloseModal();
+      fetchData();
+    } catch (error) {
+      toast.error(t('common.error'));
+    }
   };
 
   // Vérifier si une demande de message a déjà été envoyée au profil ouvert
@@ -448,6 +469,39 @@ const Matches = () => {
                     <FiUser /> {t('matches.viewProfile')}
                   </button>
                 </div>
+
+                {/* Bouton Unmatch — uniquement sur l'onglet Matchs */}
+                {activeTab === 'matches' && !showUnmatchConfirm && (
+                  <div className="modal-unmatch-row">
+                    <button
+                      className="modal-action-btn unmatch"
+                      onClick={() => setShowUnmatchConfirm(true)}
+                    >
+                      <FiUserX /> {t('matches.unmatch')}
+                    </button>
+                  </div>
+                )}
+
+                {/* Confirmation Unmatch */}
+                {showUnmatchConfirm && (
+                  <div className="modal-unmatch-confirm">
+                    <p>{t('matches.unmatchConfirmText')}</p>
+                    <div className="modal-unmatch-confirm-btns">
+                      <button
+                        className="modal-action-btn secondary"
+                        onClick={() => setShowUnmatchConfirm(false)}
+                      >
+                        {t('matches.unmatchCancel')}
+                      </button>
+                      <button
+                        className="modal-action-btn unmatch"
+                        onClick={handleUnmatch}
+                      >
+                        <FiUserX /> {t('matches.unmatchConfirmBtn')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

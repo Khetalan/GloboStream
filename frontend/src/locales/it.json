@@ -289,7 +289,13 @@
     "likeSuccess": "Profilo piaciuto!",
     "likeError": "Errore nel like",
     "messageSent": "Messaggio inviato!",
-    "messageError": "Errore nell'invio"
+    "messageError": "Errore nell'invio",
+    "unmatch": "Elimina & Unmatch",
+    "unmatchConfirmTitle": "Eliminare questo match?",
+    "unmatchConfirmText": "Questa azione è irreversibile. Il match e tutti i messaggi saranno eliminati definitivamente.",
+    "unmatchConfirmBtn": "Elimina definitivamente",
+    "unmatchCancel": "Annulla",
+    "unmatchSuccess": "Match eliminato"
   },
   "chat": {
     "title": "Messaggi",
@@ -306,7 +312,8 @@
     "messagePlaceholder": "Scrivi...",
     "loadConversationsError": "Errore durante il caricamento delle conversazioni",
     "loadMessagesError": "Errore durante il caricamento dei messaggi",
-    "sendError": "Errore durante l'invio"
+    "sendError": "Errore durante l'invio",
+    "menuDeleteUnmatch": "Elimina & Unmatch"
   },
   "support": {
     "title": "Supporto",

@@ -289,7 +289,13 @@
     "likeSuccess": "Profil geliked!",
     "likeError": "Fehler beim Liken",
     "messageSent": "Nachricht gesendet!",
-    "messageError": "Fehler beim Senden"
+    "messageError": "Fehler beim Senden",
+    "unmatch": "Löschen & Unmatch",
+    "unmatchConfirmTitle": "Dieses Match löschen?",
+    "unmatchConfirmText": "Diese Aktion ist unwiderruflich. Das Match und alle Nachrichten werden dauerhaft gelöscht.",
+    "unmatchConfirmBtn": "Dauerhaft löschen",
+    "unmatchCancel": "Abbrechen",
+    "unmatchSuccess": "Match gelöscht"
   },
   "chat": {
     "title": "Nachrichten",
@@ -306,7 +312,8 @@
     "messagePlaceholder": "Schreiben...",
     "loadConversationsError": "Fehler beim Laden der Unterhaltungen",
     "loadMessagesError": "Fehler beim Laden der Nachrichten",
-    "sendError": "Fehler beim Senden"
+    "sendError": "Fehler beim Senden",
+    "menuDeleteUnmatch": "Löschen & Unmatch"
   },
   "support": {
     "title": "Support",
