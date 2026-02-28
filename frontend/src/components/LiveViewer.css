@@ -299,8 +299,6 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  align-self: flex-start;
-  margin-top: 1px;
 }
 
 .lv-chat-avatar img {

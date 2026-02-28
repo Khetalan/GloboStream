@@ -1034,7 +1034,7 @@
   padding: 6px 10px;
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   line-height: 1.4;
   border-bottom: none;
@@ -1050,8 +1050,6 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  align-self: flex-start;
-  margin-top: 1px;
 }
 
 .ls-chat-avatar img {
