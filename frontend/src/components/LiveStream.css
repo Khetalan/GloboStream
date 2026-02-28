@@ -405,11 +405,9 @@
   overflow: hidden;
 }
 
-/* Quand chat dédié actif (3+ participants) : zone vidéo prend 48% + bordure mode */
+/* Quand chat dédié actif (3+ participants) : zone vidéo prend 48% */
 .ls-container.has-chat .ls-video-zone {
   flex: 0 0 48%;
-  border: 2px solid var(--ls-accent-color);
-  box-sizing: border-box;
 }
 
 /* Bordure streamer uniquement en mode has-chat */
@@ -1632,43 +1630,43 @@
 /* -- Contrôles sur la carte d'un participant (toujours visibles — TÂCHE-024) -- */
 .ls-participant-controls {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 4px;
+  right: 6px;
   display: flex;
-  gap: 6px;
+  gap: 4px;
   opacity: 1;
   z-index: 15;
 }
 
 .ls-participant-ctrl-btn {
-  background: rgba(0, 0, 0, 0.55);
+  background: transparent;
   border: none;
-  color: #fff;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.85);
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+  transition: color 0.15s;
 }
-.ls-participant-ctrl-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
+.ls-participant-ctrl-btn:hover { color: #fff; }
 
-/* Micro muté → orange */
+/* Micro muté → icône orange */
 .ls-participant-ctrl-btn.mic-btn.muted {
-  background: rgba(255, 149, 0, 0.8);
+  color: #ff9500;
 }
 .ls-participant-ctrl-btn.mic-btn.muted:hover {
-  background: rgba(255, 149, 0, 1);
+  color: #ffac33;
 }
 
-/* Masquer carte → neutre semi-transparent */
+/* Bouton X → rouge discret */
 .ls-participant-ctrl-btn.hide-btn {
-  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.7);
 }
 .ls-participant-ctrl-btn.hide-btn:hover {
-  background: rgba(60, 60, 60, 0.9);
+  color: #ff3b30;
 }
 
 /* ── Bouton Kick dans le panel spectateurs ─────────────────── */
