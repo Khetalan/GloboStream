@@ -1114,7 +1114,8 @@
 /* ── Grille des autres participants (TÂCHE-048) ─────────────── */
 .lv-participants-grid {
   position: absolute;
-  bottom: 100px;
+  /* Audit fix : bottom dynamique pour dégager la barre du bas + safe area iOS */
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   left: 8px;
   z-index: 25;
   display: grid;

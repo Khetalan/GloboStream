@@ -139,7 +139,7 @@ function setupLiveRoomHandlers(io, socket) {
 
       // Diffuser la liste mise à jour à tous dans la room (streamer inclus)
       io.to(roomId).emit('viewers-updated', {
-        viewerCount: room.viewers.size,
+        viewerCount: room.viewers.size + room.participants.size,
         viewers:     viewersList
       });
 
@@ -329,6 +329,17 @@ function setupLiveRoomHandlers(io, socket) {
         participantSocketId: viewerSocketId,
         participantInfo: viewerInfo,
         participantCount: room.participants.size
+      });
+
+      // Audit fix : mettre à jour la liste viewers (promoted user retiré) + participants
+      const updatedViewersList = buildViewersList(room);
+      io.to(roomId).emit('viewers-updated', {
+        viewerCount: room.viewers.size + room.participants.size,
+        viewers:     updatedViewersList
+      });
+      io.to(roomId).emit('participants-updated', {
+        participantCount: room.participants.size,
+        participants:     buildParticipantsList(room)
       });
 
       console.log(`Viewer ${viewerInfo.userId} promoted to participant in room ${roomId}`);
@@ -604,22 +615,29 @@ function handleLeaveRoom(io, socket, roomId) {
       });
     }
 
-    // Notifier le streamer (event spécifique pour gérer l'UI streamer)
-    io.to(room.streamerSocketId).emit('viewer-left', {
-      viewerSocketId: socket.id
-    });
+    // Notifier le streamer uniquement si c'était un viewer pur (audit fix : pas de double event)
+    if (!wasParticipant) {
+      io.to(room.streamerSocketId).emit('viewer-left', {
+        viewerSocketId: socket.id
+      });
+    }
 
     if (wasParticipant) {
       io.to(roomId).emit('participant-left', {
         participantSocketId: socket.id,
         participantCount:    room.participants.size
       });
+      // Mettre à jour la liste des participants après départ
+      io.to(roomId).emit('participants-updated', {
+        participantCount: room.participants.size,
+        participants:     buildParticipantsList(room)
+      });
     }
 
     // TÂCHE-013 — diffuser la liste mise à jour après départ
     const viewersList = buildViewersList(room);
     io.to(roomId).emit('viewers-updated', {
-      viewerCount: room.viewers.size,
+      viewerCount: room.viewers.size + room.participants.size,
       viewers:     viewersList
     });
 
@@ -633,6 +651,15 @@ function handleLeaveRoom(io, socket, roomId) {
 function buildViewersList(room) {
   const list = [];
   for (const [socketId, info] of room.viewers.entries()) {
+    list.push({ socketId, userId: info.userId, displayName: info.displayName, photoUrl: info.photoUrl });
+  }
+  return list;
+}
+
+// ── Construire la liste des participants pour le panel streamer ── audit fix
+function buildParticipantsList(room) {
+  const list = [];
+  for (const [socketId, info] of room.participants.entries()) {
     list.push({ socketId, userId: info.userId, displayName: info.displayName, photoUrl: info.photoUrl });
   }
   return list;

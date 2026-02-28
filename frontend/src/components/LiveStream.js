@@ -83,6 +83,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   const [liveModerators, setLiveModerators] = useState(new Set());
   const [kickConfirmTarget, setKickConfirmTarget] = useState(null);
   const [blockConfirmTarget, setBlockConfirmTarget] = useState(null);
+  const [panelParticipants, setPanelParticipants] = useState([]); // audit fix : participants dans le panel modération
 
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesAccepted, setRulesAccepted] = useState(false);
@@ -267,7 +268,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       viewerPeersRef.current.set(viewerSocketId, peer);
     });
 
-    // Un viewer quitte
+    // Un viewer quitte (audit fix : backend n'émet plus viewer-left pour les participants)
     socket.on('viewer-left', ({ viewerSocketId }) => {
       setViewerCount(prev => Math.max(0, prev - 1));
       setViewers(prev => prev.filter(v => v.socketId !== viewerSocketId));
@@ -276,14 +277,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       if (peer) {
         peer.destroy();
         viewerPeersRef.current.delete(viewerSocketId);
-      }
-
-      // Aussi vérifier si c'était un participant
-      const pData = participantPeersRef.current.get(viewerSocketId);
-      if (pData) {
-        pData.peer.destroy();
-        participantPeersRef.current.delete(viewerSocketId);
-        setParticipants(prev => prev.filter(p => p.socketId !== viewerSocketId));
       }
     });
 
@@ -345,9 +338,20 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     // Note: Le backend doit relayer cet événement au participant concerné
     // pour qu'il coupe réellement son micro.
 
-    // Un participant rejoint (après acceptation)
-    socket.on('participant-joined', ({ participantSocketId, participantInfo, participantCount }) => {
-      console.log('Participant joined:', participantInfo.displayName);
+    // Un participant rejoint (après acceptation) — audit fix : nettoyer viewers + joinRequests
+    socket.on('participant-joined', ({ participantSocketId, participantInfo }) => {
+      setViewers(prev => prev.filter(v => v.socketId !== participantSocketId));
+      setJoinRequests(prev => prev.filter(r => r.socketId !== participantSocketId));
+    });
+
+    // Liste des participants mise à jour — audit fix : panel modération côté streamer
+    socket.on('participants-updated', ({ participants: pList }) => {
+      setPanelParticipants((pList || []).map(p => ({
+        socketId: p.socketId,
+        userId:   p.userId,
+        name:     p.displayName,
+        photoUrl: p.photoUrl || null
+      })));
     });
 
     // Un participant quitte
@@ -1315,6 +1319,65 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
               <span className="ls-stats-total-value">{formatNumber(viewerCount)}</span>
             </div>
             <div className="ls-stats-list">
+              {/* Participants actifs — audit fix : moderables depuis le panel */}
+              {panelParticipants.length > 0 && (
+                <div className="ls-panel-section-header">
+                  {t('liveStream.liveParticipants')} ({panelParticipants.length})
+                </div>
+              )}
+              {panelParticipants.map((p) => (
+                <div
+                  key={`pnl-${p.socketId}`}
+                  className={`ls-stats-row ${p.userId ? 'clickable' : ''}`}
+                  onClick={() => p.userId && navigate(`/profile/${p.userId}`)}
+                >
+                  <div className="ls-stats-row-left">
+                    {p.photoUrl ? (
+                      <img src={getPhotoUrl(p.photoUrl)} alt={p.name} className="ls-stats-avatar-img" />
+                    ) : (
+                      <div className="ls-stats-avatar">{p.name.charAt(0)}</div>
+                    )}
+                    <div>
+                      <div className="ls-stats-name">
+                        {p.name}
+                        <span className="ls-participant-badge">LIVE</span>
+                        {liveModerators.has(p.socketId) && (
+                          <span className="ls-mod-badge">{t('liveStream.modBadge')}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ls-viewer-actions" onClick={e => e.stopPropagation()}>
+                    <button
+                      className={`ls-action-btn mod-btn ${liveModerators.has(p.socketId) ? 'active' : ''}`}
+                      onClick={() => handleToggleMod(p)}
+                      title={liveModerators.has(p.socketId) ? t('liveStream.demoteMod') : t('liveStream.promoteMod')}
+                    >
+                      <FiShield size={13} />
+                    </button>
+                    <button
+                      className="ls-action-btn kick-btn"
+                      onClick={() => handleKickFromLive(p)}
+                      title={t('liveStream.kickParticipant')}
+                    >
+                      <FiUserX size={13} />
+                    </button>
+                    <button
+                      className="ls-action-btn block-btn"
+                      onClick={() => handleBlockFromLive(p)}
+                      title={t('liveStream.blockViewer')}
+                    >
+                      <FiSlash size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {/* Spectateurs purs */}
+              {viewers.length > 0 && panelParticipants.length > 0 && (
+                <div className="ls-panel-section-header">
+                  {t('liveStream.viewers')} ({viewers.length})
+                </div>
+              )}
               {viewers.map((v, i) => (
                 <div
                   key={i}

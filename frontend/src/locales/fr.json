@@ -418,6 +418,7 @@
   "liveStream": {
     "welcomeMessage": "Bienvenue dans le live ! Respectez les règles de la communauté.",
     "viewers": "Spectateurs",
+    "liveParticipants": "Participants en live",
     "gifts": "Cadeaux",
     "totalViewers": "Total spectateurs",
     "totalGifts": "Total cadeaux",

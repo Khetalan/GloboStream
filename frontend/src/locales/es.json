@@ -420,6 +420,7 @@
   "liveStream": {
     "welcomeMessage": "¡Bienvenido al directo! Respeta las normas de la comunidad.",
     "viewers": "Espectadores",
+    "liveParticipants": "Participantes en vivo",
     "gifts": "Regalos",
     "totalViewers": "Total espectadores",
     "totalGifts": "Total regalos",

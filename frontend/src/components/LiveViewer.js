@@ -482,6 +482,7 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       // (caméra prête ici, on peut envoyer l'offre immédiatement au streamer)
       const peer = new Peer({
         initiator: true,
+        trickle: true,
         config: PEER_CONFIG,
         stream: stream
       });
