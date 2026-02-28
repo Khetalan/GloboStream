@@ -1766,6 +1766,135 @@
   background: rgba(255, 59, 48, 0.12);
 }
 
+/* ── Modération viewer panel (TÂCHE-049C) ──────────────────── */
+.ls-viewer-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ls-action-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.ls-action-btn.mod-btn {
+  color: rgba(148, 163, 184, 0.6);
+}
+.ls-action-btn.mod-btn:hover {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+}
+.ls-action-btn.mod-btn.active {
+  color: #60a5fa;
+}
+
+.ls-action-btn.kick-btn {
+  color: rgba(251, 146, 60, 0.7);
+}
+.ls-action-btn.kick-btn:hover {
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.12);
+}
+
+.ls-action-btn.block-btn {
+  color: rgba(248, 113, 113, 0.7);
+}
+.ls-action-btn.block-btn:hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.ls-mod-badge {
+  display: inline-block;
+  background: rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 5px;
+  vertical-align: middle;
+  letter-spacing: 0.05em;
+}
+
+/* ── Modals confirmation kick/block (TÂCHE-049C) ───────────── */
+.ls-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ls-confirm-modal {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 300px;
+  width: 100%;
+  text-align: center;
+}
+
+.ls-confirm-modal h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.ls-confirm-modal p {
+  margin: 0 0 18px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
+}
+
+.ls-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ls-confirm-cancel {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ls-confirm-cancel:hover { background: rgba(255, 255, 255, 0.14); }
+
+.ls-confirm-danger {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ls-confirm-danger:hover { background: rgba(239, 68, 68, 0.25); }
+
 /* ── Bouton quitter en haut à droite (simple X discret) ───── */
 .ls-top-quit {
   background: transparent;

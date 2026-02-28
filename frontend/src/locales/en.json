@@ -460,7 +460,23 @@
     "hideParticipant": "Hide tile",
     "kickParticipant": "Remove from live",
     "participantKicked": "{{name}} has been removed from the live",
-    "stopStream": "Leave the live"
+    "stopStream": "Leave the live",
+    "promoteMod": "Promote to moderator",
+    "demoteMod": "Demote from moderator",
+    "modBadge": "MOD",
+    "kickViewerConfirm": "Remove {{name}} from this live?",
+    "blockViewer": "Block & blacklist",
+    "blockViewerConfirm": "Block {{name}}? They won't be able to join your lives.",
+    "viewerKickedMsg": "{{name}} was removed from the live",
+    "viewerBlockedMsg": "{{name}} was blocked",
+    "modPromotedMsg": "{{name}} is now a moderator",
+    "modDemotedMsg": "{{name}} is no longer a moderator",
+    "blockSelf": "Block this user",
+    "blockSelfSuccess": "{{name}} blocked",
+    "muteParticipant": "Mute",
+    "unmuteParticipant": "Unmute",
+    "participantMuted": "{{name}} muted",
+    "participantUnmuted": "{{name}} unmuted"
   },
   "liveViewer": {
     "roomNotFound": "Room not found",
@@ -480,7 +496,11 @@
     "joinedLive": "You joined the live!",
     "requestRejected": "Request rejected",
     "liveEnded": "The live has ended",
-    "kickedFromRoom": "You have been removed from the live by the streamer"
+    "kickedFromRoom": "You have been removed from the live by the streamer",
+    "joinRejectedKicked": "You were removed from this live",
+    "joinRejectedBlacklisted": "You are blacklisted from this live",
+    "modPromoted": "You are now a moderator of this live",
+    "modDemoted": "You are no longer a moderator"
   },
   "liveGifts": {
     "panelTitle": "Send a gift",

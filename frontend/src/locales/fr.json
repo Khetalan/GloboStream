@@ -458,7 +458,23 @@
     "hideParticipant": "Masquer la carte",
     "kickParticipant": "Expulser du live",
     "participantKicked": "{{name}} a été expulsé du live",
-    "stopStream": "Quitter le live"
+    "stopStream": "Quitter le live",
+    "promoteMod": "Promouvoir modérateur",
+    "demoteMod": "Rétrograder modérateur",
+    "modBadge": "MOD",
+    "kickViewerConfirm": "Expulser {{name}} de ce live ?",
+    "blockViewer": "Bloquer & blacklister",
+    "blockViewerConfirm": "Bloquer {{name}} ? Il ne pourra plus rejoindre vos lives.",
+    "viewerKickedMsg": "{{name}} a été expulsé du live",
+    "viewerBlockedMsg": "{{name}} a été bloqué",
+    "modPromotedMsg": "{{name}} est maintenant modérateur de ce live",
+    "modDemotedMsg": "{{name}} n'est plus modérateur",
+    "blockSelf": "Bloquer cet utilisateur",
+    "blockSelfSuccess": "{{name}} bloqué",
+    "muteParticipant": "Mettre en sourdine",
+    "unmuteParticipant": "Réactiver le micro",
+    "participantMuted": "{{name}} mis en sourdine",
+    "participantUnmuted": "{{name}} réactivé"
   },
   "liveViewer": {
     "roomNotFound": "Salon introuvable",
@@ -478,7 +494,11 @@
     "joinedLive": "Vous avez rejoint le live !",
     "requestRejected": "Demande refusée",
     "liveEnded": "Le live est terminé",
-    "kickedFromRoom": "Vous avez été expulsé du live par le streamer"
+    "kickedFromRoom": "Vous avez été expulsé du live par le streamer",
+    "joinRejectedKicked": "Vous avez été expulsé de ce live",
+    "joinRejectedBlacklisted": "Vous êtes blacklisté de ce live",
+    "modPromoted": "Vous êtes maintenant modérateur de ce live",
+    "modDemoted": "Vous n'êtes plus modérateur"
   },
   "liveGifts": {
     "panelTitle": "Envoyer un cadeau",

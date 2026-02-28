@@ -460,7 +460,23 @@
     "hideParticipant": "Nascondi la scheda",
     "kickParticipant": "Espelli dal live",
     "participantKicked": "{{name}} è stato espulso dal live",
-    "stopStream": "Lascia il live"
+    "stopStream": "Lascia il live",
+    "promoteMod": "Promuovi moderatore",
+    "demoteMod": "Degrada moderatore",
+    "modBadge": "MOD",
+    "kickViewerConfirm": "Rimuovere {{name}} da questa diretta?",
+    "blockViewer": "Blocca e blacklista",
+    "blockViewerConfirm": "Bloccare {{name}}? Non potrà più unirsi alle tue dirette.",
+    "viewerKickedMsg": "{{name}} è stato rimosso dalla diretta",
+    "viewerBlockedMsg": "{{name}} è stato bloccato",
+    "modPromotedMsg": "{{name}} è ora un moderatore",
+    "modDemotedMsg": "{{name}} non è più un moderatore",
+    "blockSelf": "Blocca questo utente",
+    "blockSelfSuccess": "{{name}} bloccato",
+    "muteParticipant": "Silenzia",
+    "unmuteParticipant": "Riattiva audio",
+    "participantMuted": "{{name}} silenziato",
+    "participantUnmuted": "{{name}} riattivato"
   },
   "liveViewer": {
     "roomNotFound": "Sala non trovata",
@@ -480,7 +496,11 @@
     "joinedLive": "Ti sei unito alla diretta!",
     "requestRejected": "Richiesta rifiutata",
     "liveEnded": "La diretta è terminata",
-    "kickedFromRoom": "Sei stato espulso dal live dallo streamer"
+    "kickedFromRoom": "Sei stato espulso dal live dallo streamer",
+    "joinRejectedKicked": "Sei stato rimosso da questa diretta",
+    "joinRejectedBlacklisted": "Sei nella blacklist di questa diretta",
+    "modPromoted": "Sei ora un moderatore di questa diretta",
+    "modDemoted": "Non sei più un moderatore"
   },
   "liveGifts": {
     "panelTitle": "Invia un regalo",

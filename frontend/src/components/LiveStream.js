@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiUsers,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
-  FiUserPlus, FiCheck, FiSlash, FiAlertTriangle, FiGlobe
+  FiUserPlus, FiCheck, FiSlash, FiAlertTriangle, FiGlobe,
+  FiShield, FiUserX
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
@@ -79,6 +80,9 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   const [joinRequests, setJoinRequests] = useState([]);
   const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
   const [isUiVisible, setIsUiVisible] = useState(true);
+  const [liveModerators, setLiveModerators] = useState(new Set());
+  const [kickConfirmTarget, setKickConfirmTarget] = useState(null);
+  const [blockConfirmTarget, setBlockConfirmTarget] = useState(null);
 
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesAccepted, setRulesAccepted] = useState(false);
@@ -373,6 +377,62 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
     });
 
+    // Modérateur promu dans le live
+    socket.on('live-mod-promoted', ({ targetSocketId, displayName }) => {
+      setLiveModerators(prev => new Set([...prev, targetSocketId]));
+      setMessages(prev => [...prev, {
+        id: `sys-mod-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.modPromotedMsg', { name: displayName }),
+        isSystem: true,
+        isOwn: false,
+        photoUrl: null
+      }]);
+    });
+
+    // Modérateur rétrogradé dans le live
+    socket.on('live-mod-demoted', ({ targetSocketId, displayName }) => {
+      setLiveModerators(prev => {
+        const next = new Set(prev);
+        next.delete(targetSocketId);
+        return next;
+      });
+      setMessages(prev => [...prev, {
+        id: `sys-demod-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.modDemotedMsg', { name: displayName || '' }),
+        isSystem: true,
+        isOwn: false,
+        photoUrl: null
+      }]);
+    });
+
+    // Viewer expulsé (message système dans chat + retrait liste)
+    socket.on('viewer-kicked', ({ displayName }) => {
+      setViewers(prev => prev.filter(v => v.name !== displayName));
+      setMessages(prev => [...prev, {
+        id: `sys-kicked-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.viewerKickedMsg', { name: displayName }),
+        isSystem: true,
+        isOwn: false,
+        photoUrl: null
+      }]);
+    });
+
+    // Viewer bloqué (message système dans chat + retrait liste)
+    socket.on('viewer-blocked', ({ displayName }) => {
+      setViewers(prev => prev.filter(v => v.name !== displayName));
+      setMessages(prev => [...prev, {
+        id: `sys-blocked-${Date.now()}`,
+        username: 'System',
+        text: t('liveStream.viewerBlockedMsg', { name: displayName }),
+        isSystem: true,
+        isOwn: false,
+        photoUrl: null
+      }]);
+    });
+
     // Enregistrer l'utilisateur
     if (user?._id) {
       socket.emit('register', user._id);
@@ -629,16 +689,45 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     toast.success(newMuteState ? t('liveStream.participantMuted', { name: participant.name }) : t('liveStream.participantUnmuted', { name: participant.name }));
   }, [t]);
 
-  // Expulser un spectateur du live (streamer uniquement) — TÂCHE-024
-  const handleKickViewer = useCallback((viewer) => {
+  // Promouvoir / rétrograder un modérateur live — TÂCHE-049C
+  const handleToggleMod = useCallback((viewer) => {
     if (!socketRef.current || !roomIdRef.current) return;
-    socketRef.current.emit('streamer-kick-participant', {
+    const isMod = liveModerators.has(viewer.socketId);
+    socketRef.current.emit(isMod ? 'demote-live-mod' : 'promote-to-live-mod', {
       roomId: roomIdRef.current,
-      participantSocketId: viewer.socketId,
+      targetSocketId: viewer.socketId
     });
-    setViewers(prev => prev.filter(v => v.socketId !== viewer.socketId));
-    toast.success(t('liveStream.participantKicked', { name: viewer.name }));
-  }, [t]);
+  }, [liveModerators]);
+
+  // Kick temporaire depuis le live (streamer) — TÂCHE-049C
+  const handleKickFromLive = useCallback((viewer) => {
+    setKickConfirmTarget(viewer);
+  }, []);
+
+  const confirmKickFromLive = useCallback(() => {
+    if (!kickConfirmTarget || !socketRef.current || !roomIdRef.current) return;
+    socketRef.current.emit('kick-from-live', {
+      roomId: roomIdRef.current,
+      targetSocketId: kickConfirmTarget.socketId,
+      targetUserId: kickConfirmTarget.userId
+    });
+    setKickConfirmTarget(null);
+  }, [kickConfirmTarget]);
+
+  // Blocage & blacklist depuis le live (streamer) — TÂCHE-049C
+  const handleBlockFromLive = useCallback((viewer) => {
+    setBlockConfirmTarget(viewer);
+  }, []);
+
+  const confirmBlockFromLive = useCallback(() => {
+    if (!blockConfirmTarget || !socketRef.current || !roomIdRef.current) return;
+    socketRef.current.emit('block-user-from-live', {
+      roomId: roomIdRef.current,
+      targetUserId: blockConfirmTarget.userId,
+      targetSocketId: blockConfirmTarget.socketId
+    });
+    setBlockConfirmTarget(null);
+  }, [blockConfirmTarget]);
 
   // Envoyer un cadeau à un participant (streamer uniquement)
   const handleSendGift = useCallback((gift, participant) => {
@@ -1234,18 +1323,39 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                       <div className="ls-stats-avatar">{v.name.charAt(0)}</div>
                     )}
                     <div>
-                      <div className="ls-stats-name">{v.name}</div>
+                      <div className="ls-stats-name">
+                        {v.name}
+                        {liveModerators.has(v.socketId) && (
+                          <span className="ls-mod-badge">{t('liveStream.modBadge')}</span>
+                        )}
+                      </div>
                       <div className="ls-stats-badge">{v.joinedAt}</div>
                     </div>
                   </div>
-                  {/* Bouton Kick — streamer uniquement */}
-                  <button
-                    className="ls-kick-btn"
-                    onClick={(e) => { e.stopPropagation(); handleKickViewer(v); }}
-                    title={t('liveStream.kickParticipant')}
-                  >
-                    <FiSlash size={14} />
-                  </button>
+                  {/* Actions streamer : promouvoir, kick, block */}
+                  <div className="ls-viewer-actions" onClick={e => e.stopPropagation()}>
+                    <button
+                      className={`ls-action-btn mod-btn ${liveModerators.has(v.socketId) ? 'active' : ''}`}
+                      onClick={() => handleToggleMod(v)}
+                      title={liveModerators.has(v.socketId) ? t('liveStream.demoteMod') : t('liveStream.promoteMod')}
+                    >
+                      <FiShield size={13} />
+                    </button>
+                    <button
+                      className="ls-action-btn kick-btn"
+                      onClick={() => handleKickFromLive(v)}
+                      title={t('liveStream.kickParticipant')}
+                    >
+                      <FiUserX size={13} />
+                    </button>
+                    <button
+                      className="ls-action-btn block-btn"
+                      onClick={() => handleBlockFromLive(v)}
+                      title={t('liveStream.blockViewer')}
+                    >
+                      <FiSlash size={13} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1381,6 +1491,42 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal confirmation Kick — TÂCHE-049C */}
+      {kickConfirmTarget && (
+        <div className="ls-confirm-overlay" onClick={() => setKickConfirmTarget(null)}>
+          <div className="ls-confirm-modal" onClick={e => e.stopPropagation()}>
+            <h4>{t('liveStream.kickParticipant')}</h4>
+            <p>{t('liveStream.kickViewerConfirm', { name: kickConfirmTarget.name })}</p>
+            <div className="ls-confirm-actions">
+              <button className="ls-confirm-cancel" onClick={() => setKickConfirmTarget(null)}>
+                {t('common.cancel')}
+              </button>
+              <button className="ls-confirm-danger" onClick={confirmKickFromLive}>
+                <FiUserX size={14} /> {t('liveStream.kickParticipant')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmation Block — TÂCHE-049C */}
+      {blockConfirmTarget && (
+        <div className="ls-confirm-overlay" onClick={() => setBlockConfirmTarget(null)}>
+          <div className="ls-confirm-modal" onClick={e => e.stopPropagation()}>
+            <h4>{t('liveStream.blockViewer')}</h4>
+            <p>{t('liveStream.blockViewerConfirm', { name: blockConfirmTarget.name })}</p>
+            <div className="ls-confirm-actions">
+              <button className="ls-confirm-cancel" onClick={() => setBlockConfirmTarget(null)}>
+                {t('common.cancel')}
+              </button>
+              <button className="ls-confirm-danger" onClick={confirmBlockFromLive}>
+                <FiSlash size={14} /> {t('liveStream.blockViewer')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

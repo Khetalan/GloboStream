@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import io from 'socket.io-client';
 import Peer from 'simple-peer';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
-  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle, FiGlobe
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle, FiGlobe,
+  FiUserX, FiSlash
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
@@ -67,6 +69,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [showGiftPanel, setShowGiftPanel] = useState(false);
   const [showJoinRulesModal, setShowJoinRulesModal] = useState(false);
   const [joinRulesAccepted, setJoinRulesAccepted] = useState(false);
+  const [isLiveMod, setIsLiveMod] = useState(false);
+  const [kickConfirmTarget, setKickConfirmTarget] = useState(null);
+  const [blockConfirmTarget, setBlockConfirmTarget] = useState(null);
 
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -244,11 +249,18 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       startLocalCamera(streamerSocketId);
     });
 
-    // Demande refusée
-    socket.on('join-rejected', () => {
-      setJoinRequestStatus('rejected');
-      toast.error(t('liveViewer.requestRejected'));
-      setTimeout(() => setJoinRequestStatus('idle'), 3000);
+    // Demande refusée (participation streamer) ou accès room refusé (kicked/blacklisted) — TÂCHE-049C
+    socket.on('join-rejected', ({ reason } = {}) => {
+      if (reason === 'blacklisted') {
+        toast.error(t('liveViewer.joinRejectedBlacklisted'), { duration: 5000 });
+        setTimeout(() => onLeave(), 2000);
+      } else if (reason === 'kicked') {
+        toast.error(t('liveViewer.joinRejectedKicked'), { duration: 4000 });
+      } else {
+        setJoinRequestStatus('rejected');
+        toast.error(t('liveViewer.requestRejected'));
+        setTimeout(() => setJoinRequestStatus('idle'), 3000);
+      }
     });
 
     // Room fermée par le streamer
@@ -291,6 +303,62 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         setGiftScore(prev => prev + 1);
       }
       toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
+    });
+
+    // Promu modérateur live — TÂCHE-049C
+    socket.on('live-mod-promoted', ({ targetSocketId, displayName }) => {
+      if (targetSocketId === socket.id) {
+        setIsLiveMod(true);
+        toast.success(t('liveViewer.modPromoted'));
+      }
+      setViewers(prev => prev.map(v =>
+        v.socketId === targetSocketId ? { ...v, isMod: true } : v
+      ));
+    });
+
+    // Rétrogradé modérateur live — TÂCHE-049C
+    socket.on('live-mod-demoted', ({ targetSocketId }) => {
+      if (targetSocketId === socket.id) {
+        setIsLiveMod(false);
+        toast(t('liveViewer.modDemoted'));
+      }
+      setViewers(prev => prev.map(v =>
+        v.socketId === targetSocketId ? { ...v, isMod: false } : v
+      ));
+    });
+
+    // Viewer expulsé — message système dans chat — TÂCHE-049C
+    socket.on('viewer-kicked', ({ displayName }) => {
+      setViewers(prev => prev.filter(v => v.name !== displayName));
+      setMessages(prev => {
+        const msg = {
+          id: `sys-kicked-${Date.now()}`,
+          username: 'System',
+          text: t('liveStream.viewerKickedMsg', { name: displayName }),
+          isSystem: true,
+          isOwn: false,
+          photoUrl: null
+        };
+        const updated = [...prev, msg];
+        return updated.length > 200 ? updated.slice(-200) : updated;
+      });
+    });
+
+    // Viewer bloqué — message système dans chat — TÂCHE-049C
+    socket.on('viewer-blocked', ({ displayName }) => {
+      setViewers(prev => prev.filter(v => v.name !== displayName));
+      setMessages(prev => {
+        const msg = {
+          id: `sys-blocked-${Date.now()}`,
+          username: 'System',
+          text: t('liveStream.viewerBlockedMsg', { name: displayName }),
+          isSystem: true,
+          isOwn: false,
+          photoUrl: null
+        };
+        const updated = [...prev, msg];
+        return updated.length > 200 ? updated.slice(-200) : updated;
+      });
     });
 
     return () => {
@@ -493,6 +561,47 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const toggleUiVisibility = useCallback(() => {
     setIsUiVisible(prev => !prev);
   }, []);
+
+  // Kick depuis le live (modérateur live uniquement) — TÂCHE-049C
+  const handleKickFromLive = useCallback((viewer) => {
+    setKickConfirmTarget(viewer);
+  }, []);
+
+  const confirmKickFromLive = useCallback(() => {
+    if (!kickConfirmTarget || !socketRef.current) return;
+    socketRef.current.emit('kick-from-live', {
+      roomId,
+      targetSocketId: kickConfirmTarget.socketId,
+      targetUserId: kickConfirmTarget.userId
+    });
+    setKickConfirmTarget(null);
+  }, [kickConfirmTarget, roomId]);
+
+  // Blocage depuis le live (modérateur live uniquement) — TÂCHE-049C
+  const handleBlockFromLive = useCallback((viewer) => {
+    setBlockConfirmTarget(viewer);
+  }, []);
+
+  const confirmBlockFromLive = useCallback(() => {
+    if (!blockConfirmTarget || !socketRef.current) return;
+    socketRef.current.emit('block-user-from-live', {
+      roomId,
+      targetUserId: blockConfirmTarget.userId,
+      targetSocketId: blockConfirmTarget.socketId
+    });
+    setBlockConfirmTarget(null);
+  }, [blockConfirmTarget, roomId]);
+
+  // Bloquer un utilisateur pour soi-même (tous les viewers) — TÂCHE-049C
+  const handleBlockUser = useCallback(async (viewer) => {
+    if (!viewer.userId) return;
+    try {
+      await axios.post(`/api/users/block/${viewer.userId}`);
+      toast.success(t('liveStream.blockSelfSuccess', { name: viewer.name }));
+    } catch {
+      toast.error(t('common.error'));
+    }
+  }, [t]);
 
   // ── Erreur room ──
   if (roomError) {
@@ -876,10 +985,44 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                       <div className="lv-stats-avatar">{v.name.charAt(0)}</div>
                     )}
                     <div>
-                      <div className="lv-stats-name">{v.name}</div>
+                      <div className="lv-stats-name">
+                        {v.name}
+                        {v.isMod && <span className="lv-mod-badge">{t('liveStream.modBadge')}</span>}
+                      </div>
                       <div className="lv-stats-badge">{v.joinedAt}</div>
                     </div>
                   </div>
+                  {/* Actions — masquées pour soi-même */}
+                  {v.userId && v.userId !== user?._id?.toString() && (
+                    <div className="lv-viewer-actions" onClick={e => e.stopPropagation()}>
+                      {isLiveMod ? (
+                        <>
+                          <button
+                            className="lv-action-btn kick-btn"
+                            onClick={() => handleKickFromLive(v)}
+                            title={t('liveStream.kickParticipant')}
+                          >
+                            <FiUserX size={13} />
+                          </button>
+                          <button
+                            className="lv-action-btn block-btn"
+                            onClick={() => handleBlockFromLive(v)}
+                            title={t('liveStream.blockViewer')}
+                          >
+                            <FiSlash size={13} />
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="lv-action-btn block-self-btn"
+                          onClick={() => handleBlockUser(v)}
+                          title={t('liveStream.blockSelf')}
+                        >
+                          <FiSlash size={13} />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -898,6 +1041,42 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           </div>
         )}
       </div>
+
+      {/* Modal confirmation Kick — modérateur live — TÂCHE-049C */}
+      {kickConfirmTarget && (
+        <div className="lv-confirm-overlay" onClick={() => setKickConfirmTarget(null)}>
+          <div className="lv-confirm-modal" onClick={e => e.stopPropagation()}>
+            <h4>{t('liveStream.kickParticipant')}</h4>
+            <p>{t('liveStream.kickViewerConfirm', { name: kickConfirmTarget.name })}</p>
+            <div className="lv-confirm-actions">
+              <button className="lv-confirm-cancel" onClick={() => setKickConfirmTarget(null)}>
+                {t('common.cancel')}
+              </button>
+              <button className="lv-confirm-danger" onClick={confirmKickFromLive}>
+                <FiUserX size={14} /> {t('liveStream.kickParticipant')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmation Block — modérateur live — TÂCHE-049C */}
+      {blockConfirmTarget && (
+        <div className="lv-confirm-overlay" onClick={() => setBlockConfirmTarget(null)}>
+          <div className="lv-confirm-modal" onClick={e => e.stopPropagation()}>
+            <h4>{t('liveStream.blockViewer')}</h4>
+            <p>{t('liveStream.blockViewerConfirm', { name: blockConfirmTarget.name })}</p>
+            <div className="lv-confirm-actions">
+              <button className="lv-confirm-cancel" onClick={() => setBlockConfirmTarget(null)}>
+                {t('common.cancel')}
+              </button>
+              <button className="lv-confirm-danger" onClick={confirmBlockFromLive}>
+                <FiSlash size={14} /> {t('liveStream.blockViewer')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
