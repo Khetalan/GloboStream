@@ -585,6 +585,8 @@
 .ls-video-grid.layout-5 .ls-video-card.streamer {
   grid-column: 1;
   grid-row: 1 / 3;
+  align-self: center;
+  height: 50%;
 }
 /* Invités 2-5 : auto-placés dans cols 2-3, rows 1-2 */
 
@@ -607,6 +609,8 @@
 .ls-video-grid.layout-7 .ls-video-card.streamer {
   grid-column: 1;
   grid-row: 1 / 4;
+  align-self: center;
+  height: 50%;
 }
 /* Invités 2-7 : auto-placés dans cols 2-3, rows 1-3 */
 
