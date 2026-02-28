@@ -382,13 +382,13 @@
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.3);
-  font-size: 15px;
   cursor: pointer;
   padding: 0 2px;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   line-height: 1;
   transition: color 0.15s;
-  margin-top: 1px;
 }
 
 .lv-translate-btn:hover {
@@ -461,6 +461,8 @@
 }
 
 .lv-input-container input {
+  flex: 1;
+  min-width: 0;
   font-size: 1rem;
   color: #fff;
   background: transparent !important;
@@ -475,13 +477,23 @@
 }
 
 .lv-send-btn {
-  background: none;
+  flex-shrink: 0;
+  background: transparent;
   border: none;
-  color: var(--primary, #e4405f);
+  color: var(--ls-accent-color, #e4405f);
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  transition: opacity 0.15s;
   padding: 0;
+}
+
+.lv-send-btn:hover {
+  opacity: 0.75;
 }
 
 /* Conteneur pour les boutons d'action (Rejoindre, Cadeau) */

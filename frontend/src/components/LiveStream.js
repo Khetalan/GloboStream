@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiUsers,
   FiX, FiEye, FiSend, FiPlay, FiArrowLeft,
-  FiUserPlus, FiCheck, FiSlash, FiEdit2, FiAlertTriangle
+  FiUserPlus, FiCheck, FiSlash, FiAlertTriangle, FiGlobe
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
@@ -79,7 +79,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   const [joinRequests, setJoinRequests] = useState([]);
   const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
   const [isUiVisible, setIsUiVisible] = useState(true);
-  const [showChatPanel, setShowChatPanel] = useState(false);
+
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesAccepted, setRulesAccepted] = useState(false);
   const [liveDescription, setLiveDescription] = useState('');
@@ -1041,18 +1041,16 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                       <div className="ls-chat-body">
                         <span className="ls-chat-username">{msg.username} :</span>
                         <span className="ls-chat-text">{msg.text}</span>
-                        <div className="ls-chat-icons">
-                          {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
-                          {!msg.isSystem && (
-                            <button
-                              className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                              onClick={() => handleTranslateMsg(msg.id)}
-                              title={t('liveStream.translate')}
-                            >
-                              🌐
-                            </button>
-                          )}
-                        </div>
+                        {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
+                        {!msg.isSystem && (
+                          <button
+                            className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                            onClick={() => handleTranslateMsg(msg.id)}
+                            title={t('liveStream.translate')}
+                          >
+                            <FiGlobe size={11} />
+                          </button>
+                        )}
                       </div>
                       {msg.showTranslation && msg.translatedText && (
                         <div className="ls-translated-text">🌐 {msg.translatedText}</div>
@@ -1066,52 +1064,20 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
               </div>
             )}
 
-            {/* Panel de saisie du chat (slide-up au-dessus de la barre) */}
-            <AnimatePresence>
-              {showChatPanel && (
-                <motion.div
-                  className="ls-chat-panel"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 20, opacity: 0 }}
-                  transition={{ duration: 0.18 }}
-                >
-                  <input
-                    type="text"
-                    className="ls-chat-panel-input"
-                    placeholder={t('liveStream.chatPlaceholder')}
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') { handleSendMessage(); setShowChatPanel(false); }
-                    }}
-                    autoFocus
-                  />
-                  <button
-                    className="ls-chat-panel-send"
-                    onClick={() => { handleSendMessage(); setShowChatPanel(false); }}
-                  >
-                    <FiSend size={16} />
-                  </button>
-                  <button
-                    className="ls-chat-panel-close"
-                    onClick={() => { setChatInput(''); setShowChatPanel(false); }}
-                  >
-                    <FiX size={16} />
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             {/* Barre du bas */}
             <div className="ls-bottom-bar">
-              <button
-                className="ls-write-btn"
-                onClick={() => setShowChatPanel(prev => !prev)}
-              >
-                <FiEdit2 size={16} />
-                <span>{t('liveStream.writeBtn')}</span>
-              </button>
+              <div className="ls-write-btn">
+                <input
+                  type="text"
+                  placeholder={t('liveStream.chatPlaceholder')}
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
+                />
+                <button className="lv-send-btn" onClick={handleSendMessage} title={t('liveStream.send')}>
+                  <FiSend size={16} />
+                </button>
+              </div>
 
               <div className="ls-controls-left">
                 <button className="ls-control-btn requests-btn" onClick={(e) => { e.stopPropagation(); setShowJoinRequestsPanel(true); }}>
@@ -1158,18 +1124,16 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                   <div className="ls-chat-body">
                     <span className="ls-chat-username">{msg.username} :</span>
                     <span className="ls-chat-text">{msg.text}</span>
-                    <div className="ls-chat-icons">
-                      {msg.lang && <span className="ls-lang-badge">{msg.lang.toUpperCase()}</span>}
-                      {!msg.isSystem && (
-                        <button
-                          className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                          onClick={() => handleTranslateMsg(msg.id)}
-                          title={t('liveStream.translate')}
-                        >
-                          🌐
-                        </button>
-                      )}
-                    </div>
+                    {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
+                    {!msg.isSystem && (
+                      <button
+                        className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                        onClick={() => handleTranslateMsg(msg.id)}
+                        title={t('liveStream.translate')}
+                      >
+                        <FiGlobe size={11} />
+                      </button>
+                    )}
                   </div>
                   {msg.showTranslation && msg.translatedText && (
                     <div className="ls-translated-text">🌐 {msg.translatedText}</div>
@@ -1187,39 +1151,18 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       {/* ── Bottom bar permanent (has-chat) ── */}
       {hasDedicatedChat && (
         <div className="ls-bottom-bar">
-          <AnimatePresence>
-            {showChatPanel && (
-              <motion.div
-                className="ls-chat-panel"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                transition={{ duration: 0.18 }}
-              >
-                <input
-                  type="text"
-                  className="ls-chat-panel-input"
-                  placeholder={t('liveStream.chatPlaceholder')}
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') { handleSendMessage(); setShowChatPanel(false); }
-                  }}
-                  autoFocus
-                />
-                <button className="ls-chat-panel-send" onClick={() => { handleSendMessage(); setShowChatPanel(false); }}>
-                  <FiSend size={16} />
-                </button>
-                <button className="ls-chat-panel-close" onClick={() => { setChatInput(''); setShowChatPanel(false); }}>
-                  <FiX size={16} />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <button className="ls-write-btn" onClick={() => setShowChatPanel(prev => !prev)}>
-            <FiEdit2 size={16} />
-            <span>{t('liveStream.writeBtn')}</span>
-          </button>
+          <div className="ls-write-btn">
+            <input
+              type="text"
+              placeholder={t('liveStream.chatPlaceholder')}
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyPress={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
+            />
+            <button className="lv-send-btn" onClick={handleSendMessage} title={t('liveStream.send')}>
+              <FiSend size={16} />
+            </button>
+          </div>
           <div className="ls-controls-left">
             <button className="ls-control-btn requests-btn" onClick={(e) => { e.stopPropagation(); setShowJoinRequestsPanel(true); }}>
               <FiUsers size={20} />

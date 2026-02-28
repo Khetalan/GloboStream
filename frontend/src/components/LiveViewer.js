@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
-  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle
+  FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle, FiGlobe
 } from 'react-icons/fi';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
@@ -629,18 +629,16 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                     <div className="lv-chat-body">
                       <span className="lv-chat-username">{msg.username} :</span>
                       <span className="lv-chat-text">{msg.text}</span>
-                      <div className="lv-chat-icons">
-                        {msg.lang && <span className="lv-lang-badge">{msg.lang.toUpperCase()}</span>}
-                        {!msg.isSystem && (
-                          <button
-                            className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
-                            onClick={() => handleTranslateMsg(msg.id)}
-                            title={t('liveViewer.translate')}
-                          >
-                            🌐
-                          </button>
-                        )}
-                      </div>
+                      {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
+                      {!msg.isSystem && (
+                        <button
+                          className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
+                          onClick={() => handleTranslateMsg(msg.id)}
+                          title={t('liveViewer.translate')}
+                        >
+                          <FiGlobe size={11} />
+                        </button>
+                      )}
                     </div>
                     {msg.showTranslation && msg.translatedText && (
                       <div className="lv-translated-text">🌐 {msg.translatedText}</div>

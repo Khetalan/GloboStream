@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiUsers, FiGift,
   FiEye, FiX, FiPlus, FiMinus, FiSend, FiUserPlus,
-  FiMessageSquare, FiAlertCircle, FiArrowLeft
+  FiGlobe, FiAlertCircle, FiArrowLeft
 } from 'react-icons/fi';
 import '../components/LiveStream.css';
 import '../components/LiveViewer.css';
@@ -22,16 +22,16 @@ const FAKE_PARTICIPANTS = [
 ];
 
 const FAKE_MESSAGES_POOL = [
-  { user: 'Alice',   color: '#e4405f', text: 'Super stream ! 🔥' },
-  { user: 'Bob',     color: '#6366f1', text: 'Bonjour tout le monde !' },
-  { user: 'Charlie', color: '#22c55e', text: 'Quand est-ce qu\'on commence ?' },
-  { user: 'Diana',   color: '#f59e0b', text: 'J\'adore cette ambiance 💜' },
-  { user: 'Evan',    color: '#ef4444', text: 'Première fois ici, c\'est top !' },
-  { user: 'Fiona',   color: '#8b5cf6', text: 'Quelqu\'un peut me rejoindre ?' },
-  { user: 'Alice',   color: '#e4405f', text: 'Les layouts sont trop bien 👌' },
-  { user: 'Bob',     color: '#6366f1', text: 'On est combien en direct ?' },
-  { user: 'George',  color: '#06b6d4', text: 'Test de message long pour voir le retour à la ligne automatique dans le chat' },
-  { user: 'Hannah',  color: '#ec4899', text: 'Hellooo ! 👋' },
+  { user: 'Alice',   color: '#e4405f', text: 'Super stream ! 🔥', country: '🇫🇷' },
+  { user: 'Bob',     color: '#6366f1', text: 'Bonjour tout le monde !', country: '🇬🇧' },
+  { user: 'Charlie', color: '#22c55e', text: 'Quand est-ce qu\'on commence ?', country: '🇪🇸' },
+  { user: 'Diana',   color: '#f59e0b', text: 'J\'adore cette ambiance 💜', country: '🇺🇸' },
+  { user: 'Evan',    color: '#ef4444', text: 'Première fois ici, c\'est top !', country: '🇩🇪' },
+  { user: 'Fiona',   color: '#8b5cf6', text: 'Quelqu\'un peut me rejoindre ?', country: '🇧🇷' },
+  { user: 'Alice',   color: '#e4405f', text: 'Les layouts sont trop bien 👌', country: '🇫🇷' },
+  { user: 'Bob',     color: '#6366f1', text: 'On est combien en direct ?', country: '🇬🇧' },
+  { user: 'George',  color: '#06b6d4', text: 'Test de message long pour voir le retour à la ligne automatique dans le chat', country: '🇯🇵' },
+  { user: 'Hannah',  color: '#ec4899', text: 'Hellooo ! 👋', country: '🇰🇷' },
 ];
 
 /* ── Composant canvas animé (faux flux vidéo) ───────────────── */
@@ -106,12 +106,11 @@ const LiveTestPage = () => {
   const [streamerCamOff, setStreamerCamOff] = useState(false);
   const [streamerMuted, setStreamerMuted] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 'm0', user: 'Alice', color: '#e4405f', text: 'Salut ! C\'est quoi ce test ? 😄', isOwn: false },
-    { id: 'm1', user: 'Bob',   color: '#6366f1', text: 'Bonjour tout le monde 👋', isOwn: false },
+    { id: 'm0', user: 'Alice', color: '#e4405f', text: 'Salut ! C\'est quoi ce test ? 😄', isOwn: false, country: '🇫🇷' },
+    { id: 'm1', user: 'Bob',   color: '#6366f1', text: 'Bonjour tout le monde 👋', isOwn: false, country: '🇬🇧' },
   ]);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [showRequestsPanel, setShowRequestsPanel] = useState(false);
-  const [showChatInput, setShowChatInput] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [viewerCount] = useState(42);
   const [activeStatsTab, setActiveStatsTab] = useState('viewers');
@@ -123,8 +122,8 @@ const LiveTestPage = () => {
   const [viewerCamOff, setViewerCamOff] = useState(false);
   const [viewerMuted, setViewerMuted] = useState(false);
   const [viewerMessages, setViewerMessages] = useState([
-    { id: 'v0', user: 'Streamer Test', color: '#e4405f', text: 'Bienvenue tout le monde !', isSystem: false },
-    { id: 'v1', user: 'Alice', color: '#e4405f', text: 'Super live ! 🔥', isSystem: false },
+    { id: 'v0', user: 'Streamer Test', color: '#e4405f', text: 'Bienvenue tout le monde !', isSystem: false, country: '🇫🇷' },
+    { id: 'v1', user: 'Alice', color: '#e4405f', text: 'Super live ! 🔥', isSystem: false, country: '🇬🇧' },
   ]);
   const viewerChatRef = useRef(null);
 
@@ -211,15 +210,14 @@ const LiveTestPage = () => {
       const msg = pool[Math.floor(Math.random() * pool.length)];
       setMessages(prev => [
         ...prev,
-        { id: `msg-${Date.now()}`, user: msg.user, color: msg.color, text: msg.text, isSystem: false }
+        { id: `msg-${Date.now()}`, user: msg.user, color: msg.color, text: msg.text, isSystem: false, country: msg.country }
       ]);
     } else {
       setMessages(prev => [
         ...prev,
-        { id: `msg-${Date.now()}`, user: 'Streamer Test', color: '#e4405f', text, isSystem: false, isOwn: true }
+        { id: `msg-${Date.now()}`, user: 'Streamer Test', color: '#e4405f', text, isSystem: false, isOwn: true, country: '🇫🇷' }
       ]);
       setChatInput('');
-      setShowChatInput(false);
     }
   }, [chatInput]);
 
@@ -397,6 +395,8 @@ const LiveTestPage = () => {
                                 {msg.user}
                               </span>
                               <span className="ls-chat-text">{msg.text}</span>
+                              {msg.country && <span className="ls-country-badge">{msg.country}</span>}
+                              <button className="ls-translate-btn" title="Traduire"><FiGlobe size={11} /></button>
                             </div>
                           </div>
                         </div>
@@ -405,32 +405,19 @@ const LiveTestPage = () => {
                   </div>
                 )}
 
-              {/* Chat panel input (slide-up) */}
-              {showChatInput && (
-                <div className="ls-chat-panel">
+              {/* Bottom bar */}
+              <div className="ls-bottom-bar">
+                <div className="ls-write-btn">
                   <input
-                    className="ls-chat-panel-input"
-                    placeholder="Écrire un message..."
+                    placeholder="Écrivez"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') sendFakeMessage(); }}
-                    autoFocus
                   />
-                  <button className="ls-chat-panel-send" onClick={sendFakeMessage}>
-                    <FiSend size={14} />
-                  </button>
-                  <button className="ls-chat-panel-close" onClick={() => setShowChatInput(false)}>
-                    <FiX size={14} />
+                  <button className="lv-send-btn" onClick={sendFakeMessage} title="Envoyer">
+                    <FiSend size={16} />
                   </button>
                 </div>
-              )}
-
-              {/* Bottom bar */}
-              <div className="ls-bottom-bar">
-                <button className="ls-write-btn" onClick={() => setShowChatInput(!showChatInput)}>
-                  <FiMessageSquare size={16} />
-                  <span>Écrire...</span>
-                </button>
                 <div className="ls-controls-left">
                   <button className="ls-control-btn requests-btn"
                     onClick={() => { setShowRequestsPanel(!showRequestsPanel); setShowStatsPanel(false); }}
@@ -487,6 +474,8 @@ const LiveTestPage = () => {
                               {msg.user}
                             </span>
                             <span className="ls-chat-text">{msg.text}</span>
+                            {msg.country && <span className="ls-country-badge">{msg.country}</span>}
+                            <button className="ls-translate-btn" title="Traduire"><FiGlobe size={11} /></button>
                           </div>
                         </div>
                       </div>
@@ -499,28 +488,17 @@ const LiveTestPage = () => {
             {/* Bottom bar permanent — uniquement has-chat (3+ participants) */}
             {hasDedicatedChat && (
               <div className="ls-bottom-bar">
-                {showChatInput && (
-                  <div className="ls-chat-panel">
-                    <input
-                      className="ls-chat-panel-input"
-                      placeholder="Écrire un message..."
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') sendFakeMessage(); }}
-                      autoFocus
-                    />
-                    <button className="ls-chat-panel-send" onClick={sendFakeMessage}>
-                      <FiSend size={14} />
-                    </button>
-                    <button className="ls-chat-panel-close" onClick={() => setShowChatInput(false)}>
-                      <FiX size={14} />
-                    </button>
-                  </div>
-                )}
-                <button className="ls-write-btn" onClick={() => setShowChatInput(!showChatInput)}>
-                  <FiMessageSquare size={16} />
-                  <span>Écrire...</span>
-                </button>
+                <div className="ls-write-btn">
+                  <input
+                    placeholder="Écrivez"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') sendFakeMessage(); }}
+                  />
+                  <button className="lv-send-btn" onClick={sendFakeMessage} title="Envoyer">
+                    <FiSend size={16} />
+                  </button>
+                </div>
                 <div className="ls-controls-left">
                   <button className="ls-control-btn requests-btn"
                     onClick={() => { setShowRequestsPanel(!showRequestsPanel); setShowStatsPanel(false); }}
@@ -858,6 +836,8 @@ const LiveTestPage = () => {
                               {msg.user}
                             </span>
                             <span className="lv-chat-text">{msg.text}</span>
+                            {msg.country && <span className="ls-country-badge">{msg.country}</span>}
+                            <button className="ls-translate-btn" title="Traduire"><FiGlobe size={11} /></button>
                           </div>
                         </div>
                       </div>
@@ -867,7 +847,7 @@ const LiveTestPage = () => {
                   {/* Bottom bar */}
                   <div className="lv-bottom-bar">
                     <div className="lv-input-container">
-                      <input placeholder="Écrire un message..." />
+                      <input placeholder="Écrivez" />
                       <button className="lv-send-btn" onClick={sendViewerMessage}>
                         <FiSend size={16} />
                       </button>

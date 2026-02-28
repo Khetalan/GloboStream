@@ -1298,6 +1298,62 @@
   color: #fff;
 }
 
+/* Input inline dans ls-write-btn (mode streamer) */
+.ls-write-btn input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+}
+.ls-write-btn input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Bouton envoi inline (streamer) */
+.lv-send-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--ls-accent-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  transition: opacity 0.15s;
+  padding: 0;
+}
+.lv-send-btn:hover { opacity: 0.75; }
+
+/* Badge pays + bouton traduction dans les bulles de chat */
+.ls-country-badge {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
+}
+.ls-translate-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s;
+  line-height: 1;
+}
+.ls-translate-btn:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 /* Réorganisation des boutons */
 .ls-controls-left {
   order: 2;
