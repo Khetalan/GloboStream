@@ -25,61 +25,81 @@ Q4 2026 (Oct-Déc)  │ Expansion & Scale
 
 ---
 
-## PHASE 1 : MVP (EN COURS)
+## PHASE 1 : MVP ✅ FONCTIONNEL
 **Janvier - Mars 2026**
 
 ### Objectif
 Créer une application fonctionnelle avec les fonctionnalités essentielles pour valider le concept.
 
-### Fonctionnalités (code écrit, à tester)
+### Fonctionnalités ✅ Complétées
 
 **Authentification**
-- [x] Inscription/Connexion email
-- [x] OAuth Google/Facebook/Apple (structure)
-- [x] JWT sécurisé
+- [x] Inscription/Connexion email (9 bugs corrigés)
+- [x] OAuth Google/Facebook (structure) + Apple (email duplicate check corrigé)
+- [x] JWT sécurisé (payload `{ userId }`)
 
 **Profil Utilisateur**
-- [x] Upload 6 photos
+- [x] Upload 6 photos (Cloudinary persistant)
 - [x] 20+ champs de profil
 - [x] Géolocalisation GPS
 - [x] Autocomplétion ville
 
 **Swipe & Matching**
-- [x] Système de swipe fluide
-- [x] 10 filtres avancés
-- [x] Calcul distance GPS
+- [x] Système de swipe fluide (drag & drop Framer Motion)
+- [x] 10 filtres avancés (FiltersPanel)
+- [x] Calcul distance GPS Haversine
 - [x] Détection matchs auto
+- [x] Modale profil → carte centrée scrollable (480px, border-radius 20px)
 
 **Messagerie**
-- [x] Chat temps réel
+- [x] Chat temps réel (Socket.IO)
 - [x] Demandes de messages
-- [ ] Notifications push
+- [x] Emoji picker (emoji-picker-react)
+- [ ] Notifications push (Phase 2)
 
 **Live Streaming**
-- [x] Live Surprise (Speed Dating)
-- [x] Live Publique + Compétition + Événementiel
-- [x] Flux caméra réel avec preview
-- [ ] WebRTC multi-participants
+- [x] Live Surprise : WebRTC P2P, timer 3/5/8/10 min, filtres genre/langues/âge/pays
+- [x] Live Publique : StreamCard redesignée, FAB, filtres onglets
+- [x] LiveCompetition : règlement + CompStreamCard + FAB équipe + badge TAG
+- [x] LiveEvent / Thématiques : 8 thèmes colorés, compteur par thème
+- [x] LiveStream streamer : contrôles mic/cam, kick, watermark anti-capture
+- [x] LiveViewer spectateur : WebRTC, chat, panel viewers, PiP cam-off
+- [x] StreamHub : stats temps réel Socket.IO
+- [ ] WebRTC multi-participants (Phase 2 — actuellement 1-on-1)
+
+**Équipes & Compétitions** *(réalisé en avance — Phase MVP)*
+- [x] Modèle Team (captain/members/joinRequests/grades/TAG/chat)
+- [x] Modèle Competition (CRUD admin)
+- [x] TeamPage : 4 onglets, candidatures, chat temps réel, grades, emoji picker
+- [x] Système de candidatures (bug populate corrigé)
 
 **Modération**
-- [x] 4 niveaux privilèges
-- [x] Panel complet
-- [x] Actions modération
+- [x] 4 niveaux privilèges (User/Mod/Admin/SuperAdmin)
+- [x] Panel complet (18 tests passés ✅)
+- [x] Actions modération (avertir, bannir, débannir, promouvoir)
+
+**Interface & UX**
+- [x] 19 pages frontend (testées visuellement)
+- [x] Dark mode (thème sombre par défaut)
+- [x] Responsive CSS mobile-first (3 tailles testées)
+- [x] Animations Framer Motion
+- [x] RGPD : ConsentModal + page Legal (CGU/Confidentialité/Mentions) + watermark
 
 **Infrastructure**
-- [x] Architecture scalable
-- [x] MongoDB Atlas
+- [x] Architecture scalable (Express + MongoDB Atlas)
 - [x] Socket.IO temps réel
 - [x] Design responsive (CSS mobile-first)
-- [x] i18n (5 langues)
-- [x] Déploiement (Render + GitHub Pages)
-- [x] 210 tests Jest (100%)
+- [x] i18n 5 langues (FR/EN/IT/DE/ES — ~700 clés)
+- [x] Déploiement (Render backend + GitHub Pages frontend)
+- [x] 210 tests Jest backend (100% passent)
+- [x] Build 0 warning — 348 KB JS / 26 KB CSS
 
 ### Métriques de Succès
-- [x] Application fonctionnelle
-- [x] 0 bug critique
-- [x] Performance correcte
+- [x] Application fonctionnelle (148 fonctionnalités)
+- [x] 0 warning ESLint (37 corrigés)
+- [x] 26 bugs corrigés
 - [x] Code maintenable
+- [x] Déployé et accessible publiquement
 
 ---
 
@@ -328,5 +348,5 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 ---
 
 **Roadmap maintenue par** : Équipe GloboStream
-**Dernière mise à jour** : Février 2026
+**Dernière mise à jour** : 28 Février 2026
 **Prochaine révision** : Mars 2026

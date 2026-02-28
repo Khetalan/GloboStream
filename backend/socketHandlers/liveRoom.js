@@ -14,13 +14,35 @@ const liveRooms = new Map();
 function setupLiveRoomHandlers(io, socket) {
 
   // ── Créer un salon ──
-  socket.on('create-live-room', ({ mode, title, tags, userId, displayName, description }) => {
+  socket.on('create-live-room', async ({ mode, title, tags, userId, displayName, description }) => {
     try {
       const roomId = `live-${userId}`;
+
+      // BUG-2 : Nettoyer la room zombie du même streamer avant d'en créer une nouvelle
+      if (liveRooms.has(roomId)) {
+        const oldRoom = liveRooms.get(roomId);
+        io.to(roomId).emit('room-closed');
+        oldRoom.viewers.clear();
+        oldRoom.participants.clear();
+        liveRooms.delete(roomId);
+        console.log(`Room zombie nettoyée : ${roomId}`);
+      }
+
+      // BUG-1 : Récupérer la photo du streamer pour l'afficher dans le chat
+      let streamerPhotoUrl = null;
+      try {
+        const User = require('../models/User');
+        const streamer = await User.findById(userId).select('photos');
+        if (streamer?.photos?.length > 0) {
+          const primary = streamer.photos.find(p => p.isPrimary) || streamer.photos[0];
+          streamerPhotoUrl = primary.url;
+        }
+      } catch (e) { /* non-bloquant */ }
 
       liveRooms.set(roomId, {
         streamerId: userId,
         streamerSocketId: socket.id,
+        streamerPhotoUrl,
         displayName: displayName || 'Streamer',
         mode: mode || 'public',
         title: title || 'Live',
@@ -157,7 +179,16 @@ function setupLiveRoomHandlers(io, socket) {
   });
 
   // ── Signaling WebRTC (streamer ↔ viewer/participant) ──
+  // BUG-3 : Vérifier que sender et destinataire sont dans la même room avant de relayer
   socket.on('live-signal', ({ to, signal }) => {
+    const senderRoomId = socket.liveRoomId;
+    if (!senderRoomId) return;
+    const room = liveRooms.get(senderRoomId);
+    if (!room) return;
+    const toAllowed = room.streamerSocketId === to
+      || room.viewers.has(to)
+      || room.participants.has(to);
+    if (!toAllowed) return;
     io.to(to).emit('live-signal', {
       from: socket.id,
       signal: signal
@@ -185,6 +216,7 @@ function setupLiveRoomHandlers(io, socket) {
         photoUrl = participantInfo.photoUrl;
       } else if (room.streamerSocketId === socket.id) {
         userId = room.streamerId;
+        photoUrl = room.streamerPhotoUrl || null; // BUG-1 fix
       }
     }
 
@@ -204,10 +236,14 @@ function setupLiveRoomHandlers(io, socket) {
       const room = liveRooms.get(roomId);
       if (!room) return;
 
+      // BUG-4 : Récupérer photoUrl depuis la map viewers (déjà peuplée lors du join)
+      const viewerEntry = room.viewers.get(socket.id);
+      const photoUrl = viewerEntry?.photoUrl || null;
+
       // Envoyer la demande au streamer
       io.to(room.streamerSocketId).emit('join-request-received', {
         viewerSocketId: socket.id,
-        viewerInfo: { userId, displayName }
+        viewerInfo: { userId, displayName, photoUrl }
       });
 
       console.log(`Join request from ${userId} for room ${roomId}`);

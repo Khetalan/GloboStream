@@ -1743,3 +1743,106 @@ Suite de la Session 20. Corrections de bugs (T6 header LiveSurprise, T2 PiP cam-
 - `handleKeyPress` était défini mais la JSX utilisait déjà un `onKeyPress` inline équivalent → suppression sans régression.
 
 > **Rappel** : Ce fichier DOIT etre mis a jour a la fin de chaque session Claude Code.
+
+---
+
+## Session 25 — 28 Février 2026
+
+### Ce qui a été fait
+
+#### Fix — Candidature équipe : joinRequests.user non peuplé
+**Fichier** : `backend/routes/teams.js`
+- **Cause** : GET /api/teams/mine ne peuplait pas joinRequests.user → dans le JSX, u._id était undefined → handleAccept(undefined) → POST .../accept/undefined → 404 → toast erreur affiché au capitaine
+- **Fix** : Ajout `await team.populate('joinRequests.user', 'displayName firstName photos isVerified')`
+- **Commit** : `1f19100`
+
+#### Swipe — Modale profil carte centrée + icône message
+**Fichiers** : `frontend/src/pages/Swipe.js`, `frontend/src/pages/Swipe.css`
+- `.action-btn.message` : 52px → 60px, font-size 22px → 26px
+- `.modal-overlay.profile-overlay` : align-items center + padding 16px
+- `.profile-modal` : max-width 480px, border-radius 20px, max-height 85dvh
+- `.modal-photo` : border-radius 20px 20px 0 0, overflow hidden
+- Animation Framer Motion : slide-up → fade+scale (opacity + scale:0.95 + y:10)
+- **Commit** : `52ec3c5`
+
+#### Apple OAuth confirmé corrigé (commit 6ac5c40 déjà en place)
+- Code passport.js vérifié : User.findOne({ email }) avant création OK
+
+#### RAPPORT.md v10.0 + LiveEvent refonte + fichiers MD tous mis à jour
+- Section 10 Equipes & Compétitions, 148 fonctionnalités, 26 bugs, 19 pages
+- docs/MVP.md v3.0 — toutes les cases cochées
+- ROADMAP.md — Phase 1 FONCTIONNEL
+- claude_context.md v1.4 — état actuel mis à jour
+- **Commit** : `3910e78`
+
+### Fichiers modifiés (Session 25)
+- backend/routes/teams.js — populate joinRequests.user
+- frontend/src/pages/Swipe.js + Swipe.css — modale carte + bouton message
+- frontend/src/pages/LiveEvent.js + LiveEvent.css — refonte
+- frontend/src/components/LiveStream.css — ajustements
+- backend/routes/live.js — corrections mineures
+- docs/RAPPORT.md, docs/MVP.md, ROADMAP.md, claude_context.md
+
+### Etat a la fin de la session
+- Build : 0 warning, 0 erreur — 348 KB JS / 26 KB CSS
+- Branche : claude-work — 2 commits en avance (non pushes)
+- todo_claude.md : aucune tache en attente
+- Tests Live interface en cours (prochaine étape)
+
+---
+
+## Session 26 — 28 Février 2026
+
+### Objectif
+Tests complets de l'interface Live (streamer + viewer) + corrections de bugs.
+
+### Audit Live — 8 bugs identifiés et corrigés
+
+#### Bug 1 — Avatar streamer absent dans le chat (liveRoom.js)
+- `create-live-room` rendu async
+- Fetch `User.photos` au démarrage du live
+- `streamerPhotoUrl` stocké dans `liveRooms` Map
+- Utilisé dans `live-chat` pour populer `photoUrl`
+
+#### Bug 2 — Room zombie si streamer reconnecte sans close (liveRoom.js)
+- Cleanup explicite de l'ancienne room avant création
+- Émission `room-closed` aux viewers orphelins
+- `liveRooms.delete(roomId)` avant re-création
+
+#### Bug 3 — Sécurité WebRTC : signal sans vérification d'appartenance (liveRoom.js)
+- Vérification que `socket.id` appartient à la room (`streamer`, `viewers`, ou `participants`)
+- Vérification que la destination `to` appartient aussi à la room
+- `return;` si vérification échoue
+
+#### Bug 4 — `request-join-live` sans photoUrl viewer (liveRoom.js)
+- `viewerEntry = room.viewers.get(socket.id)`
+- `photoUrl = viewerEntry?.photoUrl || null`
+- Inclus dans `join-request-received` → streamer voit l'avatar
+
+#### Bug 5 — Socket listeners s'accumulent côté streamer (LiveStream.js)
+- `socket.removeAllListeners()` avant `socket.disconnect()` au démontage
+
+#### Bug 6 — srcObject non nettoyé dans ParticipantVideo (LiveStream.js)
+- Variable locale `const video = videoRef.current`
+- `video.srcObject = null` dans cleanup useEffect
+- Évite le warning ESLint react-hooks/exhaustive-deps + memory leak
+
+#### Bug 7 — Messages array croît infiniment côté viewer (LiveViewer.js)
+- Cap à 200 messages : `updated.slice(-200)` si dépassement
+
+#### Bug 8 — Socket listeners s'accumulent côté viewer (LiveViewer.js)
+- `socket.removeAllListeners()` avant `socket.disconnect()` au démontage
+
+### Build
+- 0 warning, 0 erreur — 348.13 KB JS / 26.13 KB CSS ✅
+
+### Fichiers modifiés (Session 26)
+- backend/socketHandlers/liveRoom.js — Bugs 1, 2, 3, 4
+- frontend/src/components/LiveStream.js — Bugs 5, 6
+- frontend/src/components/LiveViewer.js — Bugs 7, 8
+- docs/RAPPORT.md — 8 nouvelles lignes bugs table
+
+### Etat a la fin de la session
+- Build : 0 warning, 0 erreur — 348 KB JS / 26 KB CSS
+- Branche : claude-work — commit en attente
+- Prochaine étape : tests visuels WebRTC en situation réelle

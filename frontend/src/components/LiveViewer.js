@@ -209,18 +209,23 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       const info = viewersInfoRef.current.get(username);
       const photoUrl = msgPhotoUrl || info?.photoUrl || null;
       const userId = info?.userId || null;
-      setMessages(prev => [...prev, {
-        id: `msg-${timestamp}-${Math.random()}`,
-        username,
-        text,
-        lang: lang || null,
-        translatedText: null,
-        showTranslation: false,
-        translating: false,
-        isOwn: false,
-        photoUrl,
-        userId
-      }]);
+      // BUG-7 : Limiter à 200 messages pour éviter la croissance mémoire infinie
+      setMessages(prev => {
+        const newMsg = {
+          id: `msg-${timestamp}-${Math.random()}`,
+          username,
+          text,
+          lang: lang || null,
+          translatedText: null,
+          showTranslation: false,
+          translating: false,
+          isOwn: false,
+          photoUrl,
+          userId
+        };
+        const updated = [...prev, newMsg];
+        return updated.length > 200 ? updated.slice(-200) : updated;
+      });
     });
 
     // Un viewer quitte (pour mettre à jour la liste)
@@ -293,6 +298,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         cleanup();
         socket.emit('leave-live-room', { roomId });
       }
+      // BUG-8 : Supprimer tous les listeners avant déconnexion
+      socket.removeAllListeners();
       socket.disconnect();
     };
   }, [roomId, user]); // eslint-disable-line react-hooks/exhaustive-deps

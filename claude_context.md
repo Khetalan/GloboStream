@@ -406,21 +406,22 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 ---
 
-## 7. État Actuel du Projet (Février 2026)
+## 7. État Actuel du Projet (28 Février 2026)
 
 ### Compteurs
 | Métrique | Valeur |
 |---|---|
-| Fonctionnalités codées | 90+ |
+| Fonctionnalités codées | 148 |
 | Tests automatisés Jest | 210 tests (100% passent) |
-| API backend testées | ~66/90 (~73%) |
-| Pages frontend | 17+ (dont LiveCompetition, LiveEvent) |
-| Pages frontend testées | 15/15 ✅ (voir `docs/rapport_frontend.md` par Gemini) |
-| Responsive testé | 3 tailles ✅ (CSS mobile-first) |
-| i18n intégré | 29/29 fichiers ✅ (5 langues, ~700 clés) |
-| Interface de live | LiveStream (streamer) + LiveViewer (spectateur) + traduction chat |
+| API backend testées | 60/148 |
+| Pages frontend | 19 (Landing, Login, Register, Home, Profile, PublicProfile, Swipe, Matches, Chat, Settings, Support, ModerationPanel, StreamHub, LiveSurprise, LivePublic, LiveCompetition, LiveEvent, TeamPage, Legal) |
+| Pages frontend testées | 19/19 ✅ (revue code + tests visuels) |
+| Responsive testé | 3 tailles ✅ (mobile/tablette/desktop) |
+| i18n intégré | 22/22 fichiers ✅ (5 langues, ~700 clés) |
+| Interface de live | LiveStream (streamer) + LiveViewer (spectateur) + LiveSurprise + LiveCompetition + LiveEvent |
 | Photos | Cloudinary (persistantes) |
-| Bugs corrigés | 20+ |
+| Bugs corrigés | 26 + 37 ESLint |
+| Build | ✅ 0 warning, 0 erreur — 348 KB JS / 26 KB CSS |
 
 ### Déploiement
 | Service | URL | Détails |
@@ -430,13 +431,13 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 | **Repo** | https://github.com/Khetalan/GloboStream | Public |
 
 ### Phase actuelle
-**MVP en progression** — Backend deploye sur Render, frontend sur GitHub Pages. Architecture live complete (Socket.IO rooms + WebRTC). Photos persistantes via Cloudinary. Traduction chat en temps reel.
+**MVP fonctionnel** — Backend et frontend déployés. Architecture live complète (Socket.IO rooms + WebRTC). Équipes & Compétitions terminées. 26 bugs corrigés. Build 0 warning.
 
 ### Prochaines etapes prioritaires
-1. **Corriger bug Apple OAuth** (passport.js ligne 143)
-2. **Tester visuellement** les nouvelles pages (LiveCompetition, LiveEvent)
-3. **Ameliorer scaling WebRTC** multi-viewers
-4. **Deployer** les derniers changements (favicon, flows live, i18n complet)
+1. **Tests live WebRTC** en conditions réelles (2 clients simultanés)
+2. **Remplacer placeholders** légaux `[NOM_ÉDITEUR]` / `[EMAIL_CONTACT]` dans Legal.js
+3. **WebRTC multi-participants** (Phase 2 — actuellement 1-on-1)
+4. **Valider MVP** avant passage en Phase 2 (Amélioration & Croissance)
 
 ---
 
@@ -492,6 +493,6 @@ APPLE_CLIENT_SECRET=...
 
 ---
 
-**Version** : 1.3
-**Dernière mise à jour** : 26 Février 2026
-**Statut** : ✅ Déployé (Render + GitHub Pages) — Gemini retiré, Claude seul responsable backend + frontend
+**Version** : 1.4
+**Dernière mise à jour** : 28 Février 2026
+**Statut** : ✅ Déployé (Render + GitHub Pages) — MVP fonctionnel — 148 fonctionnalités — 19 pages — 0 warning

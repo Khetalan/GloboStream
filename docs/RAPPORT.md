@@ -51,6 +51,14 @@
 | Candidature équipe : `joinRequests.user` non peuplé dans GET /mine | `backend/routes/teams.js` | `team.populate('joinRequests.user', ...)` ajouté → `handleAccept()` reçoit un vrai `_id` |
 | Swipe : icône message trop petite vs boutons like/dislike | `frontend/src/pages/Swipe.css` | `.action-btn.message` : 52px → 60px, font-size 22px → 26px |
 | Swipe : modale profil full-width bottom-sheet | `frontend/src/pages/Swipe.css`, `Swipe.js` | Modale → carte centrée max-width 480px, border-radius 20px, animation fade+scale |
+| **Live** : avatar streamer absent dans le chat (photoUrl = null) | `backend/socketHandlers/liveRoom.js` | `create-live-room` async → fetch `User.photos` au démarrage → `streamerPhotoUrl` stocké dans `room` |
+| **Live** : room zombie si streamer reconnecte sans close | `backend/socketHandlers/liveRoom.js` | Cleanup explicite ancienne room + émission `room-closed` avant création |
+| **Live** : sécurité WebRTC — n'importe quel socket peut relayer un signal | `backend/socketHandlers/liveRoom.js` | Vérification appartenance à la room avant relai `live-signal` |
+| **Live** : `request-join-live` sans photoUrl viewer | `backend/socketHandlers/liveRoom.js` | photoUrl récupéré depuis `room.viewers.get(socket.id)` → inclus dans `join-request-received` |
+| **Live** : socket listeners s'accumulent (memory leak) côté streamer | `frontend/src/components/LiveStream.js` | `socket.removeAllListeners()` ajouté avant `socket.disconnect()` au démontage |
+| **Live** : `srcObject` non nettoyé dans `ParticipantVideo` (memory leak) | `frontend/src/components/LiveStream.js` | Variable locale `video = videoRef.current` + `video.srcObject = null` dans cleanup useEffect |
+| **Live** : messages state croît infiniment (memory leak viewer) | `frontend/src/components/LiveViewer.js` | Cap à 200 messages : `updated.length > 200 ? updated.slice(-200) : updated` |
+| **Live** : socket listeners s'accumulent (memory leak) côté viewer | `frontend/src/components/LiveViewer.js` | `socket.removeAllListeners()` ajouté avant `socket.disconnect()` au démontage |
 
 ---
 

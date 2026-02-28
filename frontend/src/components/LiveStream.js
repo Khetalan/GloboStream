@@ -378,6 +378,8 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     }
 
     return () => {
+      // BUG-5 : Supprimer tous les listeners avant déconnexion (évite accumulation)
+      socket.removeAllListeners();
       socket.disconnect();
     };
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -658,9 +660,16 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     const videoRef = useRef(null);
 
     useEffect(() => {
-      if (videoRef.current && stream) {
-        videoRef.current.srcObject = stream;
+      const video = videoRef.current;
+      if (video && stream) {
+        video.srcObject = stream;
       }
+      // BUG-6 : Nettoyer srcObject pour éviter le memory leak (variable locale pour éviter ESLint warning)
+      return () => {
+        if (video) {
+          video.srcObject = null;
+        }
+      };
     }, [stream]);
 
     return (
