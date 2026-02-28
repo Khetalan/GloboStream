@@ -474,7 +474,9 @@
     "muteParticipant": "Mettre en sourdine",
     "unmuteParticipant": "Réactiver le micro",
     "participantMuted": "{{name}} mis en sourdine",
-    "participantUnmuted": "{{name}} réactivé"
+    "participantUnmuted": "{{name}} réactivé",
+    "roomFull": "Salle complète (7/7)",
+    "roomFullTooltip": "Impossible d'accepter plus de 7 participants"
   },
   "liveViewer": {
     "roomNotFound": "Salon introuvable",
@@ -498,7 +500,8 @@
     "joinRejectedKicked": "Vous avez été expulsé de ce live",
     "joinRejectedBlacklisted": "Vous êtes blacklisté de ce live",
     "modPromoted": "Vous êtes maintenant modérateur de ce live",
-    "modDemoted": "Vous n'êtes plus modérateur"
+    "modDemoted": "Vous n'êtes plus modérateur",
+    "otherParticipants": "Autres participants"
   },
   "liveGifts": {
     "panelTitle": "Envoyer un cadeau",

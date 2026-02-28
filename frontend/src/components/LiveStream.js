@@ -420,6 +420,11 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       }]);
     });
 
+    // Salle pleine — TÂCHE-048
+    socket.on('room-full', ({ max }) => {
+      toast(t('liveStream.roomFull'), { icon: '⚠️' });
+    });
+
     // Viewer bloqué (message système dans chat + retrait liste)
     socket.on('viewer-blocked', ({ displayName }) => {
       setViewers(prev => prev.filter(v => v.name !== displayName));
@@ -1410,9 +1415,11 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                   <button
                     className="ls-request-accept-btn"
                     onClick={() => handleAcceptJoinRequest(req)}
+                    disabled={participants.length >= 7}
+                    title={participants.length >= 7 ? t('liveStream.roomFullTooltip') : undefined}
                   >
                     <FiCheck size={16} />
-                    <span>{t('liveStream.accept')}</span>
+                    <span>{participants.length >= 7 ? t('liveStream.roomFull') : t('liveStream.accept')}</span>
                   </button>
                   <button
                     className="ls-request-reject-btn"

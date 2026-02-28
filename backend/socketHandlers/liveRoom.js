@@ -283,11 +283,17 @@ function setupLiveRoomHandlers(io, socket) {
     }
   });
 
-  // ── Accepter une demande de participation ──
+  // ── Accepter une demande de participation ── TÂCHE-048 : limite + P2P mesh
   socket.on('accept-join-request', ({ roomId, viewerSocketId }) => {
     try {
       const room = liveRooms.get(roomId);
       if (!room || room.streamerSocketId !== socket.id) return;
+
+      // Vérification limite participants — TÂCHE-048
+      if (room.participants.size >= room.maxParticipants) {
+        socket.emit('room-full', { max: room.maxParticipants });
+        return;
+      }
 
       // Récupérer les infos du viewer
       const viewerInfo = room.viewers.get(viewerSocketId);
@@ -297,9 +303,25 @@ function setupLiveRoomHandlers(io, socket) {
       room.viewers.delete(viewerSocketId);
       room.participants.set(viewerSocketId, viewerInfo);
 
-      // Notifier le viewer promu
+      // Envoyer la liste des participants existants au nouveau — TÂCHE-048
+      const existingParticipants = [...room.participants.entries()]
+        .filter(([sid]) => sid !== viewerSocketId)
+        .map(([sid, info]) => ({ socketId: sid, ...info }));
+
+      // Notifier le viewer promu (avec liste des participants existants)
       io.to(viewerSocketId).emit('join-accepted', {
-        streamerSocketId: room.streamerSocketId
+        streamerSocketId: room.streamerSocketId,
+        existingParticipants
+      });
+
+      // Notifier chaque participant existant du nouveau venu — TÂCHE-048
+      room.participants.forEach((info, sid) => {
+        if (sid !== viewerSocketId) {
+          io.to(sid).emit('new-participant', {
+            participantSocketId: viewerSocketId,
+            participantInfo: viewerInfo
+          });
+        }
       });
 
       // Notifier toute la room

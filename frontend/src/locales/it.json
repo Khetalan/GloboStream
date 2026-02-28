@@ -476,7 +476,9 @@
     "muteParticipant": "Silenzia",
     "unmuteParticipant": "Riattiva audio",
     "participantMuted": "{{name}} silenziato",
-    "participantUnmuted": "{{name}} riattivato"
+    "participantUnmuted": "{{name}} riattivato",
+    "roomFull": "Sala piena (7/7)",
+    "roomFullTooltip": "Impossibile accettare più di 7 partecipanti"
   },
   "liveViewer": {
     "roomNotFound": "Sala non trovata",
@@ -500,7 +502,8 @@
     "joinRejectedKicked": "Sei stato rimosso da questa diretta",
     "joinRejectedBlacklisted": "Sei nella blacklist di questa diretta",
     "modPromoted": "Sei ora un moderatore di questa diretta",
-    "modDemoted": "Non sei più un moderatore"
+    "modDemoted": "Non sei più un moderatore",
+    "otherParticipants": "Altri partecipanti"
   },
   "liveGifts": {
     "panelTitle": "Invia un regalo",

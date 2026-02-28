@@ -73,6 +73,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [kickConfirmTarget, setKickConfirmTarget] = useState(null);
   const [blockConfirmTarget, setBlockConfirmTarget] = useState(null);
 
+  const [otherParticipants, setOtherParticipants] = useState([]); // TÂCHE-048: grille P2P
+
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
   const socketRef = useRef(null);
@@ -81,6 +83,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const chatRef = useRef(null);
   const hasLeftRef = useRef(false);
   const viewersInfoRef = useRef(new Map()); // displayName → { userId, photoUrl }
+  const participantPeersRef = useRef(new Map()); // socketId → { peer } — TÂCHE-048
+  const streamerSocketIdRef = useRef(null); // TÂCHE-048
 
   // Connecter Socket.IO et rejoindre le salon
   useEffect(() => {
@@ -155,33 +159,36 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       toast.error(message || t('liveViewer.roomNotFound'));
     });
 
-    // Signaling WebRTC (offer du streamer)
+    // Signaling WebRTC — TÂCHE-048 : route selon l'émetteur (streamer vs participant)
     socket.on('live-signal', ({ from, signal }) => {
-      if (peerRef.current) {
-        peerRef.current.signal(signal);
+      // Si non-participant ou signal du streamer → peer principal
+      if (!streamerSocketIdRef.current || from === streamerSocketIdRef.current) {
+        if (peerRef.current) {
+          peerRef.current.signal(signal);
+        } else {
+          // Viewer non-participant : créer un peer non-initiator pour recevoir le stream
+          const peer = new Peer({
+            initiator: false,
+            config: PEER_CONFIG,
+            stream: localStreamRef.current || undefined
+          });
+          peer.on('signal', (answer) => {
+            socket.emit('live-signal', { to: from, signal: answer });
+          });
+          peer.on('stream', (stream) => {
+            setRemoteStream(stream);
+          });
+          peer.on('error', (err) => {
+            console.error('Peer error:', err);
+            peerRef.current = null;
+          });
+          peer.signal(signal);
+          peerRef.current = peer;
+        }
       } else {
-        // Créer un peer non-initiator pour recevoir le stream
-        const peer = new Peer({
-          initiator: false,
-          config: PEER_CONFIG,
-          stream: localStreamRef.current || undefined
-        });
-
-        peer.on('signal', (answer) => {
-          socket.emit('live-signal', { to: from, signal: answer });
-        });
-
-        peer.on('stream', (stream) => {
-          setRemoteStream(stream);
-        });
-
-        peer.on('error', (err) => {
-          console.error('Peer error:', err);
-          peerRef.current = null;
-        });
-
-        peer.signal(signal);
-        peerRef.current = peer;
+        // Signal d'un autre participant — TÂCHE-048
+        const pData = participantPeersRef.current.get(from);
+        if (pData) pData.peer.signal(signal);
       }
     });
 
@@ -239,14 +246,15 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       setViewers(prev => prev.filter(v => v.socketId !== viewerSocketId));
     });
 
-    // Demande de participation acceptée
-    socket.on('join-accepted', ({ streamerSocketId }) => {
+    // Demande de participation acceptée — TÂCHE-048 : + existingParticipants
+    socket.on('join-accepted', ({ streamerSocketId, existingParticipants = [] }) => {
+      streamerSocketIdRef.current = streamerSocketId;
       setJoinRequestStatus('accepted');
       setIsParticipant(true);
       toast.success(t('liveViewer.joinedLive'));
 
-      // Démarrer la caméra pour participer
-      startLocalCamera(streamerSocketId);
+      // Démarrer la caméra pour participer (+ créer peers inter-participants)
+      startLocalCamera(streamerSocketId, existingParticipants);
     });
 
     // Demande refusée (participation streamer) ou accès room refusé (kicked/blacklisted) — TÂCHE-049C
@@ -303,6 +311,40 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         setGiftScore(prev => prev + 1);
       }
       toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
+    });
+
+    // Nouveau participant dans la room — TÂCHE-048 : créer peer non-initiateur vers lui
+    socket.on('new-participant', ({ participantSocketId, participantInfo }) => {
+      if (!localStreamRef.current) return;
+      const peer = new Peer({
+        initiator: false,
+        trickle: true,
+        config: PEER_CONFIG,
+        stream: localStreamRef.current
+      });
+      peer.on('signal', sig => socket.emit('live-signal', { to: participantSocketId, signal: sig }));
+      peer.on('stream', stream => {
+        setOtherParticipants(prev => {
+          if (prev.some(p => p.socketId === participantSocketId)) return prev;
+          return [...prev, { socketId: participantSocketId, stream, name: participantInfo.displayName, photoUrl: participantInfo.photoUrl }];
+        });
+      });
+      peer.on('close', () => {
+        participantPeersRef.current.delete(participantSocketId);
+        setOtherParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
+      });
+      peer.on('error', () => {
+        participantPeersRef.current.delete(participantSocketId);
+        setOtherParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
+      });
+      participantPeersRef.current.set(participantSocketId, { peer });
+    });
+
+    // Participant a quitté — TÂCHE-048
+    socket.on('participant-left', ({ participantSocketId }) => {
+      const pData = participantPeersRef.current.get(participantSocketId);
+      if (pData) { pData.peer.destroy(); participantPeersRef.current.delete(participantSocketId); }
+      setOtherParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
     });
 
     // Promu modérateur live — TÂCHE-049C
@@ -394,8 +436,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     }
   }, [messages]);
 
-  // Démarrer caméra quand promu participant
-  const startLocalCamera = async (streamerSocketId) => {
+  // Démarrer caméra quand promu participant — TÂCHE-048 : + existingParticipants
+  const startLocalCamera = async (streamerSocketId, existingParticipants = []) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720 },
@@ -409,6 +451,32 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         peerRef.current.destroy();
         peerRef.current = null;
       }
+
+      // Créer peers initiateurs vers les participants existants — TÂCHE-048
+      existingParticipants.forEach(({ socketId, displayName, photoUrl }) => {
+        const peerP = new Peer({
+          initiator: true,
+          trickle: true,
+          config: PEER_CONFIG,
+          stream
+        });
+        peerP.on('signal', sig => socketRef.current?.emit('live-signal', { to: socketId, signal: sig }));
+        peerP.on('stream', remStr => {
+          setOtherParticipants(prev => {
+            if (prev.some(p => p.socketId === socketId)) return prev;
+            return [...prev, { socketId, stream: remStr, name: displayName, photoUrl }];
+          });
+        });
+        peerP.on('close', () => {
+          participantPeersRef.current.delete(socketId);
+          setOtherParticipants(prev => prev.filter(p => p.socketId !== socketId));
+        });
+        peerP.on('error', () => {
+          participantPeersRef.current.delete(socketId);
+          setOtherParticipants(prev => prev.filter(p => p.socketId !== socketId));
+        });
+        participantPeersRef.current.set(socketId, { peer: peerP });
+      });
 
       // Créer un nouveau peer bidirectionnel — participant est l'initiateur
       // (caméra prête ici, on peut envoyer l'offre immédiatement au streamer)
@@ -444,6 +512,11 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       peerRef.current.destroy();
       peerRef.current = null;
     }
+    // Détruire tous les peers participants — TÂCHE-048
+    for (const { peer } of participantPeersRef.current.values()) {
+      peer.destroy();
+    }
+    participantPeersRef.current.clear();
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach(track => track.stop());
       localStreamRef.current = null;
@@ -603,6 +676,22 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     }
   }, [t]);
 
+  // Composant vignette participant — TÂCHE-048
+  const ParticipantThumb = ({ stream, name }) => {
+    const videoRef = useRef(null);
+    useEffect(() => {
+      const video = videoRef.current;
+      if (video && stream) video.srcObject = stream;
+      return () => { if (video) video.srcObject = null; };
+    }, [stream]);
+    return (
+      <div className="lv-participant-thumb">
+        <video ref={videoRef} autoPlay playsInline className="lv-thumb-video" />
+        <span className="lv-participant-thumb-name">{name}</span>
+      </div>
+    );
+  };
+
   // ── Erreur room ──
   if (roomError) {
     return (
@@ -663,6 +752,15 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
         )}
 
       </div>
+
+      {/* Grille des autres participants — TÂCHE-048 */}
+      {isParticipant && otherParticipants.length > 0 && (
+        <div className="lv-participants-grid">
+          {otherParticipants.map(p => (
+            <ParticipantThumb key={p.socketId} stream={p.stream} name={p.name} />
+          ))}
+        </div>
+      )}
 
       {/* Preview locale si participant — en dehors de lv-video-section pour z-index correct */}
       {isParticipant && localStream && (

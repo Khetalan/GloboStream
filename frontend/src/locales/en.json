@@ -476,7 +476,9 @@
     "muteParticipant": "Mute",
     "unmuteParticipant": "Unmute",
     "participantMuted": "{{name}} muted",
-    "participantUnmuted": "{{name}} unmuted"
+    "participantUnmuted": "{{name}} unmuted",
+    "roomFull": "Room full (7/7)",
+    "roomFullTooltip": "Cannot accept more than 7 participants"
   },
   "liveViewer": {
     "roomNotFound": "Room not found",
@@ -500,7 +502,8 @@
     "joinRejectedKicked": "You were removed from this live",
     "joinRejectedBlacklisted": "You are blacklisted from this live",
     "modPromoted": "You are now a moderator of this live",
-    "modDemoted": "You are no longer a moderator"
+    "modDemoted": "You are no longer a moderator",
+    "otherParticipants": "Other participants"
   },
   "liveGifts": {
     "panelTitle": "Send a gift",
