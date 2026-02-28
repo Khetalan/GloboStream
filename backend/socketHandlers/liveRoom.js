@@ -55,6 +55,9 @@ function setupLiveRoomHandlers(io, socket) {
         description: description || '',
         viewers: new Map(),
         participants: new Map(),
+        moderators: new Map(),   // socketId → { userId, displayName } — Modérateurs live (promus par le streamer)
+        kickedViewers: new Set(), // Set<userId> — Bannis temporaires jusqu'à la fin du live
+        maxParticipants: 7,
         createdAt: Date.now()
       });
 
@@ -81,7 +84,13 @@ function setupLiveRoomHandlers(io, socket) {
         return;
       }
 
-      // Récupérer la photo + pays de profil pour l'afficher dans le chat live (TÂCHE-017 prep)
+      // Vérifier le kick temporaire (mémoire, expire à la fin du live)
+      if (room.kickedViewers.has(userId)) {
+        socket.emit('join-rejected', { reason: 'kicked' });
+        return;
+      }
+
+      // Récupérer la photo + pays de profil + vérifier la blacklist live
       let photoUrl = null;
       let countryFlag = null;
       try {
@@ -92,6 +101,16 @@ function setupLiveRoomHandlers(io, socket) {
           photoUrl = primary.url;
         }
         countryFlag = getCountryFlag(user?.location?.country);
+
+        // Vérifier la blacklist permanente du streamer
+        const streamer = await User.findById(room.streamerId).select('liveBlacklist');
+        if (streamer && streamer.liveBlacklist) {
+          const blacklisted = streamer.liveBlacklist.some(id => id.toString() === userId);
+          if (blacklisted) {
+            socket.emit('join-rejected', { reason: 'blacklisted' });
+            return;
+          }
+        }
       } catch (e) { /* non-bloquant */ }
 
       room.viewers.set(socket.id, { userId, displayName, photoUrl, countryFlag });
@@ -313,15 +332,129 @@ function setupLiveRoomHandlers(io, socket) {
     }
   });
 
-  // ── Expulser un spectateur ou participant (streamer uniquement) — TÂCHE-024
+  // ── Expulser un spectateur ou participant (streamer uniquement) — TÂCHE-024 (legacy)
   socket.on('streamer-kick-participant', ({ roomId, participantSocketId }) => {
     try {
       const room = liveRooms.get(roomId);
       if (!room || room.streamerSocketId !== socket.id) return;
-      // Le participant reçoit l'événement, émet leave-live-room et gère le cleanup
       io.to(participantSocketId).emit('kicked-from-room', {});
     } catch (error) {
       console.error('Error kicking participant:', error);
+    }
+  });
+
+  // ── Promouvoir un viewer en Modérateur Live (streamer uniquement) ──
+  socket.on('promote-to-live-mod', ({ roomId, targetSocketId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room || room.streamerSocketId !== socket.id) return;
+
+      const viewerInfo = room.viewers.get(targetSocketId) || room.participants.get(targetSocketId);
+      if (!viewerInfo) return;
+
+      room.moderators.set(targetSocketId, { userId: viewerInfo.userId, displayName: viewerInfo.displayName });
+
+      // Notifier toute la room
+      io.to(roomId).emit('live-mod-promoted', {
+        targetSocketId,
+        userId:      viewerInfo.userId,
+        displayName: viewerInfo.displayName
+      });
+      console.log(`Live mod promoted: ${viewerInfo.displayName} in room ${roomId}`);
+    } catch (error) {
+      console.error('Error promoting mod:', error);
+    }
+  });
+
+  // ── Rétrograder un Modérateur Live (streamer uniquement) ──
+  socket.on('demote-live-mod', ({ roomId, targetSocketId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room || room.streamerSocketId !== socket.id) return;
+
+      const modInfo = room.moderators.get(targetSocketId);
+      if (!modInfo) return;
+
+      room.moderators.delete(targetSocketId);
+      io.to(roomId).emit('live-mod-demoted', { targetSocketId, displayName: modInfo.displayName });
+    } catch (error) {
+      console.error('Error demoting mod:', error);
+    }
+  });
+
+  // ── Kick temporaire (streamer ou modérateur live) ──
+  // Interdit de rejoindre ce live jusqu'à sa fermeture
+  socket.on('kick-from-live', ({ roomId, targetSocketId, targetUserId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room) return;
+
+      const isStreamer = room.streamerSocketId === socket.id;
+      const isMod     = room.moderators.has(socket.id);
+      if (!isStreamer && !isMod) return;
+
+      // Récupérer le displayName de la cible
+      const targetInfo = room.viewers.get(targetSocketId) || room.participants.get(targetSocketId);
+      const displayName = targetInfo?.displayName || 'Utilisateur';
+
+      // Enregistrer le kick temporaire
+      if (targetUserId) room.kickedViewers.add(targetUserId);
+
+      // Retirer le modérateur live si c'était un mod
+      room.moderators.delete(targetSocketId);
+
+      // Notifier la cible
+      io.to(targetSocketId).emit('kicked-from-room', { reason: 'kick' });
+
+      // Message système dans le chat
+      io.to(roomId).emit('viewer-kicked', { displayName });
+
+      console.log(`Kick: ${displayName} kicked from room ${roomId}`);
+    } catch (error) {
+      console.error('Error kick-from-live:', error);
+    }
+  });
+
+  // ── Blocage global depuis un live (streamer ou modérateur) ──
+  socket.on('block-user-from-live', async ({ roomId, targetSocketId, targetUserId }) => {
+    try {
+      const room = liveRooms.get(roomId);
+      if (!room) return;
+
+      const isStreamer = room.streamerSocketId === socket.id;
+      const isMod     = room.moderators.has(socket.id);
+      if (!isStreamer && !isMod) return;
+
+      const targetInfo = room.viewers.get(targetSocketId) || room.participants.get(targetSocketId);
+      const displayName = targetInfo?.displayName || 'Utilisateur';
+
+      const User = require('../models/User');
+
+      if (isStreamer) {
+        // Streamer : blocage personnel + blacklist live permanente
+        await User.findByIdAndUpdate(room.streamerId, {
+          $addToSet: { blockedUsers: targetUserId, liveBlacklist: targetUserId }
+        });
+      } else {
+        // Modérateur : blocage personnel uniquement (pour lui-même)
+        const modInfo = room.moderators.get(socket.id);
+        if (modInfo) {
+          await User.findByIdAndUpdate(modInfo.userId, {
+            $addToSet: { blockedUsers: targetUserId }
+          });
+        }
+      }
+
+      // Kick immédiat de la room + inscription au kickedViewers
+      if (targetUserId) room.kickedViewers.add(targetUserId);
+      room.moderators.delete(targetSocketId);
+
+      io.to(targetSocketId).emit('kicked-from-room', { reason: 'block' });
+      io.to(roomId).emit('viewer-blocked', { displayName });
+
+      console.log(`Block: ${displayName} (${targetUserId}) blocked from room ${roomId}`);
+    } catch (error) {
+      console.error('Error block-user-from-live:', error);
     }
   });
 
@@ -432,9 +565,10 @@ function handleLeaveRoom(io, socket, roomId) {
     const participantInfo = room.participants.get(socket.id);
     const leavingInfo     = viewerInfo || participantInfo;
 
-    // Retirer des viewers ou participants
+    // Retirer des viewers, participants et éventuellement des modérateurs live
     room.viewers.delete(socket.id);
     room.participants.delete(socket.id);
+    room.moderators.delete(socket.id);
 
     socket.leave(roomId);
     socket.liveRoomId = null;
