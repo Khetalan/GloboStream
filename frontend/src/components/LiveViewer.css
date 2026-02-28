@@ -7,7 +7,9 @@
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  max-width: 768px;
   width: 100%;
+  margin: 0 auto;
   overflow: hidden;
   position: relative;
   background-color: #000;
@@ -17,7 +19,7 @@
   box-shadow: none;
 }
 
-/* Centrage Mobile First sur Desktop */
+/* Centrage Mobile First sur Desktop — max-width 768px centré */
 
 
 /* ── Écrans erreur / chargement ───────────────────────────── */
@@ -282,14 +284,16 @@
 }
 
 .lv-chat-message {
-  padding: 2px 0;
+  padding: 6px 10px;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 6px;
   line-height: 1.4;
   border-bottom: none;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  margin-bottom: 4px;
 }
 
 /* Avatar photo dans le chat — TÂCHE-017 */
@@ -448,14 +452,17 @@
 }
 .ls-translate-btn:hover { color: #60a5fa; }
 
-/* Style pour les messages de "spectateur a rejoint" */
+/* Style pour les messages de "spectateur a rejoint" — pas de bulle */
 .lv-chat-message.is-join-event {
   text-align: center;
   font-style: italic;
   color: rgba(255, 255, 255, 0.6);
-  padding: 8px 0;
-  border-bottom: none; /* Pas de bordure pour les messages système */
+  padding: 4px 0;
+  border-bottom: none;
   font-size: 0.85rem;
+  background: transparent;
+  border-radius: 0;
+  margin-bottom: 0;
 }
 .lv-chat-message.is-join-event .lv-chat-body {
     justify-content: center;

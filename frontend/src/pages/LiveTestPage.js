@@ -226,7 +226,7 @@ const LiveTestPage = () => {
     const msg = pool[Math.floor(Math.random() * pool.length)];
     setViewerMessages(prev => [
       ...prev,
-      { id: `vm-${Date.now()}`, user: msg.user, color: msg.color, text: msg.text, isSystem: false }
+      { id: `vm-${Date.now()}`, user: msg.user, color: msg.color, text: msg.text, isSystem: false, country: msg.country }
     ]);
   }, []);
 
@@ -938,16 +938,28 @@ const LiveTestPage = () => {
                 </>
               )}
 
+              <div className="ltp-section-title">Participants (Layout)</div>
+              <div className="ltp-viewer-state">
+                Layout actuel : <strong>layout-{Math.min(1 + activeParticipants.length, 8)}</strong>
+                {' '}({activeParticipants.length} participant{activeParticipants.length !== 1 ? 's' : ''})
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                <button className="ltp-btn" style={{ flex: 1 }}
+                  onClick={addParticipant}
+                  disabled={activeParticipants.length >= 7}>
+                  <FiPlus size={12} /> Ajouter
+                </button>
+                <button className="ltp-btn danger" style={{ flex: 1 }}
+                  onClick={removeParticipant}
+                  disabled={activeParticipants.length === 0}>
+                  <FiMinus size={12} /> Retirer
+                </button>
+              </div>
+
               <div className="ltp-section-title">Chat</div>
               <button className="ltp-btn" onClick={sendViewerMessage}>
                 Message aléatoire
               </button>
-
-              <div className="ltp-section-title" style={{ marginTop: 8 }}>Note</div>
-              <div className="ltp-info">
-                Le PiP apparaît sous la top bar (corrigé).
-                <br />La bottom bar s'adapte : Join → Mic+Cam.
-              </div>
 
               <button className="ltp-btn danger" style={{ marginTop: 8 }}
                 onClick={() => { setShowViewerModal(false); setViewerIsParticipant(false); }}>
