@@ -426,18 +426,19 @@ const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
   const primaryPhoto = profile.photos?.find(p => p.isPrimary) || profile.photos?.[0];
 
   return (
-    <motion.div 
-      className="modal-overlay"
+    <motion.div
+      className="modal-overlay profile-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
-      <motion.div 
+      <motion.div
         className="profile-modal"
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button className="modal-close" onClick={onClose}>
