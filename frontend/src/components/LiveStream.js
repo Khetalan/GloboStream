@@ -924,10 +924,31 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   return (
     <div className={`ls-container ls-mode-${mode}${hasDedicatedChat ? ' has-chat' : ''}`}>
 
-      {/* ── Zone vidéo (grille + overlay UI) ── */}
+      {/* ── Header permanent — uniquement pour has-chat (3+ participants) ── */}
+      {hasDedicatedChat && (
+        <div className="ls-top-bar">
+          <div className="ls-streamer-info">
+            <span className="ls-streamer-name">{streamerName}</span>
+            <div className="ls-stats-indicators">
+              <div className="ls-live-badge"><span>LIVE</span></div>
+              <button className="ls-viewer-count" onClick={(e) => { e.stopPropagation(); setShowStatsPanel(true); }}>
+                <FiEye /> {formatNumber(viewerCount)}
+              </button>
+              <button className="ls-gift-count" onClick={(e) => { e.stopPropagation(); setActiveStatsTab('gifts'); setShowStatsPanel(true); }}>
+                <FiGift /> {formatNumber(giftCount)}
+              </button>
+            </div>
+          </div>
+          <button className="ls-top-quit" onClick={(e) => { e.stopPropagation(); handleQuit(); }} title={t('liveStream.stopStream')}>
+            <FiX size={22} />
+          </button>
+        </div>
+      )}
+
+      {/* ── Zone vidéo (grille + overlay UI layouts 1-2) ── */}
       <div className="ls-video-zone">
-        {/* Grille vidéo en arrière-plan, cliquable pour toggle l'UI */}
-        <div className={`ls-video-grid ${layoutClass}`} onClick={toggleUiVisibility}>
+        {/* Grille vidéo — cliquable pour toggle UI uniquement en layouts 1-2 */}
+        <div className={`ls-video-grid ${layoutClass}`} onClick={hasDedicatedChat ? undefined : toggleUiVisibility}>
           <div className="ls-video-card streamer">
             <div className="ls-video-placeholder">
               {/* Le <video> est toujours monté pour éviter de perdre le stream. On le cache simplement. */}
@@ -965,7 +986,8 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
           {renderParticipantCards()}
         </div>
 
-      {/* Interface Utilisateur (Overlay sur ls-video-zone) */}
+      {/* Interface Utilisateur (Overlay sur ls-video-zone) — uniquement layouts 1-2 */}
+      {!hasDedicatedChat && (
       <AnimatePresence>
         {isUiVisible && (
           <motion.div
@@ -1114,6 +1136,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
           </motion.div>
         )}
       </AnimatePresence>
+      )}
       </div>{/* fin ls-video-zone */}
 
       {/* ── Zone chat dédiée (3+ participants) ── */}
@@ -1157,6 +1180,62 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Bottom bar permanent (has-chat) ── */}
+      {hasDedicatedChat && (
+        <div className="ls-bottom-bar">
+          <AnimatePresence>
+            {showChatPanel && (
+              <motion.div
+                className="ls-chat-panel"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <input
+                  type="text"
+                  className="ls-chat-panel-input"
+                  placeholder={t('liveStream.chatPlaceholder')}
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') { handleSendMessage(); setShowChatPanel(false); }
+                  }}
+                  autoFocus
+                />
+                <button className="ls-chat-panel-send" onClick={() => { handleSendMessage(); setShowChatPanel(false); }}>
+                  <FiSend size={16} />
+                </button>
+                <button className="ls-chat-panel-close" onClick={() => { setChatInput(''); setShowChatPanel(false); }}>
+                  <FiX size={16} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button className="ls-write-btn" onClick={() => setShowChatPanel(prev => !prev)}>
+            <FiEdit2 size={16} />
+            <span>{t('liveStream.writeBtn')}</span>
+          </button>
+          <div className="ls-controls-left">
+            <button className="ls-control-btn requests-btn" onClick={(e) => { e.stopPropagation(); setShowJoinRequestsPanel(true); }}>
+              <FiUsers size={20} />
+              {joinRequests.length > 0 && <span className="ls-requests-count">{joinRequests.length}</span>}
+            </button>
+            <button className="ls-control-btn gift-btn" onClick={(e) => { e.stopPropagation(); setShowGiftPanel(true); }}>
+              <FiGift size={20} />
+            </button>
+          </div>
+          <div className="ls-controls-right">
+            <button className={`ls-control-btn ${isMuted ? 'off' : ''}`} onClick={toggleMic}>
+              {isMuted ? <FiMicOff size={20} /> : <FiMic size={20} />}
+            </button>
+            <button className={`ls-control-btn ${isCamOff ? 'off' : ''}`} onClick={toggleCam}>
+              {isCamOff ? <FiVideoOff size={20} /> : <FiVideo size={20} />}
+            </button>
           </div>
         </div>
       )}

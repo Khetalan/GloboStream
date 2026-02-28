@@ -405,9 +405,17 @@
   overflow: hidden;
 }
 
-/* Quand chat dédié actif (3+ participants) : zone vidéo prend 58% */
+/* Quand chat dédié actif (3+ participants) : zone vidéo prend 48% + bordure mode */
 .ls-container.has-chat .ls-video-zone {
-  flex: 0 0 58%;
+  flex: 0 0 48%;
+  border: 2px solid var(--ls-accent-color);
+  box-sizing: border-box;
+}
+
+/* Bordure streamer uniquement en mode has-chat */
+.ls-container.has-chat .ls-video-card.streamer {
+  outline: 2px solid var(--ls-accent-color);
+  outline-offset: -2px;
 }
 
 /* ── Zone chat dédiée (flex child, 3+ participants) ──────── */
@@ -433,6 +441,50 @@
   padding: 0 !important;
   mask-image: none !important;
   -webkit-mask-image: none !important;
+}
+
+/* ── Header permanent (has-chat) — au-dessus de la zone vidéo ── */
+.ls-container.has-chat > .ls-top-bar {
+  flex-shrink: 0;
+  z-index: 20;
+  background: #111111;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.ls-container.has-chat > .ls-top-bar .ls-streamer-info {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.ls-container.has-chat > .ls-top-bar .ls-top-quit {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Footer permanent (has-chat) — en dessous de la zone chat ── */
+.ls-container.has-chat > .ls-bottom-bar {
+  flex-shrink: 0;
+  background: #0d0d0d;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  position: relative;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+/* Chat panel slide-up au-dessus du footer */
+.ls-container.has-chat > .ls-bottom-bar .ls-chat-panel {
+  position: absolute;
+  bottom: 100%;
+  left: 12px;
+  right: 12px;
+  margin-bottom: 8px;
 }
 
 /* ── Grille vidéo — Arrière-plan plein écran ─────────────── */
@@ -482,12 +534,14 @@
 
 .ls-video-grid.layout-2 .ls-video-card:nth-child(2) {
   position: absolute;
-  top: 12px;
+  top: 72px;
   right: 12px;
-  width: 100px;
-  height: 140px;
+  width: 112px;
+  height: 158px;
   z-index: 10;
   border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .ls-video-grid.layout-3 {
@@ -1815,9 +1869,9 @@
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 360px) {
   .ls-video-grid.layout-2 .ls-video-card:nth-child(2) {
-    width: 80px;
-    height: 110px;
-    top: 6px;
+    width: 88px;
+    height: 124px;
+    top: 62px;
     right: 6px;
   }
 }
@@ -1825,13 +1879,13 @@
 /* ── Tablette (481px+) ─────────────────────────────────────── */
 @media (min-width: 481px) {
   .ls-video-grid.layout-2 .ls-video-card:nth-child(2) {
-    width: 120px;
-    height: 168px;
-    top: 14px;
+    width: 128px;
+    height: 180px;
+    top: 76px;
     right: 14px;
   }
   .ls-container.has-chat .ls-video-zone {
-    flex: 0 0 62%;
+    flex: 0 0 52%;
   }
   .ls-bottom-bar {
     padding-left: 1.5rem;

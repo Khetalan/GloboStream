@@ -296,6 +296,29 @@ const LiveTestPage = () => {
         <div className="ltp-streamer-panel">
           <div className={`ls-container ls-mode-public${hasDedicatedChat ? ' has-chat' : ''}`} style={{ maxWidth: '480px', height: '100%' }}>
 
+            {/* ── Header permanent — uniquement has-chat (3+ participants) ── */}
+            {hasDedicatedChat && (
+              <div className="ls-top-bar">
+                <div className="ls-streamer-info">
+                  <span className="ls-streamer-name">Streamer Test</span>
+                  <div className="ls-stats-indicators">
+                    <div className="ls-live-badge">LIVE</div>
+                    <button className="ls-viewer-count"
+                      onClick={() => { setShowStatsPanel(!showStatsPanel); setShowRequestsPanel(false); }}>
+                      <FiEye size={11} /> {viewerCount}
+                    </button>
+                    <button className="ls-gift-count"
+                      onClick={() => { setShowStatsPanel(!showStatsPanel); setActiveStatsTab('gifts'); setShowRequestsPanel(false); }}>
+                      <FiGift size={11} /> 7
+                    </button>
+                  </div>
+                </div>
+                <button className="ls-top-quit" onClick={() => navigate(-1)} title="Quitter">
+                  <FiX size={22} />
+                </button>
+              </div>
+            )}
+
             {/* ── Zone vidéo ── */}
             <div className="ls-video-zone">
 
@@ -326,7 +349,8 @@ const LiveTestPage = () => {
                 {renderParticipantCards(activeParticipants)}
               </div>
 
-              {/* UI Overlay sur la zone vidéo */}
+              {/* UI Overlay — uniquement pour layouts 1-2 (tap to hide) */}
+              {!hasDedicatedChat && (
               <div className="ls-ui-overlay" onClick={(e) => e.stopPropagation()}>
 
                 {/* Top bar */}
@@ -434,8 +458,9 @@ const LiveTestPage = () => {
                     {streamerCamOff ? <FiVideoOff size={18} /> : <FiVideo size={18} />}
                   </button>
                 </div>
-              </div>{/* /ls-bottom-bar */}
-              </div>{/* /ls-ui-overlay */}
+              </div>
+              </div>
+              )}
             </div>{/* /ls-video-zone */}
 
             {/* Zone chat dédiée (3+ participants) */}
@@ -467,6 +492,61 @@ const LiveTestPage = () => {
                       </div>
                     )
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom bar permanent — uniquement has-chat (3+ participants) */}
+            {hasDedicatedChat && (
+              <div className="ls-bottom-bar">
+                {showChatInput && (
+                  <div className="ls-chat-panel">
+                    <input
+                      className="ls-chat-panel-input"
+                      placeholder="Écrire un message..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') sendFakeMessage(); }}
+                      autoFocus
+                    />
+                    <button className="ls-chat-panel-send" onClick={sendFakeMessage}>
+                      <FiSend size={14} />
+                    </button>
+                    <button className="ls-chat-panel-close" onClick={() => setShowChatInput(false)}>
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                )}
+                <button className="ls-write-btn" onClick={() => setShowChatInput(!showChatInput)}>
+                  <FiMessageSquare size={16} />
+                  <span>Écrire...</span>
+                </button>
+                <div className="ls-controls-left">
+                  <button className="ls-control-btn requests-btn"
+                    onClick={() => { setShowRequestsPanel(!showRequestsPanel); setShowStatsPanel(false); }}
+                    title="Demandes de participation">
+                    <FiUsers size={18} />
+                    {activeParticipants.length < 8 && (
+                      <span className="ls-requests-count">1</span>
+                    )}
+                  </button>
+                  <button className="ls-control-btn gift-btn" title="Cadeaux">
+                    <FiGift size={18} />
+                  </button>
+                </div>
+                <div className="ls-controls-right">
+                  <button
+                    className={`ls-control-btn${streamerMuted ? ' off' : ''}`}
+                    onClick={() => setStreamerMuted(!streamerMuted)}
+                    title="Micro">
+                    {streamerMuted ? <FiMicOff size={18} /> : <FiMic size={18} />}
+                  </button>
+                  <button
+                    className={`ls-control-btn${streamerCamOff ? ' off' : ''}`}
+                    onClick={() => setStreamerCamOff(!streamerCamOff)}
+                    title="Caméra">
+                    {streamerCamOff ? <FiVideoOff size={18} /> : <FiVideo size={18} />}
+                  </button>
                 </div>
               </div>
             )}
