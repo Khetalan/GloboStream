@@ -285,7 +285,7 @@
   padding: 2px 0;
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   line-height: 1.4;
   border-bottom: none;
@@ -414,6 +414,41 @@
   padding-left: 8px;
   margin-left: 4px;
 }
+
+/* Wrapper droite — badge pays + globe (partagé avec LiveStream) */
+.ls-chat-meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  align-self: center;
+}
+
+.ls-country-badge {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ls-translate-btn {
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s;
+  line-height: 1;
+}
+.ls-translate-btn:hover { color: #60a5fa; }
 
 /* Style pour les messages de "spectateur a rejoint" */
 .lv-chat-message.is-join-event {

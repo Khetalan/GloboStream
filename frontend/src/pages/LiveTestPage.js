@@ -395,9 +395,11 @@ const LiveTestPage = () => {
                                 {msg.user}
                               </span>
                               <span className="ls-chat-text">{msg.text}</span>
-                              {msg.country && <span className="ls-country-badge">{msg.country}</span>}
-                              <button className="ls-translate-btn" title="Traduire"><FiGlobe size={11} /></button>
                             </div>
+                          </div>
+                          <div className="ls-chat-meta">
+                            {msg.country && <span className="ls-country-badge">{msg.country}</span>}
+                            <button className="ls-translate-btn" title="Traduire"><FiGlobe size={14} /></button>
                           </div>
                         </div>
                       )
@@ -474,9 +476,11 @@ const LiveTestPage = () => {
                               {msg.user}
                             </span>
                             <span className="ls-chat-text">{msg.text}</span>
-                            {msg.country && <span className="ls-country-badge">{msg.country}</span>}
-                            <button className="ls-translate-btn" title="Traduire"><FiGlobe size={11} /></button>
                           </div>
+                        </div>
+                        <div className="ls-chat-meta">
+                          {msg.country && <span className="ls-country-badge">{msg.country}</span>}
+                          <button className="ls-translate-btn" title="Traduire"><FiGlobe size={14} /></button>
                         </div>
                       </div>
                     )
@@ -836,9 +840,11 @@ const LiveTestPage = () => {
                               {msg.user}
                             </span>
                             <span className="lv-chat-text">{msg.text}</span>
-                            {msg.country && <span className="ls-country-badge">{msg.country}</span>}
-                            <button className="ls-translate-btn" title="Traduire"><FiGlobe size={11} /></button>
                           </div>
+                        </div>
+                        <div className="ls-chat-meta">
+                          {msg.country && <span className="ls-country-badge">{msg.country}</span>}
+                          <button className="ls-translate-btn" title="Traduire"><FiGlobe size={14} /></button>
                         </div>
                       </div>
                     ))}

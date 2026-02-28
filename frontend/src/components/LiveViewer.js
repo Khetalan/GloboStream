@@ -629,16 +629,6 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                     <div className="lv-chat-body">
                       <span className="lv-chat-username">{msg.username} :</span>
                       <span className="lv-chat-text">{msg.text}</span>
-                      {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
-                      {!msg.isSystem && (
-                        <button
-                          className={`lv-translate-btn ${msg.translating ? 'loading' : ''}`}
-                          onClick={() => handleTranslateMsg(msg.id)}
-                          title={t('liveViewer.translate')}
-                        >
-                          <FiGlobe size={11} />
-                        </button>
-                      )}
                     </div>
                     {msg.showTranslation && msg.translatedText && (
                       <div className="lv-translated-text">🌐 {msg.translatedText}</div>
@@ -647,6 +637,18 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                       <div className="lv-translated-text">✓ {t('liveViewer.alreadyYourLang')}</div>
                     )}
                   </div>
+                  {!msg.isSystem && (
+                    <div className="ls-chat-meta">
+                      {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
+                      <button
+                        className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                        onClick={() => handleTranslateMsg(msg.id)}
+                        title={t('liveViewer.translate')}
+                      >
+                        <FiGlobe size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

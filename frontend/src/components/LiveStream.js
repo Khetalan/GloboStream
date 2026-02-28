@@ -1041,16 +1041,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                       <div className="ls-chat-body">
                         <span className="ls-chat-username">{msg.username} :</span>
                         <span className="ls-chat-text">{msg.text}</span>
-                        {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
-                        {!msg.isSystem && (
-                          <button
-                            className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                            onClick={() => handleTranslateMsg(msg.id)}
-                            title={t('liveStream.translate')}
-                          >
-                            <FiGlobe size={11} />
-                          </button>
-                        )}
                       </div>
                       {msg.showTranslation && msg.translatedText && (
                         <div className="ls-translated-text">🌐 {msg.translatedText}</div>
@@ -1059,6 +1049,18 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                         <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
                       )}
                     </div>
+                    {!msg.isSystem && (
+                      <div className="ls-chat-meta">
+                        {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
+                        <button
+                          className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                          onClick={() => handleTranslateMsg(msg.id)}
+                          title={t('liveStream.translate')}
+                        >
+                          <FiGlobe size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1124,16 +1126,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                   <div className="ls-chat-body">
                     <span className="ls-chat-username">{msg.username} :</span>
                     <span className="ls-chat-text">{msg.text}</span>
-                    {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
-                    {!msg.isSystem && (
-                      <button
-                        className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
-                        onClick={() => handleTranslateMsg(msg.id)}
-                        title={t('liveStream.translate')}
-                      >
-                        <FiGlobe size={11} />
-                      </button>
-                    )}
                   </div>
                   {msg.showTranslation && msg.translatedText && (
                     <div className="ls-translated-text">🌐 {msg.translatedText}</div>
@@ -1142,6 +1134,18 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                     <div className="ls-translated-text">✓ {t('liveStream.alreadyYourLang')}</div>
                   )}
                 </div>
+                {!msg.isSystem && (
+                  <div className="ls-chat-meta">
+                    {msg.countryFlag && <span className="ls-country-badge">{msg.countryFlag}</span>}
+                    <button
+                      className={`ls-translate-btn ${msg.translating ? 'loading' : ''}`}
+                      onClick={() => handleTranslateMsg(msg.id)}
+                      title={t('liveStream.translate')}
+                    >
+                      <FiGlobe size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
