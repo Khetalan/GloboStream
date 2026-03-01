@@ -8,6 +8,16 @@
 
 ## En attente
 
+#### TÂCHE-051 — Audit Live : Corrections complètes LiveViewer + liveRoom (BUG-1 à BUG-6)
+- **Statut** : EN COURS — Session 30
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Plan** : `Rapport de test/Plan-Live-Verification-01.md`
+- **Fichiers** :
+  - `backend/socketHandlers/liveRoom.js` — BUG-2 (participants-updated au join), BUG-5 (reject-join-request permission + reason)
+  - `frontend/src/components/LiveViewer.js` — BUG-1 (panelParticipants + stats panel 2 sections), BUG-3 (liveModerators Set + badges MOD), BUG-4 (kicked-from-room reason)
+  - `frontend/src/components/LiveViewer.css` — BUG-6 (.lv-participant-badge + .lv-panel-section-header)
+  - `frontend/src/locales/*.json` (5 fichiers) — clé `liveViewer.blockedFromRoom`
+
 ---
 
 ## Terminées (session en cours)

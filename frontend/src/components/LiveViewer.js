@@ -74,6 +74,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [blockConfirmTarget, setBlockConfirmTarget] = useState(null);
 
   const [otherParticipants, setOtherParticipants] = useState([]); // TÂCHE-048: grille P2P
+  const [panelParticipants, setPanelParticipants] = useState([]); // BUG-1: participants dans stats panel
+  const [liveModerators, setLiveModerators]       = useState(new Set()); // BUG-3: Set<socketId> des mods actifs
 
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -137,6 +139,16 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       viewersList.forEach(v => {
         viewersInfoRef.current.set(v.displayName, { userId: v.userId, photoUrl: v.photoUrl });
       });
+    });
+
+    // BUG-1 fix : Participants en live → stats panel
+    socket.on('participants-updated', ({ participants: pList }) => {
+      setPanelParticipants((pList || []).map(p => ({
+        socketId: p.socketId,
+        userId:   p.userId,
+        name:     p.displayName,
+        photoUrl: p.photoUrl || null
+      })));
     });
 
     // Message "X a quitté le live" — TÂCHE-018
@@ -296,9 +308,13 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       setIsStreamerMuted(isMuted);
     });
 
-    // Expulsé du live par le streamer — TÂCHE-024
-    socket.on('kicked-from-room', () => {
-      toast.error(t('liveViewer.kickedFromRoom'));
+    // Expulsé du live par le streamer ou un modérateur — BUG-4 fix : lecture du reason
+    socket.on('kicked-from-room', ({ reason } = {}) => {
+      if (reason === 'block') {
+        toast.error(t('liveViewer.blockedFromRoom'), { duration: 5000 });
+      } else {
+        toast.error(t('liveViewer.kickedFromRoom'), { duration: 3000 });
+      }
       hasLeftRef.current = true;
       cleanup();
       socket.emit('leave-live-room', { roomId });
@@ -347,8 +363,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       setOtherParticipants(prev => prev.filter(p => p.socketId !== participantSocketId));
     });
 
-    // Promu modérateur live — TÂCHE-049C
-    socket.on('live-mod-promoted', ({ targetSocketId, displayName }) => {
+    // Promu modérateur live — BUG-3 fix : alimenter liveModerators Set
+    socket.on('live-mod-promoted', ({ targetSocketId }) => {
+      setLiveModerators(prev => new Set([...prev, targetSocketId]));
       if (targetSocketId === socket.id) {
         setIsLiveMod(true);
         toast.success(t('liveViewer.modPromoted'));
@@ -358,8 +375,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       ));
     });
 
-    // Rétrogradé modérateur live — TÂCHE-049C
+    // Rétrogradé modérateur live — BUG-3 fix : retirer du liveModerators Set
     socket.on('live-mod-demoted', ({ targetSocketId }) => {
+      setLiveModerators(prev => { const s = new Set(prev); s.delete(targetSocketId); return s; });
       if (targetSocketId === socket.id) {
         setIsLiveMod(false);
         toast(t('liveViewer.modDemoted'));
@@ -1071,6 +1089,76 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
               <span className="lv-stats-total-value">{viewerCount}</span>
             </div>
             <div className="lv-stats-list">
+
+              {/* BUG-1 fix : Section Participants en live */}
+              {panelParticipants.length > 0 && (
+                <div className="lv-panel-section-header">
+                  {t('liveStream.liveParticipants')} ({panelParticipants.length})
+                </div>
+              )}
+              {panelParticipants.map(p => (
+                <div
+                  key={`pp-${p.socketId}`}
+                  className={`lv-stats-row ${p.userId ? 'clickable' : ''}`}
+                  onClick={() => p.userId && navigate(`/profile/${p.userId}`)}
+                >
+                  <div className="lv-stats-row-left">
+                    {p.photoUrl ? (
+                      <img src={getPhotoUrl(p.photoUrl)} alt={p.name} className="lv-stats-avatar-img" />
+                    ) : (
+                      <div className="lv-stats-avatar">{(p.name || '?').charAt(0)}</div>
+                    )}
+                    <div>
+                      <div className="lv-stats-name">
+                        {p.name}
+                        <span className="lv-participant-badge">LIVE</span>
+                        {liveModerators.has(p.socketId) && (
+                          <span className="lv-mod-badge">{t('liveStream.modBadge')}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {p.userId && p.userId !== user?._id?.toString() && (
+                    <div className="lv-viewer-actions" onClick={e => e.stopPropagation()}>
+                      {isLiveMod ? (
+                        <>
+                          <button
+                            className="lv-action-btn kick-btn"
+                            onClick={() => handleKickFromLive(p)}
+                            title={t('liveStream.kickParticipant')}
+                          >
+                            <FiUserX size={13} />
+                          </button>
+                          <button
+                            className="lv-action-btn block-btn"
+                            onClick={() => handleBlockFromLive(p)}
+                            title={t('liveStream.blockViewer')}
+                          >
+                            <FiSlash size={13} />
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="lv-action-btn block-self-btn"
+                          onClick={() => handleBlockUser(p)}
+                          title={t('liveStream.blockSelf')}
+                        >
+                          <FiSlash size={13} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Séparateur si les deux sections coexistent */}
+              {viewers.length > 0 && panelParticipants.length > 0 && (
+                <div className="lv-panel-section-header">
+                  {t('liveStream.viewers')} ({viewers.length})
+                </div>
+              )}
+
+              {/* Section Viewers purs */}
               {viewers.map((v, i) => (
                 <div
                   key={i}
@@ -1086,7 +1174,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                     <div>
                       <div className="lv-stats-name">
                         {v.name}
-                        {v.isMod && <span className="lv-mod-badge">{t('liveStream.modBadge')}</span>}
+                        {/* BUG-3 fix : badge MOD via liveModerators Set */}
+                        {(liveModerators.has(v.socketId) || v.isMod) && (
+                          <span className="lv-mod-badge">{t('liveStream.modBadge')}</span>
+                        )}
                       </div>
                       <div className="lv-stats-badge">{v.joinedAt}</div>
                     </div>

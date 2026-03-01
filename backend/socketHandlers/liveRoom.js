@@ -143,6 +143,12 @@ function setupLiveRoomHandlers(io, socket) {
         viewers:     viewersList
       });
 
+      // BUG-2 fix : Envoyer la liste des participants existants au nouveau viewer
+      socket.emit('participants-updated', {
+        participantCount: room.participants.size,
+        participants:     buildParticipantsList(room)
+      });
+
       broadcastStreamStats(io);
       console.log(`Viewer ${userId} joined room ${roomId}. Viewers: ${room.viewers.size}`);
     } catch (error) {
@@ -350,7 +356,10 @@ function setupLiveRoomHandlers(io, socket) {
 
   // ── Refuser une demande de participation ──
   socket.on('reject-join-request', ({ viewerSocketId }) => {
-    io.to(viewerSocketId).emit('join-rejected');
+    // BUG-5 fix : Vérifier que c'est bien le streamer qui refuse + envoyer la reason
+    const room = liveRooms.get(socket.liveRoomId);
+    if (!room || room.streamerSocketId !== socket.id) return;
+    io.to(viewerSocketId).emit('join-rejected', { reason: 'rejected' });
   });
 
   // ── Couper/rétablir le micro d'un participant (streamer uniquement) ── TÂCHE-002

@@ -1204,6 +1204,33 @@
   letter-spacing: 0.05em;
 }
 
+/* BUG-6 fix : Badge LIVE pour participants dans stats panel */
+.lv-participant-badge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 5px;
+  vertical-align: middle;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* BUG-6 fix : Séparateur de section dans le stats panel */
+.lv-panel-section-header {
+  padding: 6px 12px 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
+}
+
 /* ── Modals confirmation kick/block (TÂCHE-049C) ───────────── */
 .lv-confirm-overlay {
   position: absolute;

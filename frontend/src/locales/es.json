@@ -500,6 +500,7 @@
     "requestRejected": "Solicitud rechazada",
     "liveEnded": "El directo ha terminado",
     "kickedFromRoom": "Has sido expulsado del directo por el streamer",
+    "blockedFromRoom": "Has sido bloqueado y expulsado de este directo",
     "joinRejectedKicked": "Fuiste expulsado de este directo",
     "joinRejectedBlacklisted": "Estás en la lista negra de este directo",
     "modPromoted": "Ahora eres moderador de este directo",

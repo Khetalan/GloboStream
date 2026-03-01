@@ -498,6 +498,7 @@
     "requestRejected": "Demande refusée",
     "liveEnded": "Le live est terminé",
     "kickedFromRoom": "Vous avez été expulsé du live par le streamer",
+    "blockedFromRoom": "Vous avez été bloqué et expulsé de ce live",
     "joinRejectedKicked": "Vous avez été expulsé de ce live",
     "joinRejectedBlacklisted": "Vous êtes blacklisté de ce live",
     "modPromoted": "Vous êtes maintenant modérateur de ce live",

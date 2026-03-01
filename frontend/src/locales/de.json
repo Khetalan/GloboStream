@@ -500,6 +500,7 @@
     "requestRejected": "Anfrage abgelehnt",
     "liveEnded": "Der Livestream ist beendet",
     "kickedFromRoom": "Du wurdest vom Streamer aus dem Live entfernt",
+    "blockedFromRoom": "Sie wurden blockiert und aus dem Live entfernt",
     "joinRejectedKicked": "Du wurdest aus diesem Live entfernt",
     "joinRejectedBlacklisted": "Du bist in der Blacklist dieses Lives",
     "modPromoted": "Du bist jetzt Moderator dieses Lives",
