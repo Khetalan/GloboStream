@@ -549,6 +549,111 @@
 
 ---
 
+---
+
+## PHASE 5 — RGPD & SÉCURITÉ OAUTH ✅ RÉALISÉ (Mars 2026)
+
+### Fix OAuth bypass âge
+- [x] Champ `profileComplete` sur User (`default: true` email/phone, `false` nouveaux OAuth)
+- [x] Suppression `birthDate: new Date(2000, 0, 1)` hardcodée dans Passport.js (Google/Facebook/Apple)
+- [x] Ajout `profileComplete: false` pour nouveaux comptes OAuth
+- [x] Redirect OAuth corrigé : `FRONTEND_URL/auth/callback` → `FRONTEND_URL/#/auth/callback` (HashRouter)
+- [x] Route `POST /api/users/complete-profile` : validate birthDate (≥18 ans), gender, set profileComplete: true
+- [x] `OAuthCallback.js` : page réception token OAuth → localStorage → refreshUser → /home
+- [x] `CompleteProfile.js` : formulaire post-OAuth (birthDate + genre, check âge client)
+- [x] `PrivateRoute` : redirect `/complete-profile` si user.profileComplete === false
+- [x] Routes `/auth/callback` (public) + `/complete-profile` (AuthedRoute)
+- [x] i18n 5 locales : clés `completeProfile.*`
+
+### Infrastructure RGPD
+- [x] Render : datacenter France ✅
+- [x] Cloudinary : region Europe (France) ✅
+- [x] MongoDB Atlas : cluster eu-west-3 Paris ✅
+- [x] GitHub Pages : CDN global, légal ok (données utilisateurs non stockées) ✅
+
+---
+
+## PHASE 6 — MONÉTISATION ✅ RÉALISÉ (Mars 2026)
+
+> Réalisé en avance sur la roadmap initiale (prévue Q3 2026).
+
+### Architecture Monétaire
+
+**Deux monnaies virtuelles :**
+- **Pièces** : achetées par les viewers via Stripe Checkout, dépensées pour envoyer des cadeaux en live
+- **Globos** : reçus par les streamers (1 gift point = 1 Globo), convertibles en Pièces ou retirés en argent réel
+
+### Backend
+
+**Nouveaux modèles :**
+- [x] `GiftCatalog` : catalogue cadeaux DB (`id`, `name`, `emoji`, `coinCost`, `globoValue`, `isActive`, `order`)
+- [x] `Transaction` : audit log complet (`type`, `coinsAmount`, `globosAmount`, `giftId`, `stripeSessionId`, `status`)
+- [x] `User.wallet` : subdocument (`coins`, `globos`, `totalCoinsSpent`, `totalGlobosEarned`)
+
+**Nouvelles routes :**
+- [x] `GET /api/gifts/catalog` — liste cadeaux actifs (public)
+- [x] `GET/POST/PATCH/DELETE /api/gifts/catalog` — CRUD admin (privilegeLevel ≥2)
+- [x] `GET /api/wallet/me` — balance + 10 dernières transactions
+- [x] `GET /api/wallet/history` — historique paginé
+- [x] `POST /api/wallet/convert` — Globos → Pièces (min 10, rate `GLOBO_TO_COIN_RATE`)
+- [x] `POST /api/wallet/withdraw` — retrait PayPal (min `MIN_WITHDRAWAL_GLOBOS`, status pending)
+- [x] `GET/PATCH /api/wallet/withdrawals` — admin gestion retraits
+- [x] `GET /api/payments/packs` — liste packs (public)
+- [x] `POST /api/payments/checkout` — crée session Stripe Checkout
+- [x] `POST /api/payments/webhook` — webhook Stripe (raw body, signature, idempotent)
+
+**Socket.IO `send-gift` reécrit async :**
+- [x] Lookup `GiftCatalog.findOne({ id, isActive: true })`
+- [x] Check `sender.wallet.coins >= gift.coinCost`, sinon `gift-insufficient-funds { required, current }`
+- [x] `$inc` atomique : `-coinCost` sender, `+globoValue` streamer
+- [x] `Transaction.create([gift_send, gift_receive])`
+- [x] `socket.emit('wallet-updated', { coins: newBalance })`
+
+**Utilitaires :**
+- [x] `backend/utils/coinPacks.js` : 4 packs (Starter/Populaire/Pro/Méga), Price IDs depuis env vars
+- [x] `backend/scripts/seedGifts.js` : seed 6 cadeaux initiaux (rose🌹/bisou💋/coeur❤️/étoile⭐/couronne👑/diamant💎)
+
+### Frontend
+
+**LiveViewer.js / LiveStream.js :**
+- [x] Retrait `GIFTS` hardcodé
+- [x] Load catalog via `GET /api/gifts/catalog` au mount
+- [x] Balance pièces affichée dans panel cadeaux
+- [x] Socket handlers : `gift-insufficient-funds` (toast), `wallet-updated` (setCoins)
+- [x] Boutons désactivés si `userCoins < gift.coinCost`
+- [x] `handleSendGift` envoie uniquement `{ roomId, giftId, recipientSocketId }`
+
+**WalletPage (nouvelle page) :**
+- [x] Onglet "Acheter" : 4 packs, bouton → Stripe Checkout redirect
+- [x] Onglet "Convertir" : input Globos → preview Pièces → POST convert
+- [x] Onglet "Retirer" : input Globos + email PayPal → POST withdraw
+- [x] Onglet "Historique" : liste paginée transactions avec types et statuts
+
+**ModerationPanel — onglet Cadeaux (admin ≥2) :**
+- [x] Table : emoji / nom / coinCost / globoValue / order / actif / actions
+- [x] Formulaire création inline (id, name, emoji, coinCost, globoValue, order)
+- [x] Edition inline (PATCH)
+- [x] Toggle actif/inactif
+
+### Variables d'environnement requises
+```
+STRIPE_SECRET_KEY          # sk_test_xxx (dev) / sk_live_xxx (prod)
+STRIPE_WEBHOOK_SECRET      # whsec_xxx
+STRIPE_PRICE_STARTER       # price_xxx
+STRIPE_PRICE_POPULAR       # price_xxx
+STRIPE_PRICE_PRO           # price_xxx
+STRIPE_PRICE_MEGA          # price_xxx
+GLOBO_TO_COIN_RATE         # défaut: 1
+MIN_WITHDRAWAL_GLOBOS      # défaut: 1000
+```
+
+### Action manuelle requise
+```bash
+node backend/scripts/seedGifts.js   # À exécuter une fois pour peupler GiftCatalog
+```
+
+---
+
 **Document maintenu par** : Équipe Produit GloboStream
-**Dernière mise à jour** : Février 2026
-**Statut** : Aucune fonctionnalité testée
+**Dernière mise à jour** : 2 Mars 2026
+**Statut** : Phase 5 + Phase 6 implémentées — Tests live WebRTC en attente (2 clients)

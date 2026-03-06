@@ -4,6 +4,8 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('../models/User');
+const Message = require('../models/Message');
+const MessageRequest = require('../models/MessageRequest');
 const authMiddleware = require('../middleware/auth');
 
 // Configuration Cloudinary
@@ -81,6 +83,38 @@ router.get('/views', async (req, res) => {
   } catch (error) {
     console.error('Erreur vues profil:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des vues' });
+  }
+});
+
+// ── RGPD — Export données utilisateur ────────────────────────────────────────
+
+// GET /api/users/export-data — Télécharger toutes les données personnelles (droit RGPD)
+router.get('/export-data', async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    const messages = await Message.find({
+      $or: [{ sender: req.user._id }, { recipient: req.user._id }]
+    }).sort({ createdAt: -1 }).limit(500);
+
+    const messageRequests = await MessageRequest.find({
+      $or: [{ sender: req.user._id }, { recipient: req.user._id }]
+    });
+
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      profile: user.toObject(),
+      messages: messages.map(m => m.toObject()),
+      messageRequests: messageRequests.map(m => m.toObject())
+    };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="globostream-data.json"');
+    res.json(exportData);
+  } catch (error) {
+    console.error('Erreur export données:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'export des données' });
   }
 });
 
@@ -400,6 +434,118 @@ router.get('/blocked', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Erreur liste bloqués:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération' });
+  }
+});
+
+// ── RGPD — Consentement ───────────────────────────────────────────────────────
+
+// POST /api/users/consent — Enregistrer le consentement RGPD en base de données
+router.post('/consent', async (req, res) => {
+  try {
+    const { version } = req.body;
+    // Récupérer l'IP réelle (derrière un proxy éventuel)
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip || req.connection.remoteAddress;
+
+    await User.findByIdAndUpdate(req.user._id, {
+      consent: {
+        accepted: true,
+        version: version || '1.0',
+        date: new Date(),
+        ip
+      }
+    });
+
+    res.json({ success: true, message: 'Consentement enregistré' });
+  } catch (error) {
+    console.error('Erreur enregistrement consentement:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'enregistrement du consentement' });
+  }
+});
+
+// ── RGPD — Suppression de compte ─────────────────────────────────────────────
+
+// DELETE /api/users/delete-account — Suppression complète et irréversible du compte
+router.delete('/delete-account', async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    // Vérification mot de passe (sauf si compte OAuth uniquement)
+    if (user.password) {
+      if (!password) return res.status(400).json({ error: 'Mot de passe requis pour confirmer la suppression' });
+      const isValid = await user.comparePassword(password);
+      if (!isValid) return res.status(401).json({ error: 'Mot de passe incorrect' });
+    }
+
+    // 1. Supprimer toutes les photos Cloudinary
+    for (const photo of user.photos) {
+      if (photo.url && photo.url.includes('cloudinary')) {
+        const urlParts = photo.url.split('/');
+        const folderAndFile = urlParts.slice(-2).join('/');
+        const publicId = folderAndFile.replace(/\.[^/.]+$/, '');
+        await cloudinary.uploader.destroy(publicId).catch(err => {
+          console.error('Cloudinary delete error:', err);
+        });
+      }
+    }
+
+    // 2. Supprimer les messages envoyés et reçus
+    await Message.deleteMany({
+      $or: [{ sender: req.user._id }, { recipient: req.user._id }]
+    });
+
+    // 3. Supprimer les demandes de message
+    await MessageRequest.deleteMany({
+      $or: [{ sender: req.user._id }, { recipient: req.user._id }]
+    });
+
+    // 4. Retirer l'utilisateur des listes de matches des autres
+    await User.updateMany(
+      { 'matches.user': req.user._id },
+      { $pull: { matches: { user: req.user._id } } }
+    );
+
+    // 5. Supprimer le compte
+    await User.findByIdAndDelete(req.user._id);
+
+    res.json({ success: true, message: 'Compte supprimé définitivement' });
+  } catch (error) {
+    console.error('Erreur suppression compte:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression du compte' });
+  }
+});
+
+// POST /api/users/complete-profile — Finaliser le profil OAuth (birthDate + gender)
+router.post('/complete-profile', authMiddleware, async (req, res) => {
+  try {
+    const { birthDate, gender } = req.body;
+
+    if (!birthDate) {
+      return res.status(400).json({ error: 'La date de naissance est requise' });
+    }
+
+    const validGenders = ['homme', 'femme', 'autre'];
+    if (!gender || !validGenders.includes(gender)) {
+      return res.status(400).json({ error: 'Le genre est requis' });
+    }
+
+    // Vérification âge minimum 18 ans
+    const age = Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
+    if (age < 18) {
+      return res.status(403).json({ error: 'underage' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { birthDate, gender, profileComplete: true },
+      { new: true }
+    );
+
+    res.json({ success: true, user: user.getPublicProfile() });
+  } catch (error) {
+    console.error('Erreur complete-profile:', error);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour du profil' });
   }
 });
 

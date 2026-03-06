@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { 
-  FiArrowLeft, FiHeart, FiMail, FiMapPin, FiUser, 
+import {
+  FiArrowLeft, FiHeart, FiMail, FiMapPin, FiUser,
   FiCheck,
-  FiHexagon
+  FiHexagon,
+  FiFlag
 } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import Navigation from '../components/Navigation';
+import ReportModal from '../components/ReportModal';
 import { getPhotoUrl } from '../utils/photoUrl';
 import './Profile.css';
 
@@ -18,6 +20,7 @@ const PublicProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [showReportModal, setShowReportModal] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -89,7 +92,17 @@ const PublicProfile = () => {
           <FiArrowLeft />
         </button>
         <h2>{t('publicProfile.title')}</h2>
-        <Navigation />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            className="btn btn-ghost"
+            onClick={() => setShowReportModal(true)}
+            title={t('report.reportProfile')}
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <FiFlag size={18} />
+          </button>
+          <Navigation />
+        </div>
       </div>
 
       <div className="public-profile-content">
@@ -275,6 +288,13 @@ const PublicProfile = () => {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        targetUserId={userId}
+        type="profile"
+      />
     </div>
   );
 };

@@ -549,43 +549,30 @@ Ce document liste toutes les fonctionnalités **à développer après le MVP** p
 
 ---
 
-### 2.5 CADEAUX VIRTUELS
+### 2.5 CADEAUX VIRTUELS ✅ PARTIELLEMENT IMPLÉMENTÉ (Phase 6 — Mars 2026)
 
 **Objectif** : Monétisation + Expression
 
-#### Boutique Cadeaux
-- [ ] 20 cadeaux virtuels :
-  - 🌹 Rose (1€ = 10 crédits)
-  - 💐 Bouquet (2€ = 20 crédits)
-  - 🍫 Chocolats (2€ = 20 crédits)
-  - ☕ Café (3€ = 30 crédits)
-  - 🍕 Pizza (5€ = 50 crédits)
-  - 🍾 Champagne (5€ = 50 crédits)
-  - 🎁 Cadeau Mystère (8€ = 80 crédits)
-  - 💎 Diamant (10€ = 100 crédits)
-  - 👑 Couronne (15€ = 150 crédits)
-  - 🌟 Étoile (20€ = 200 crédits)
-- [ ] Animations 3D cadeaux
-- [ ] Packs crédits :
-  - Starter : 50 crédits = 5€
-  - Popular : 120 crédits = 10€ (20% bonus)
-  - Premium : 300 crédits = 20€ (50% bonus)
-  - VIP : 1000 crédits = 50€ (100% bonus)
+#### Système Pièces / Globos ✅ Implémenté
+- [x] Deux monnaies virtuelles : Pièces (viewers) + Globos (streamers)
+- [x] Wallet utilisateur (coins, globos, historique total)
+- [x] Catalogue de 6 cadeaux en DB (administrable via ModerationPanel)
+- [x] 4 packs de pièces achetables via Stripe Checkout (Starter/Populaire/Pro/Méga)
+- [x] Envoi cadeaux en live déduit des pièces du viewer
+- [x] Streamers crédités en Globos (1 gift point = 1 Globo)
+- [x] Conversion Globos → Pièces (taux configurable `GLOBO_TO_COIN_RATE`)
+- [x] Demande de retrait PayPal (seuil configurable `MIN_WITHDRAWAL_GLOBOS`)
+- [x] Gestion retraits côté admin (validé/rejeté)
+- [x] WalletPage : 4 onglets (Acheter / Convertir / Retirer / Historique)
+- [x] Transactions auditées (Transaction model)
 
-#### Envoi Cadeau
-- [ ] Depuis profil ou chat
-- [ ] Sélection cadeau
-- [ ] Message accompagnement (optionnel, 100 chars)
-- [ ] Animation envoi
-- [ ] Notification réception instantanée
-- [ ] Affichage cadeau chat
-- [ ] Historique cadeaux envoyés/reçus
-
-#### Récompenses Créateur
-- [ ] Streamers reçoivent cadeaux lives
-- [ ] Conversion crédits → euros (50%)
-- [ ] Seuil minimum retrait : 50€
-- [ ] Paiement mensuel PayPal/Stripe
+#### Reste à implémenter (backlog)
+- [ ] 20 cadeaux variés (actuellement 6 — extensible via ModerationPanel)
+- [ ] Animations 3D cadeaux lors de l'envoi en live
+- [ ] Envoi cadeau depuis profil ou chat (actuellement live uniquement)
+- [ ] Message accompagnement lors de l'envoi (optionnel, 100 chars)
+- [ ] Historique cadeaux dédié sur le profil public
+- [ ] Notifications push réception cadeau
 
 ---
 
@@ -813,7 +800,8 @@ Ce document liste toutes les fonctionnalités **à développer après le MVP** p
 
 ---
 
-**Document** : Post-MVP Globostream  
-**Version** : 1.0  
-**Dernière mise à jour** : Février 2026  
+**Document** : Post-MVP Globostream
+**Version** : 2.0
+**Dernière mise à jour** : 2 Mars 2026
+**Modifications** : Section 2.5 (Cadeaux Virtuels) partiellement implémentée en Phase 6
 **Prochaine révision** : Après feedback utilisateurs MVP

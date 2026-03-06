@@ -1933,3 +1933,88 @@ Correctifs interface Live Viewer (bulle chat, mobile-first, contrôles test page
 - Commits : `dd24a7c`, `f5846f4`
 - Statut : ✅ Terminé
 
+---
+
+## Session 30 — 28 Février 2026
+
+### Objectif
+Audit Live complet — corrections BUG-1 à BUG-6 (TÂCHE-051).
+
+### Changements réalisés
+
+- `backend/socketHandlers/liveRoom.js` : BUG-2 — émission `participants-updated` au join initial ; BUG-5 — check permission `reject-join-request` (streamer seul) + raison transmise au rejeté
+- `frontend/src/components/LiveViewer.js` : BUG-1 — `panelParticipants` depuis `room-info` + stats panel 2 sections ; BUG-3 — `liveModerators` Set initialisé, badges MOD ; BUG-4 — toast différencié kick/block
+- `frontend/src/components/LiveViewer.css` : BUG-6 — `.lv-participant-badge` + `.lv-panel-section-header`
+- 5 locales : clé `liveViewer.blockedFromRoom`
+- Commit : `5c33cdd`
+
+### Résultat
+- Badges MOD, kick/block panel mods, toast différencié — Statut : ✅ Terminé
+
+---
+
+## Session 31 — 2 Mars 2026
+
+### Objectif
+Phase 5 — Infrastructure RGPD audit + Fix OAuth bypass âge (TÂCHE-072).
+
+### Changements réalisés
+
+- **Audit hébergement RGPD** : Render (France ✅), Cloudinary (France ✅), MongoDB Atlas eu-west-3 Paris ✅, GitHub Pages (CDN, légal ok)
+- `backend/models/User.js` : champ `profileComplete: { type: Boolean, default: true }`
+- `backend/config/passport.js` : suppression `birthDate` hardcodée + `gender: 'autre'` des 3 stratégies OAuth → `profileComplete: false` pour nouveaux comptes
+- `backend/routes/auth.js` : redirect OAuth corrigé `/#/auth/callback` (HashRouter)
+- `backend/routes/users.js` : route `POST /api/users/complete-profile` (age ≥18 + gender)
+- `frontend/src/pages/OAuthCallback.js` (nouveau) : page callback OAuth → refreshUser → /home
+- `frontend/src/pages/CompleteProfile.js` (nouveau) : formulaire birthDate + genre, check âge client
+- `frontend/src/App.js` : PrivateRoute + profileComplete check + routes `/auth/callback` + `/complete-profile`
+- 5 locales : clés `completeProfile.*`
+
+### Résultat
+- OAuth ne bypass plus la vérification d'âge — Statut : ✅ Terminé
+
+---
+
+## Session 32 — 2 Mars 2026
+
+### Objectif
+Phase 6 — Monétisation complète : Pièces / Globos / Stripe / Catalogue Cadeaux.
+
+### Changements réalisés
+
+**Backend :**
+- `stripe` installé via npm
+- `backend/models/GiftCatalog.js` (nouveau) : catalogue cadeaux DB
+- `backend/models/Transaction.js` (nouveau) : audit log monétaire complet
+- `backend/models/User.js` : subdocument `wallet` (coins, globos, totaux)
+- `backend/utils/coinPacks.js` (nouveau) : 4 packs avec Price IDs Stripe depuis env
+- `backend/routes/giftCatalog.js` (nouveau) : CRUD catalogue (public GET, admin ≥2 CRUD)
+- `backend/routes/wallet.js` (nouveau) : balance, historique, conversion Globo→Pièces, retrait PayPal, admin gestion retraits
+- `backend/routes/payments.js` (nouveau) : packs, Stripe Checkout session, webhook idempotent
+- `backend/server.js` : webhook raw body avant express.json(), giftLimiter, montage routes
+- `backend/socketHandlers/liveRoom.js` : send-gift async — lookup DB, check balance, $inc atomique, Transaction×2, wallet-updated, gift-insufficient-funds
+- `backend/scripts/seedGifts.js` (nouveau) : 6 cadeaux initiaux (rose/bisou/coeur/étoile/couronne/diamant)
+
+**Frontend :**
+- `LiveViewer.js` : retrait GIFTS hardcodé, load catalog API, balance pièces, gift-insufficient-funds socket, wallet-updated socket
+- `LiveViewer.css` : `.lv-gift-balance` + `.lv-gift-item--disabled`
+- `LiveStream.js` : retrait GIFTS hardcodé, load catalog API, handleSendGift → giftId seul
+- `WalletPage.js` (nouveau) : 4 onglets (Acheter/Convertir/Retirer/Historique) + Stripe redirect
+- `WalletPage.css` (nouveau) : dark mode complet, pack cards, historique tx
+- `ModerationPanel.js` : onglet "Cadeaux" (admin ≥2) — table + CRUD + toggle actif
+- `ModerationPanel.css` : styles gift table + form
+- `App.js` : route `/wallet` + import WalletPage
+- 5 locales : `wallet.*` (36 clés), `gifts.*` (11 clés), `payments.*` (2 clés)
+
+**Administratif :**
+- `Administratif/env_variables_checklist.md` (nouveau) : guide complet vars d'env (28 vars auditées)
+- `backend/.env.example` : 8 nouvelles vars Stripe + taux
+
+### Résultat
+- Système monétaire double (Pièces viewers + Globos streamers) opérationnel
+- Stripe Checkout intégré, webhook sécurisé
+- Catalogue DB, administrable via ModerationPanel
+- 22 pages frontend (+OAuthCallback +CompleteProfile +WalletPage)
+- En attente : `node backend/scripts/seedGifts.js` + vars `.env` Stripe
+- Statut : ✅ Terminé
+

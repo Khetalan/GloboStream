@@ -61,9 +61,7 @@ module.exports = (passport) => {
             isPrimary: true
           }] : [],
           linkedAccounts: { google: true },
-          // Valeurs par défaut - à compléter lors du premier usage
-          birthDate: new Date(2000, 0, 1),
-          gender: 'autre'
+          profileComplete: false // birthDate + gender requis via /complete-profile
         });
 
         await user.save();
@@ -113,8 +111,7 @@ module.exports = (passport) => {
             isPrimary: true
           }] : [],
           linkedAccounts: { facebook: true },
-          birthDate: new Date(2000, 0, 1),
-          gender: 'autre'
+          profileComplete: false // birthDate + gender requis via /complete-profile
         });
 
         await user.save();
@@ -173,8 +170,7 @@ module.exports = (passport) => {
           lastName,
           displayName: firstName,
           linkedAccounts: { apple: true },
-          birthDate: new Date(2000, 0, 1),
-          gender: 'autre'
+          profileComplete: false // birthDate + gender requis via /complete-profile
         });
 
         await user.save();

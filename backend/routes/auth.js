@@ -36,12 +36,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
     }
 
-    // Calculer l'âge si birthDate fourni
-    if (birthDate) {
-      const age = Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
-      if (age < 18) {
-        return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans' });
-      }
+    // Date de naissance obligatoire
+    if (!birthDate) {
+      return res.status(400).json({ error: 'La date de naissance est requise' });
+    }
+
+    // Vérification âge minimum 18 ans
+    const age = Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
+    if (age < 18) {
+      return res.status(403).json({ error: 'underage' });
     }
 
     // Construire le displayName
@@ -217,9 +220,12 @@ router.post('/phone', async (req, res) => {
 
     if (isNewUser) {
       // Inscription
+      if (!birthDate) {
+        return res.status(400).json({ error: 'La date de naissance est requise' });
+      }
       const age = Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
       if (age < 18) {
-        return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans' });
+        return res.status(403).json({ error: 'underage' });
       }
 
       const user = new User({
@@ -275,7 +281,7 @@ router.get('/google/callback',
   passport.authenticate('google', { session: false }),
   (req, res) => {
     const token = generateToken(req.user._id);
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL}/#/auth/callback?token=${token}`);
   }
 );
 
@@ -288,7 +294,7 @@ router.get('/facebook/callback',
   passport.authenticate('facebook', { session: false }),
   (req, res) => {
     const token = generateToken(req.user._id);
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL}/#/auth/callback?token=${token}`);
   }
 );
 
@@ -301,7 +307,7 @@ router.get('/apple/callback',
   passport.authenticate('apple', { session: false }),
   (req, res) => {
     const token = generateToken(req.user._id);
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL}/#/auth/callback?token=${token}`);
   }
 );
 

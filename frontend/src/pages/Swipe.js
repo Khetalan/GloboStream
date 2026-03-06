@@ -5,11 +5,12 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { getPhotoUrl } from '../utils/photoUrl';
 import { useTranslation } from 'react-i18next';
-import { FiHeart, FiX, FiMail, FiMapPin, FiSliders, FiArrowLeft, FiFilter } from 'react-icons/fi';
+import { FiHeart, FiX, FiMail, FiMapPin, FiSliders, FiArrowLeft, FiFilter, FiFlag } from 'react-icons/fi';
 // useAuth disponible pour fonctionnalités futures
 import Navigation from '../components/Navigation';
 import FiltersPanel from '../components/FiltersPanel';
 import MessageModal from '../components/MessageModal';
+import ReportModal from '../components/ReportModal';
 import './Swipe.css';
 
 const Swipe = () => {
@@ -422,6 +423,7 @@ const ProfileCard = ({ profile, onSwipe, onMessage, onShowProfile, sentRequests 
 
 const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
   const { t } = useTranslation();
+  const [showReportModal, setShowReportModal] = useState(false);
   const age = profile.age || Math.floor((Date.now() - new Date(profile.birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
   const primaryPhoto = profile.photos?.find(p => p.isPrimary) || profile.photos?.[0];
 
@@ -520,8 +522,22 @@ const ProfileModal = ({ profile, onClose, onLike, onPass, onMessage }) => {
               <FiHeart /> {t('swipe.like')}
             </button>
           </div>
+
+          <button
+            className="swipe-report-link"
+            onClick={() => setShowReportModal(true)}
+          >
+            <FiFlag size={13} /> {t('report.reportProfile')}
+          </button>
         </div>
       </motion.div>
+
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        targetUserId={profile._id || profile.id}
+        type="profile"
+      />
     </motion.div>
   );
 };

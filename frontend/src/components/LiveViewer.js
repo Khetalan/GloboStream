@@ -9,8 +9,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiX, FiEye, FiSend, FiArrowLeft, FiUserPlus,
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiGift, FiAlertTriangle, FiGlobe,
-  FiUserX, FiSlash
+  FiUserX, FiSlash, FiFlag
 } from 'react-icons/fi';
+import ReportModal from './ReportModal';
 import { translateMessage } from '../utils/translateChat';
 import { getPhotoUrl } from '../utils/photoUrl';
 import './LiveViewer.css';
@@ -18,14 +19,6 @@ import './LiveViewer.css';
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Catalogue des cadeaux disponibles
-const GIFTS = [
-  { id: 'rose',    emoji: '🌹', name: 'Rose',     value: 1   },
-  { id: 'kiss',    emoji: '💋', name: 'Bisou',    value: 5   },
-  { id: 'heart',   emoji: '❤️', name: 'Cœur',     value: 10  },
-  { id: 'star',    emoji: '⭐', name: 'Étoile',   value: 20  },
-  { id: 'crown',   emoji: '👑', name: 'Couronne', value: 50  },
-  { id: 'diamond', emoji: '💎', name: 'Diamant',  value: 100 },
-];
 
 // Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
 const PEER_CONFIG = {
@@ -53,6 +46,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [chatInput, setChatInput] = useState('');
   const [viewerCount, setViewerCount] = useState(0);
   const [streamerName, setStreamerName] = useState('Streamer'); // État pour le nom
+  const [streamerId, setStreamerId] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [joinRequestStatus, setJoinRequestStatus] = useState('idle'); // idle | pending | accepted | rejected
   const [isParticipant, setIsParticipant] = useState(false);
   const [localStream, setLocalStream] = useState(null);
@@ -67,6 +62,8 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   const [viewers, setViewers] = useState([]);
   const [giftScore, setGiftScore] = useState(0);
   const [showGiftPanel, setShowGiftPanel] = useState(false);
+  const [giftCatalog, setGiftCatalog] = useState([]);
+  const [userCoins, setUserCoins] = useState(0);
   const [showJoinRulesModal, setShowJoinRulesModal] = useState(false);
   const [joinRulesAccepted, setJoinRulesAccepted] = useState(false);
   const [isLiveMod, setIsLiveMod] = useState(false);
@@ -108,9 +105,10 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Infos de la room reçues
-    socket.on('room-info', ({ viewerCount: vc, streamerName: sn, viewers: initialViewers }) => {
+    socket.on('room-info', ({ viewerCount: vc, streamerName: sn, streamerId: sid, viewers: initialViewers }) => {
       setViewerCount(vc);
       if (sn) setStreamerName(sn);
+      if (sid) setStreamerId(sid);
       if (initialViewers) {
         setViewers(initialViewers.map(v => ({
           socketId: v.socketId,
@@ -322,11 +320,19 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
     });
 
     // Cadeau envoyé/reçu dans le salon
-    socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji }) => {
+    socket.on('gift-received', ({ senderName, recipientName, recipientType, giftEmoji, giftValue }) => {
       if (recipientType === 'streamer') {
-        setGiftScore(prev => prev + 1);
+        setGiftScore(prev => prev + (giftValue || 1));
       }
       toast(`${giftEmoji} ${senderName} → ${recipientName}`, { duration: 2500 });
+    });
+
+    socket.on('gift-insufficient-funds', ({ required, current }) => {
+      toast.error(`Pièces insuffisantes (${current}🪙 / ${required}🪙 requis)`);
+    });
+
+    socket.on('wallet-updated', ({ coins }) => {
+      setUserCoins(coins);
     });
 
     // Nouveau participant dans la room — TÂCHE-048 : créer peer non-initiateur vers lui
@@ -446,6 +452,12 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream]);
+
+  // Charger catalogue cadeaux + balance wallet
+  useEffect(() => {
+    axios.get('/api/gifts/catalog').then(r => setGiftCatalog(r.data.gifts || [])).catch(() => {});
+    axios.get('/api/wallet/me').then(r => setUserCoins(r.data.wallet?.coins || 0)).catch(() => {});
+  }, []);
 
   // Auto-scroll du chat
   useEffect(() => {
@@ -639,16 +651,9 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
   // Envoyer un cadeau au streamer (viewer/participant)
   const handleSendGift = useCallback((gift) => {
     if (!socketRef.current) return;
-    socketRef.current.emit('send-gift', {
-      roomId,
-      giftId: gift.id,
-      giftEmoji: gift.emoji,
-      giftName: gift.name,
-      giftValue: gift.value
-    });
+    socketRef.current.emit('send-gift', { roomId, giftId: gift.id });
     setShowGiftPanel(false);
-    toast.success(t('liveGifts.sent'));
-  }, [roomId, t]);
+  }, [roomId]);
 
   const toggleUiVisibility = useCallback(() => {
     setIsUiVisible(prev => !prev);
@@ -833,6 +838,13 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                 </div>
               </div>
               <div className="lv-header-right">
+                <button
+                  className="lv-report-btn"
+                  onClick={() => setShowReportModal(true)}
+                  title={t('report.reportLive')}
+                >
+                  <FiFlag size={18} />
+                </button>
                 <button className="lv-close-btn" onClick={handleLeave}>
                   <FiX size={24} />
                 </button>
@@ -1042,12 +1054,18 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
                 </button>
               </div>
               <p className="lv-gift-recipient">{t('liveGifts.toStreamer', { name: streamerName })}</p>
+              <p className="lv-gift-balance">🪙 {userCoins} {t('wallet.coins')}</p>
               <div className="lv-gift-grid">
-                {GIFTS.map(gift => (
-                  <button key={gift.id} className="lv-gift-item" onClick={() => handleSendGift(gift)}>
+                {giftCatalog.map(gift => (
+                  <button
+                    key={gift.id}
+                    className={`lv-gift-item${userCoins < gift.coinCost ? ' lv-gift-item--disabled' : ''}`}
+                    onClick={() => handleSendGift(gift)}
+                    disabled={userCoins < gift.coinCost}
+                  >
                     <span className="lv-gift-emoji">{gift.emoji}</span>
                     <span className="lv-gift-name">{gift.name}</span>
-                    <span className="lv-gift-value">{gift.value}pts</span>
+                    <span className="lv-gift-value">🪙{gift.coinCost}</span>
                   </button>
                 ))}
               </div>
@@ -1267,6 +1285,15 @@ const LiveViewer = ({ roomId, onLeave, user }) => {
           </div>
         </div>
       )}
+
+      {/* Modal Signalement streamer */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        targetUserId={streamerId}
+        type="live"
+        targetId={roomId}
+      />
     </div>
   );
 };

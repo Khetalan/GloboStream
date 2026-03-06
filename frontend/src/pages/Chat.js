@@ -9,13 +9,14 @@ import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import {
   FiArrowLeft, FiHeart, FiSend, FiImage, FiMoreVertical,
-  FiPhone, FiVideo, FiSearch, FiSmile, FiUserX
+  FiPhone, FiVideo, FiSearch, FiSmile, FiUserX, FiFlag
 } from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import './Chat.css';
 import MessageRequestsPanel from '../components/MessageRequestsPanel';
+import ReportModal from '../components/ReportModal';
 
 let socket;
 
@@ -38,6 +39,8 @@ const Chat = () => {
   const [showConvMenu, setShowConvMenu] = useState(false);
   const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false);
   const convMenuRef = useRef(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTargetMsg, setReportTargetMsg] = useState(null);
 
   useEffect(() => {
     // Connexion WebSocket
@@ -328,6 +331,12 @@ const Chat = () => {
                   {showConvMenu && (
                     <div className="conv-menu-dropdown">
                       <button
+                        className="conv-menu-item"
+                        onClick={() => { setShowConvMenu(false); setReportTargetMsg(null); setShowReportModal(true); }}
+                      >
+                        <FiFlag /> {t('report.reportUser')}
+                      </button>
+                      <button
                         className="conv-menu-item danger"
                         onClick={() => { setShowConvMenu(false); setShowUnmatchConfirm(true); }}
                       >
@@ -369,6 +378,15 @@ const Chat = () => {
                             })}
                           </span>
                         </div>
+                        {!isOwn && (
+                          <button
+                            className="message-report-btn"
+                            onClick={() => { setReportTargetMsg(msg); setShowReportModal(true); }}
+                            title={t('report.reportMessage')}
+                          >
+                            <FiFlag size={12} />
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -432,6 +450,15 @@ const Chat = () => {
           )}
         </div>
       </div>
+
+      {/* Modal Signalement */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => { setShowReportModal(false); setReportTargetMsg(null); }}
+        targetUserId={selectedConversation?.user._id || selectedConversation?.user.id}
+        type={reportTargetMsg ? 'message' : 'user'}
+        targetId={reportTargetMsg?._id}
+      />
 
       {/* Modal confirmation Unmatch */}
       {showUnmatchConfirm && (

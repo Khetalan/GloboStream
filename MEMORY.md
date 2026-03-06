@@ -1,27 +1,26 @@
-# MEMORY.md — Mémoire Persistante des Agents IA
+# MEMORY.md — Mémoire Persistante de Claude Code
 
-> Ce fichier doit être lu en **PRIORITÉ ABSOLUE** au démarrage de chaque session,
-> par Claude Code ET par Gemini CLI, avant toute autre action.
+> Ce fichier doit être lu en **PRIORITÉ ABSOLUE** au démarrage de chaque session.
 > Il contient les apprentissages clés, conventions et décisions architecturales
 > qui ne sont pas dans les autres fichiers.
+>
+> ⚠️ Gemini CLI a été retiré du projet le **26/02/2026**. Claude = unique agent IA.
 
 ---
 
-## agent.js — Orchestrateur IA du projet
+## agent.js — Orchestrateur IA du projet (v3.0 — Claude-only)
 
 **Emplacement** : `GloboStream/agent.js` (racine du projet)
 
 **Nature** : Script Node.js CLI (`node agent.js <commande>`) qui délègue les tâches
-au bon modèle IA selon la nature de la tâche.
+au bon modèle Claude selon la nature de la tâche.
 
 **Modèles utilisés** :
 | Modèle | ID | Cas d'usage |
 |--------|-----|-------------|
-| Claude Haiku | `claude-haiku-4-5-20251001` | Lecture / résumé / mise à jour de fichiers MD |
-| Claude Sonnet | `claude-sonnet-4-6` | Code backend courant (routes, middleware, utils) |
-| Claude Opus | `claude-opus-4-6` | Code complexe (WebRTC, architecture, refactor) |
-| Gemini 2.5 Flash | `gemini-2.5-flash` | CSS, composants React simples, i18n, nouvelles pages |
-| Gemini 2.5 Flash-Lite | `gemini-2.5-flash-lite` | Tâches simples et répétitives |
+| Claude Haiku | `claude-haiku-4-5-20251001` | Lecture / résumé / mise à jour de fichiers MD, i18n |
+| Claude Sonnet | `claude-sonnet-4-6` | Code backend courant, CSS, React simple |
+| Claude Opus | `claude-opus-4-6` | Code complexe (WebRTC, architecture, refactor, pages multi-fichiers) |
 
 **Commandes disponibles** :
 ```bash
@@ -33,21 +32,16 @@ node agent.js session "<description de session>"
 # Backend (Sonnet/Opus)
 node agent.js code "<tâche>" [simple|complex] [fichier-contexte.md]
 
-# Frontend (Gemini Flash)
+# Frontend (Sonnet/Opus)
 node agent.js css   "<description>" [fichier.js|css]
-node agent.js react "<description>" [fichier.js]
+node agent.js react "<description>" [complex] [fichier.js]
 node agent.js page  "<description>" [simple|complex]
 node agent.js i18n  "<description>" [fichier.js]
 
 node agent.js list   # liste les fichiers MD gérés
 ```
 
-**Limites Gemini free tier** :
-- `gemini-2.5-flash` : 10 req/min, 250 req/jour
-- `gemini-2.5-flash-lite` : 15 req/min, 1000 req/jour
-- En cas d'erreur 429 : quota atteint, réessayer le lendemain
-
-**Config requise** : `backend/.env` doit contenir `ANTHROPIC_API_KEY` et `GOOGLE_GEMINI_API_KEY`.
+**Config requise** : `backend/.env` doit contenir `ANTHROPIC_API_KEY`.
 
 ---
 
@@ -78,6 +72,12 @@ node agent.js list   # liste les fichiers MD gérés
 | 26/02/2026 | FAB bouton "Start Live" en bas | Bannière haute trop encombrante sur mobile |
 | 26/02/2026 | Grille cartes 2col mobile / 3col tablette | Cartes trop grandes en 1 colonne |
 | 26/02/2026 | favoriteStreamers[] sur User | Système de favoris streamers persistant |
+| 26/02/2026 | Gemini retiré — Claude agent unique | Gemini free tier trop limité, Claude couvre backend+frontend |
+| 02/03/2026 | profileComplete=false pour OAuth (Phase 5) | Empêche bypass vérification âge via OAuth |
+| 02/03/2026 | Webhook Stripe : raw body AVANT express.json() | Stripe exige body non parsé pour vérifier la signature |
+| 02/03/2026 | Wallet : MongoDB $inc atomique | Évite race conditions sur les balances pièces/globos |
+| 02/03/2026 | GiftCatalog en DB (soft delete isActive) | Catalogue administrable sans redéploiement |
+| 02/03/2026 | Transaction model — audit log complet | Traçabilité obligatoire pour toute opération monétaire |
 
 ---
 
@@ -88,14 +88,13 @@ node agent.js list   # liste les fichiers MD gérés
 | `MEMORY.md` | **CE FICHIER** — mémoire persistante, lire en P1 |
 | `agent.js` | Script orchestrateur IA — lire pour comprendre les outils disponibles |
 | `CLAUDE.md` | Instructions Claude — protocole démarrage |
-| `GEMINI.md` | Instructions Gemini — protocole démarrage |
 | `claude_context.md` | Source de vérité architecture |
 | `claude_session.md` | Journal de session Claude |
-| `gemini_session.md` | Journal de session Gemini |
-| `todo_claude.md` | Tâches pour Claude (venant de Gemini) |
-| `todo_gemini.md` | Tâches pour Gemini (venant de Claude) |
+| `todo_claude.md` | Tâches pour Claude |
+| `docs/RAPPORT.md` | Rapport complet — 148+ fonctionnalités |
+| `Administratif/env_variables_checklist.md` | Checklist variables .env à configurer |
 
 ---
 
 **Créé** : 25/02/2026
-**Maintenu par** : Claude Code + Gemini CLI (les deux agents doivent le mettre à jour)
+**Maintenu par** : Claude Code (agent unique depuis 26/02/2026)

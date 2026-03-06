@@ -1,19 +1,53 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const AdminLog = require('../models/AdminLog');
 const authMiddleware = require('../middleware/auth');
 const { requireModerator, requireAdmin, requireSuperAdmin, requirePermission } = require('../middleware/privileges');
+
+// Helper : créer une entrée de log modération
+const logAction = (actorUser, action, targetUser, details = {}, req) => {
+  return AdminLog.create({
+    actorId:    actorUser._id,
+    actorName:  actorUser.displayName || actorUser.email,
+    action,
+    targetId:   targetUser?._id,
+    targetName: targetUser?.displayName || targetUser?.email,
+    targetType: 'user',
+    details,
+    ip: req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress
+  }).catch(() => {}); // Non-bloquant
+};
 
 // Toutes les routes nécessitent l'authentification
 router.use(authMiddleware);
 
 // ============ ROUTES MODÉRATEUR ============
 
-// Obtenir la liste des rapports (signalements)
+// Obtenir la liste des rapports — délégué à /api/reports (voir routes/reports.js)
+// Cette route est conservée pour compatibilité avec le ModerationPanel frontend
+const Report = require('../models/Report');
 router.get('/reports', requireModerator, async (req, res) => {
   try {
-    // TODO: Implémenter le modèle Report
-    res.json({ reports: [], message: 'Fonctionnalité à venir' });
+    const { status, type, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = {};
+    if (status) filter.status = status;
+    if (type) filter.type = type;
+
+    const [reports, total] = await Promise.all([
+      Report.find(filter)
+        .populate('reporterId', 'displayName firstName photos')
+        .populate('reportedUserId', 'displayName firstName photos')
+        .populate('moderatorId', 'displayName firstName')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Report.countDocuments(filter)
+    ]);
+
+    res.json({ success: true, reports, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors de la récupération des rapports' });
   }
@@ -38,10 +72,12 @@ router.post('/warn/:userId', requirePermission('canIssueWarnings'), async (req, 
     moderator.moderationStats.lastActionDate = new Date();
     await moderator.save();
 
-    res.json({ 
-      success: true, 
+    logAction(moderator, 'warn', user, { reason }, req);
+
+    res.json({
+      success: true,
       message: 'Avertissement envoyé',
-      warnings: user.warnings 
+      warnings: user.warnings
     });
   } catch (error) {
     console.error(error);
@@ -75,8 +111,10 @@ router.post('/ban/:userId', requirePermission('canBanUsers'), async (req, res) =
     moderator.moderationStats.lastActionDate = new Date();
     await moderator.save();
 
-    res.json({ 
-      success: true, 
+    logAction(moderator, 'ban', user, { reason, duration: duration || 'permanent' }, req);
+
+    res.json({
+      success: true,
       message: `Utilisateur banni${duration ? ` pour ${duration} jours` : ' définitivement'}`,
       user: user.getPublicProfile()
     });
@@ -104,8 +142,10 @@ router.post('/unban/:userId', requirePermission('canBanUsers'), async (req, res)
     moderator.moderationStats.lastActionDate = new Date();
     await moderator.save();
 
-    res.json({ 
-      success: true, 
+    logAction(moderator, 'unban', user, {}, req);
+
+    res.json({
+      success: true,
       message: 'Utilisateur débanni',
       user: user.getPublicProfile()
     });
@@ -168,8 +208,11 @@ router.post('/promote/:userId', requireAdmin, async (req, res) => {
     user.promoteToModerator(permissions);
     await user.save();
 
-    res.json({ 
-      success: true, 
+    const actor = await User.findById(req.user._id);
+    logAction(actor, 'promote_moderator', user, { permissions }, req);
+
+    res.json({
+      success: true,
       message: 'Utilisateur promu en modérateur',
       user: {
         id: user._id,
@@ -207,11 +250,14 @@ router.post('/demote/:userId', requireAdmin, async (req, res) => {
       canViewReports: false,
       canIssueWarnings: false
     };
-    
+
     await user.save();
 
-    res.json({ 
-      success: true, 
+    const actor = await User.findById(req.user._id);
+    logAction(actor, 'demote_moderator', user, {}, req);
+
+    res.json({
+      success: true,
       message: 'Privilèges de modérateur révoqués',
       user: {
         id: user._id,
@@ -312,11 +358,14 @@ router.post('/promote-admin/:userId', requireSuperAdmin, async (req, res) => {
       canViewReports: true,
       canIssueWarnings: true
     };
-    
+
     await user.save();
 
-    res.json({ 
-      success: true, 
+    const actor = await User.findById(req.user._id);
+    logAction(actor, 'promote_admin', user, {}, req);
+
+    res.json({
+      success: true,
       message: 'Utilisateur promu en administrateur',
       user: {
         id: user._id,
@@ -375,6 +424,39 @@ router.get('/users', requireAdmin, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erreur lors de la récupération des utilisateurs' });
+  }
+});
+
+// ============ ROUTES LOGS ADMIN ============
+
+// Journaux des actions de modération
+router.get('/logs', requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 50, action, actorId } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = {};
+    if (action) filter.action = action;
+    if (actorId) filter.actorId = actorId;
+
+    const [logs, total] = await Promise.all([
+      AdminLog.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      AdminLog.countDocuments(filter)
+    ]);
+
+    res.json({
+      success: true,
+      logs,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des logs' });
   }
 });
 

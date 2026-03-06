@@ -4,6 +4,10 @@
 // =========================================
 
 const { getCountryFlag } = require('../utils/countryFlag');
+const AdminLog = require('../models/AdminLog');
+const User = require('../models/User');
+const GiftCatalog = require('../models/GiftCatalog');
+const Transaction = require('../models/Transaction');
 
 const liveRooms = new Map();
 // roomId → {
@@ -131,6 +135,7 @@ function setupLiveRoomHandlers(io, socket) {
       socket.emit('room-info', {
         roomId,
         streamerSocketId: room.streamerSocketId,
+        streamerId:       room.streamerId,
         streamerName:     room.displayName,
         viewerCount:      room.viewers.size,
         participantCount: room.participants.size,
@@ -451,6 +456,20 @@ function setupLiveRoomHandlers(io, socket) {
       // Message système dans le chat
       io.to(roomId).emit('viewer-kicked', { displayName });
 
+      // Log admin
+      const actorId   = isStreamer ? room.streamerId : room.moderators.get(socket.id)?.userId;
+      const actorName = isStreamer ? room.displayName : (room.moderators.get(socket.id)?.displayName || 'Modérateur');
+      if (actorId) {
+        AdminLog.create({
+          actorId, actorName,
+          action:     'live_kick',
+          targetId:   targetUserId,
+          targetName: displayName,
+          targetType: 'user',
+          details:    { roomId }
+        }).catch(() => {});
+      }
+
       console.log(`Kick: ${displayName} kicked from room ${roomId}`);
     } catch (error) {
       console.error('Error kick-from-live:', error);
@@ -494,6 +513,20 @@ function setupLiveRoomHandlers(io, socket) {
       io.to(targetSocketId).emit('kicked-from-room', { reason: 'block' });
       io.to(roomId).emit('viewer-blocked', { displayName });
 
+      // Log admin
+      const actorId   = isStreamer ? room.streamerId : room.moderators.get(socket.id)?.userId;
+      const actorName = isStreamer ? room.displayName : (room.moderators.get(socket.id)?.displayName || 'Modérateur');
+      if (actorId) {
+        AdminLog.create({
+          actorId, actorName,
+          action:     'live_block',
+          targetId:   targetUserId,
+          targetName: displayName,
+          targetType: 'user',
+          details:    { roomId, permanent: isStreamer }
+        }).catch(() => {});
+      }
+
       console.log(`Block: ${displayName} (${targetUserId}) blocked from room ${roomId}`);
     } catch (error) {
       console.error('Error block-user-from-live:', error);
@@ -528,7 +561,7 @@ function setupLiveRoomHandlers(io, socket) {
   });
 
   // ── Envoyer un cadeau ──
-  socket.on('send-gift', ({ roomId, giftId, giftEmoji, giftName, giftValue, recipientSocketId }) => {
+  socket.on('send-gift', async ({ roomId, giftId, recipientSocketId }) => {
     try {
       const room = liveRooms.get(roomId);
       if (!room) return;
@@ -538,40 +571,106 @@ function setupLiveRoomHandlers(io, socket) {
       const participantInfo = room.participants.get(socket.id);
       const senderInfo = viewerInfo || participantInfo;
       const senderName = isStreamer ? room.displayName : (senderInfo?.displayName || 'Anonyme');
+      const senderId = isStreamer ? room.streamerId : (senderInfo?.userId);
+
+      if (!senderId) return;
+
+      // Charger le cadeau depuis le catalogue DB
+      const gift = await GiftCatalog.findOne({ id: giftId, isActive: true });
+      if (!gift) {
+        socket.emit('gift-error', { error: 'Cadeau introuvable' });
+        return;
+      }
 
       let finalRecipientSocketId;
       let recipientName;
       let recipientType;
+      let recipientId;
 
       if (isStreamer) {
-        // Le streamer peut offrir uniquement à un participant (protection anti-triche : pas à lui-même)
+        // Le streamer peut offrir uniquement à un participant
         const participant = room.participants.get(recipientSocketId);
         if (!participant) return;
         finalRecipientSocketId = recipientSocketId;
         recipientName = participant.displayName;
         recipientType = 'participant';
+        recipientId = participant.userId;
       } else {
         // Viewer/Participant offre toujours au streamer
         finalRecipientSocketId = room.streamerSocketId;
         recipientName = room.displayName;
         recipientType = 'streamer';
+        recipientId = room.streamerId;
+      }
+
+      // Vérifier le solde du sender (uniquement pour non-streamer envoyant au streamer)
+      if (!isStreamer) {
+        const sender = await User.findById(senderId).select('wallet');
+        if (!sender || (sender.wallet?.coins || 0) < gift.coinCost) {
+          socket.emit('gift-insufficient-funds', {
+            required: gift.coinCost,
+            current: sender?.wallet?.coins || 0
+          });
+          return;
+        }
+
+        // Déduire pièces du sender
+        const updatedSender = await User.findByIdAndUpdate(
+          senderId,
+          { $inc: { 'wallet.coins': -gift.coinCost, 'wallet.totalCoinsSpent': gift.coinCost } },
+          { new: true, select: 'wallet' }
+        );
+
+        // Créditer globos au streamer
+        await User.findByIdAndUpdate(
+          recipientId,
+          { $inc: { 'wallet.globos': gift.globoValue, 'wallet.totalGlobosEarned': gift.globoValue } }
+        );
+
+        // Enregistrer les 2 transactions
+        await Transaction.create([
+          {
+            fromUserId: senderId,
+            toUserId: recipientId,
+            type: 'gift_send',
+            coinsAmount: -gift.coinCost,
+            giftId: gift.id,
+            giftName: gift.name,
+            roomId,
+            status: 'completed'
+          },
+          {
+            fromUserId: senderId,
+            toUserId: recipientId,
+            type: 'gift_receive',
+            globosAmount: gift.globoValue,
+            giftId: gift.id,
+            giftName: gift.name,
+            roomId,
+            status: 'completed'
+          }
+        ]);
+
+        // Notifier le sender de son nouveau solde
+        socket.emit('wallet-updated', { coins: updatedSender.wallet.coins });
       }
 
       io.to(roomId).emit('gift-received', {
         senderName,
         recipientName,
         recipientSocketId: finalRecipientSocketId,
-        giftId,
-        giftEmoji,
-        giftName,
-        giftValue: giftValue || 1,
+        giftId: gift.id,
+        giftEmoji: gift.emoji,
+        giftName: gift.name,
+        giftValue: gift.globoValue,
         recipientType,
         timestamp: Date.now()
       });
 
-      console.log(`Gift ${giftId} (×${giftValue}) : ${senderName} → ${recipientName} [${roomId}]`);
+      console.log(`Gift ${gift.id} (${gift.coinCost}🪙 → ${gift.globoValue}🌐) : ${senderName} → ${recipientName} [${roomId}]`);
     } catch (error) {
       console.error('Error sending gift:', error);
+      socket.emit('gift-error', { error: 'Erreur lors de l\'envoi du cadeau' });
     }
   });
 

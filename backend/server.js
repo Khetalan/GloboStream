@@ -8,6 +8,7 @@ const passport = require('passport');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const { setupSurpriseHandlers } = require('./socketHandlers/surprise');
 const { setupLiveRoomHandlers } = require('./socketHandlers/liveRoom');
 const { setupTeamChatHandlers } = require('./socketHandlers/teamChat');
@@ -26,6 +27,11 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
 }));
+
+// ── Stripe webhook — RAW body AVANT express.json() ──────────────
+const { webhook: stripeWebhook } = require('./routes/payments');
+app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,7 +61,40 @@ mongoose.connect(process.env.MONGODB_URI)
 // Servir les fichiers uploadés
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
+// ── Rate Limiters ──────────────────────────────────────────────
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' }
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 heure
+  limit: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Trop de créations de compte. Réessayez dans 1 heure.' }
+});
+
+const reportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 heure
+  limit: 15,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Trop de signalements. Réessayez dans 1 heure.' }
+});
+
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 60,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Trop de messages envoyés. Ralentissez.' }
+});
+
+// ── Routes ──────────────────────────────────────────────────────
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const swipeRoutes = require('./routes/swipe');
@@ -69,13 +108,31 @@ const moderationRoutes = require('./routes/moderation');
 const liveRoutes = require('./routes/live');
 const competitionRoutes = require('./routes/competitions');
 const teamRoutes = require('./routes/teams');
+const reportRoutes = require('./routes/reports');
+const giftCatalogRoutes = require('./routes/giftCatalog');
+const walletRoutes = require('./routes/wallet');
+const { router: paymentsRouter } = require('./routes/payments');
+
+// Gift limiter — 30 envois de cadeaux par minute
+const giftLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Trop de cadeaux envoyés. Ralentissez.' }
+});
+
+// Auth : limiter login et register séparément, avant le routeur
+app.post('/api/auth/login',    loginLimiter);
+app.post('/api/auth/phone',    loginLimiter);
+app.post('/api/auth/register', registerLimiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/swipe', swipeRoutes);
 app.use('/api/message-requests', messageRequestRoutes);
 app.use('/api/matches', matchRoutes);
-app.use('/api/chat', chatRoutes);
+app.use('/api/chat', chatLimiter, chatRoutes);
 app.use('/api/public-profile', publicProfileRoutes);
 app.use('/api/stream', streamRoutes);
 app.use('/api/surprise', surpriseRoutes);
@@ -83,6 +140,10 @@ app.use('/api/live', liveRoutes);
 app.use('/api/moderation', moderationRoutes);
 app.use('/api/competitions', competitionRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/reports', reportLimiter, reportRoutes);
+app.use('/api/gifts', giftLimiter, giftCatalogRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/payments', paymentsRouter);
 
 // Route de test
 app.get('/api/health', (req, res) => {

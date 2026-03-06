@@ -169,6 +169,29 @@
 .lv-header-right {
   /* Le bouton X reste en haut à droite */
   padding-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lv-report-btn {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lv-report-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 /* ── Stats Indicators (Top Right) ─────────────────────────── */
@@ -1034,7 +1057,23 @@
 .lv-gift-recipient {
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.45);
-  margin: 0 0 16px;
+  margin: 0 0 6px;
+}
+
+.lv-gift-balance {
+  font-size: 0.82rem;
+  color: #f5a623;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+
+.lv-gift-item--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.lv-gift-item--disabled:hover {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .lv-gift-grid {

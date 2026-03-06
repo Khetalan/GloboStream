@@ -8,19 +8,51 @@
 
 ## En attente
 
-#### TÂCHE-051 — Audit Live : Corrections complètes LiveViewer + liveRoom (BUG-1 à BUG-6)
-- **Statut** : EN COURS — Session 30
-- **Modèle** : Sonnet | **Difficulté** : Moyenne
-- **Plan** : `Rapport de test/Plan-Live-Verification-01.md`
-- **Fichiers** :
-  - `backend/socketHandlers/liveRoom.js` — BUG-2 (participants-updated au join), BUG-5 (reject-join-request permission + reason)
-  - `frontend/src/components/LiveViewer.js` — BUG-1 (panelParticipants + stats panel 2 sections), BUG-3 (liveModerators Set + badges MOD), BUG-4 (kicked-from-room reason)
-  - `frontend/src/components/LiveViewer.css` — BUG-6 (.lv-participant-badge + .lv-panel-section-header)
-  - `frontend/src/locales/*.json` (5 fichiers) — clé `liveViewer.blockedFromRoom`
 
 ---
 
 ## Terminées (session en cours)
+
+#### TÂCHE-072 — Phase 5 : Fix OAuth bypass âge + redirect HashRouter
+- **Statut** : DONE — Session 31 | **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Fichiers** : `backend/models/User.js` (profileComplete), `backend/config/passport.js` (suppression birthDate hardcodée), `backend/routes/auth.js` (redirect /#/), `backend/routes/users.js` (complete-profile), `frontend/src/pages/OAuthCallback.js` (nouveau), `frontend/src/pages/CompleteProfile.js` (nouveau), `frontend/src/App.js`, 5 locales
+- **Résultat** : OAuth ne bypass plus l'âge. Nouveau flux : OAuth → OAuthCallback → CompleteProfile (si nouveau) → Home.
+
+#### TÂCHE-053 — Phase 6 : Monétisation complète (Pièces / Globos / Stripe)
+- **Statut** : DONE — Session 32 | **Modèle** : Sonnet | **Difficulté** : Complexe
+- **Fichiers** :
+  - `backend/models/GiftCatalog.js` (nouveau), `Transaction.js` (nouveau), `User.js` (wallet)
+  - `backend/utils/coinPacks.js` (nouveau)
+  - `backend/routes/giftCatalog.js` (nouveau), `wallet.js` (nouveau), `payments.js` (nouveau)
+  - `backend/server.js` (webhook raw body + routes)
+  - `backend/socketHandlers/liveRoom.js` (send-gift async + wallet)
+  - `backend/scripts/seedGifts.js` (nouveau)
+  - `frontend/src/components/LiveViewer.js`, `LiveViewer.css`, `LiveStream.js`
+  - `frontend/src/pages/WalletPage.js` (nouveau), `WalletPage.css` (nouveau)
+  - `frontend/src/pages/ModerationPanel.js`, `ModerationPanel.css`
+  - `frontend/src/App.js` (route /wallet)
+  - 5 locales (wallet.* + gifts.* + payments.* = 49 clés)
+  - `Administratif/env_variables_checklist.md` (nouveau), `backend/.env.example`
+- **Résultat** : Système monétaire double (Pièces viewers + Globos streamers). Stripe Checkout intégré. Catalogue DB administrable. 22 pages frontend.
+- **Action manuelle requise** : `node backend/scripts/seedGifts.js` + vars `.env` Stripe
+
+#### TÂCHE-051 — Audit Live : Corrections complètes LiveViewer + liveRoom (BUG-1 à BUG-6)
+- **Statut** : DONE — Session 30
+- **Commit** : `5c33cdd`
+- **Modèle** : Sonnet | **Difficulté** : Moyenne
+- **Plan** : `Rapport de test/Plan-Live-Verification-01.md`
+- **Fichiers** :
+  - `backend/socketHandlers/liveRoom.js` — BUG-2 (participants-updated au join initial), BUG-5 (reject-join-request permission + reason)
+  - `frontend/src/components/LiveViewer.js` — BUG-1 (panelParticipants + stats panel 2 sections), BUG-3 (liveModerators Set + badges MOD), BUG-4 (kicked-from-room reason)
+  - `frontend/src/components/LiveViewer.css` — BUG-6 (.lv-participant-badge + .lv-panel-section-header)
+  - `frontend/src/locales/*.json` (5 fichiers) — clé `liveViewer.blockedFromRoom`
+- **Résultat** :
+  - Viewer/Participant/Mod voient désormais les participants en live dans leur stats panel (section "Participants LIVE" + badges)
+  - Mods peuvent Kick/Block les participants depuis leur stats panel
+  - Badges MOD visibles sur tous les utilisateurs (via liveModerators Set)
+  - Toast différencié : "expulsé" vs "bloqué et expulsé"
+  - Permission check sur reject-join-request (streamer seul)
+  - CSS .lv-participant-badge (vert) + .lv-panel-section-header alignés sur LiveStream.css
 
 #### TÂCHE-047 — Badge pays activé dans le vrai Live (backend + frontend)
 - **Statut** : DONE — Session 29

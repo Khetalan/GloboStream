@@ -12,7 +12,7 @@ Le **MVP (Minimum Viable Product)** est la version minimale de GloboStream qui p
 - Générer des premiers retours utilisateurs
 - Tester la viabilité technique et business
 
-**Statut Actuel** : ✅ **MVP fonctionnel** — 148 fonctionnalités codées, 26 bugs corrigés, build 0 warning
+**Statut Actuel** : ✅ **MVP fonctionnel + Phase 5 RGPD + Phase 6 Monétisation** — 22 pages, 26 bugs corrigés, build 0 warning
 
 ---
 
@@ -213,14 +213,66 @@ Le **MVP (Minimum Viable Product)** est la version minimale de GloboStream qui p
 - [x] Liste utilisateurs (recherche/filtres)
 - [x] Actions : Avertir, Bannir, Débannir, Promouvoir, Révoquer
 - [x] Gestion modérateurs
+- [x] Onglet Cadeaux (admin ≥2) — CRUD catalogue GiftCatalog (Phase 6)
 
 **Fichiers** : `frontend/src/pages/ModerationPanel.js`, `backend/routes/moderation.js`
 
 ---
 
+### 7. PHASE 5 — RGPD & SÉCURITÉ OAUTH
+
+#### Fix OAuth bypass âge (TÂCHE-072)
+- [x] `profileComplete` flag sur User (false pour OAuth, true pour email/phone)
+- [x] Suppression `birthDate` hardcodée dans Passport.js (Google/Facebook/Apple)
+- [x] Redirect OAuth corrigé → `/#/auth/callback` (HashRouter)
+- [x] Route `POST /api/users/complete-profile` (validates birthDate ≥18, gender)
+- [x] `OAuthCallback.js` — page callback OAuth
+- [x] `CompleteProfile.js` — formulaire completion profil post-OAuth
+- [x] `PrivateRoute` → redirect `/complete-profile` si `profileComplete === false`
+
+**Fichiers** : `backend/config/passport.js`, `backend/routes/auth.js`, `backend/routes/users.js`, `frontend/src/pages/OAuthCallback.js`, `frontend/src/pages/CompleteProfile.js`, `frontend/src/App.js`
+
+---
+
+### 8. PHASE 6 — MONÉTISATION (Pièces / Globos / Stripe)
+
+#### Système de Monnaie Virtuelle
+- [x] **Pièces** : achetées par les viewers, dépensées pour envoyer des cadeaux en live
+- [x] **Globos** : reçus par les streamers (1 pt cadeau = 1 Globo)
+- [x] Wallet utilisateur (`coins`, `globos`, `totalCoinsSpent`, `totalGlobosEarned`)
+- [x] Balance affichée dans le panel cadeaux du viewer
+- [x] Déduction atomique pièces au send-gift (MongoDB `$inc`)
+
+#### Catalogue Cadeaux (DB)
+- [x] `GiftCatalog` model (id, name, emoji, coinCost, globoValue, isActive, order)
+- [x] 6 cadeaux initiaux (seed script) : 🌹1🪙 💋5🪙 ❤️10🪙 ⭐20🪙 👑50🪙 💎100🪙
+- [x] Chargement dynamique depuis API (remplace GIFTS hardcodé)
+- [x] Soft delete (`isActive: false`)
+
+#### Stripe Checkout
+- [x] 4 packs de pièces : Starter(100), Populaire(550), Pro(1150), Méga(6000)
+- [x] `POST /api/payments/checkout` → session Stripe Checkout
+- [x] Webhook `checkout.session.completed` (raw body, idempotent via stripeSessionId)
+- [x] Transaction `coin_purchase` créée à la confirmation
+
+#### WalletPage
+- [x] 4 onglets : Acheter des pièces / Convertir Globos / Retirer / Historique
+- [x] Feedback URL `?success=1` / `?cancelled=1` après Stripe
+- [x] Pagination historique transactions
+
+#### Transactions & Audit
+- [x] `Transaction` model — audit log complet de toutes les opérations monétaires
+- [x] Conversion Globos → Pièces (rate configurable `GLOBO_TO_COIN_RATE`)
+- [x] Demande de retrait PayPal (min configurable `MIN_WITHDRAWAL_GLOBOS`)
+- [x] Gestion retraits admin (paid/rejected)
+
+**Fichiers** : `backend/models/GiftCatalog.js`, `backend/models/Transaction.js`, `backend/utils/coinPacks.js`, `backend/routes/giftCatalog.js`, `backend/routes/wallet.js`, `backend/routes/payments.js`, `backend/scripts/seedGifts.js`, `frontend/src/pages/WalletPage.js`, `frontend/src/components/LiveViewer.js`, `frontend/src/components/LiveStream.js`
+
+---
+
 ### 7. INTERFACE & NAVIGATION
 
-#### Pages (19 pages)
+#### Pages (22 pages)
 - [x] Landing, Login, Register
 - [x] Home, Profile, PublicProfile
 - [x] Swipe, Matches, Chat
@@ -230,6 +282,9 @@ Le **MVP (Minimum Viable Product)** est la version minimale de GloboStream qui p
 - [x] LiveCompetition, LiveEvent (Thématiques)
 - [x] TeamPage (Équipes & Compétitions)
 - [x] Legal (CGU / Confidentialité / Mentions)
+- [x] OAuthCallback (Phase 5 — callback OAuth)
+- [x] CompleteProfile (Phase 5 — completion profil OAuth)
+- [x] WalletPage (Phase 6 — portefeuille virtuel)
 
 #### Design
 - [x] Dark mode
@@ -309,6 +364,6 @@ Le **MVP (Minimum Viable Product)** est la version minimale de GloboStream qui p
 ---
 
 **Document** : MVP GloboStream
-**Version** : 3.0
-**Statut** : ✅ MVP fonctionnel — Déployé (Render + GitHub Pages) — Tests live WebRTC en attente (2 clients)
-**Date** : 28 Février 2026
+**Version** : 4.0
+**Statut** : ✅ MVP + Phase 5 RGPD + Phase 6 Monétisation — 22 pages — Déployé (Render + GitHub Pages)
+**Date** : 2 Mars 2026

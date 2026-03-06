@@ -1,15 +1,18 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
 // Pages publiques
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import OAuthCallback from './pages/OAuthCallback';
+import CompleteProfile from './pages/CompleteProfile';
 
 // Pages authentifiées
 import Home from './pages/Home';
+import WalletPage from './pages/WalletPage';
 import Profile from './pages/Profile';
 import Swipe from './pages/Swipe';
 import Matches from './pages/Matches';
@@ -34,8 +37,17 @@ import LiveTestPage from './pages/LiveTestPage';
 
 import ConsentModal from './components/ConsentModal';
 
-// Route protégée
+// Route protégée — vérifie token + profil complet
 const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  const { user } = useAuth();
+  if (!token) return <Navigate to="/login" />;
+  if (user && user.profileComplete === false) return <Navigate to="/complete-profile" />;
+  return children;
+};
+
+// Route authentifiée simple — vérifie seulement le token (pour /complete-profile)
+const AuthedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   return token ? children : <Navigate to="/login" />;
 };
@@ -80,6 +92,14 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<OAuthCallback />} />
+
+          {/* Complétion profil OAuth (token requis, profileComplete non vérifié) */}
+          <Route path="/complete-profile" element={
+            <AuthedRoute>
+              <CompleteProfile />
+            </AuthedRoute>
+          } />
 
           {/* Routes authentifiées */}
           <Route path="/home" element={
@@ -139,6 +159,12 @@ function App() {
           <Route path="/moderation" element={
             <PrivateRoute>
               <ModerationPanel />
+            </PrivateRoute>
+          } />
+
+          <Route path="/wallet" element={
+            <PrivateRoute>
+              <WalletPage />
             </PrivateRoute>
           } />
 

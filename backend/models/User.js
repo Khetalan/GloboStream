@@ -142,6 +142,25 @@ const userSchema = new mongoose.Schema({
     apple: { type: Boolean, default: false },
     spotify: { type: Boolean, default: false },
     instagram: { type: Boolean, default: false }
+  },
+
+  // Consentement RGPD
+  consent: {
+    accepted: { type: Boolean, default: false },
+    version: String,
+    date: Date,
+    ip: String
+  },
+
+  // Profil complété (false pour nouveaux utilisateurs OAuth avant saisie de birthDate)
+  profileComplete: { type: Boolean, default: true },
+
+  // Portefeuille virtuel
+  wallet: {
+    coins:             { type: Number, default: 0, min: 0 },  // pièces à dépenser
+    globos:            { type: Number, default: 0, min: 0 },  // globos gagnés via cadeaux
+    totalCoinsSpent:   { type: Number, default: 0 },          // historique total dépensé
+    totalGlobosEarned: { type: Number, default: 0 }           // historique total gagné
   }
 }, {
   timestamps: true
@@ -206,7 +225,8 @@ userSchema.methods.getPublicProfile = function() {
     isVerified: this.isVerified,
     isPremium: this.isPremium,
     isLive: this.isLive,
-    lastActive: this.lastActive
+    lastActive: this.lastActive,
+    profileComplete: this.profileComplete
   };
 };
 

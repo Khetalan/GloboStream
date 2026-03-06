@@ -57,6 +57,24 @@ Créer une application fonctionnelle avec les fonctionnalités essentielles pour
 - [x] Emoji picker (emoji-picker-react)
 - [ ] Notifications push (Phase 2)
 
+**RGPD & Sécurité OAuth** *(Phase 5 — Mars 2026)*
+- [x] Audit infrastructure hébergement (Render/Cloudinary/MongoDB Atlas — EU ✅)
+- [x] Fix OAuth bypass âge : suppression `birthDate` hardcodée dans Passport.js
+- [x] Redirect HashRouter corrigé (`/#/auth/callback`)
+- [x] OAuthCallback + CompleteProfile : flux completion profil post-OAuth
+- [x] PrivateRoute : redirect si `profileComplete === false`
+
+**Monétisation** *(Phase 6 — Mars 2026 — réalisé en avance sur la roadmap)*
+- [x] Deux monnaies : Pièces (viewers) + Globos (streamers)
+- [x] Wallet utilisateur (coins, globos, historique)
+- [x] Catalogue cadeaux en DB, administrable via ModerationPanel
+- [x] 6 cadeaux initiaux (seed script)
+- [x] Stripe Checkout — 4 packs de pièces
+- [x] Webhook Stripe `checkout.session.completed` (idempotent)
+- [x] Conversion Globos → Pièces + retrait PayPal
+- [x] WalletPage — 4 onglets complets
+- [x] Audit Transaction log complet
+
 **Live Streaming**
 - [x] Live Surprise : WebRTC P2P, timer 3/5/8/10 min, filtres genre/langues/âge/pays
 - [x] Live Publique : StreamCard redesignée, FAB, filtres onglets
@@ -221,11 +239,12 @@ Monétisation et fonctionnalités premium pour générer des revenus.
 - [ ] Badges récompenses
 - [ ] Classements
 
-**Cadeaux Virtuels**
-- [ ] Boutique cadeaux
-- [ ] Envoyer cadeaux
-- [ ] Monnaie virtuelle
-- [ ] Packs cadeaux
+**Cadeaux Virtuels** *(partiellement réalisé — Phase 6 Mars 2026)*
+- [x] Monnaie virtuelle (Pièces + Globos)
+- [x] Packs cadeaux Stripe (4 packs)
+- [x] Envoyer cadeaux en live
+- [ ] Boutique cadeaux sur profil/chat
+- [ ] Animations 3D
 
 ### Objectifs Revenus
 - 100 abonnés premium
@@ -348,5 +367,5 @@ Croissance utilisateurs, expansion internationale, et optimisation à grande éc
 ---
 
 **Roadmap maintenue par** : Équipe GloboStream
-**Dernière mise à jour** : 28 Février 2026
-**Prochaine révision** : Mars 2026
+**Dernière mise à jour** : 2 Mars 2026
+**Prochaine révision** : Avril 2026

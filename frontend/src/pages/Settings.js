@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import {
   FiArrowLeft, FiBell, FiLock, FiEye, FiEyeOff, FiShield,
-  FiTrash2, FiAlertCircle, FiGlobe
+  FiTrash2, FiAlertCircle, FiGlobe, FiDownload, FiX
 } from 'react-icons/fi';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../contexts/AuthContext';
@@ -54,6 +54,14 @@ const Settings = () => {
     showOnline: true,
     allowMessageRequests: true
   });
+
+  // États suppression de compte
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  // États export données
+  const [exportingData, setExportingData] = useState(false);
 
   // États généraux
   const [loading, setLoading] = useState(true);
@@ -144,23 +152,44 @@ const Settings = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(t('settings.deleteConfirm'));
-
-    if (!confirmed) return;
-
-    const doubleConfirm = window.confirm(t('settings.deleteLastConfirm'));
-
-    if (!doubleConfirm) return;
-
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    setDeletingAccount(true);
     try {
-      await axios.delete('/api/users/me');
+      await axios.delete('/api/users/delete-account', {
+        data: { password: deletePassword }
+      });
       toast.success(t('settings.accountDeleted'));
       logout();
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast.error(t('settings.deleteError'));
+      toast.error(error.response?.data?.error || t('settings.deleteError'));
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    setExportingData(true);
+    try {
+      const response = await axios.get('/api/users/export-data', {
+        responseType: 'blob'
+      });
+      const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'globostream-data.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success(t('settings.exportSuccess'));
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast.error(t('settings.exportError'));
+    } finally {
+      setExportingData(false);
     }
   };
 
@@ -421,6 +450,23 @@ const Settings = () => {
           </div>
 
           <div className="danger-actions">
+            {/* Export données RGPD */}
+            <div className="danger-item danger-item--neutral">
+              <div>
+                <h3>{t('settings.exportData')}</h3>
+                <p>{t('settings.exportDataDesc')}</p>
+              </div>
+              <button
+                className="btn btn-outline"
+                onClick={handleExportData}
+                disabled={exportingData}
+              >
+                <FiDownload />
+                {exportingData ? t('common.loading') : t('settings.exportBtn')}
+              </button>
+            </div>
+
+            {/* Suppression compte */}
             <div className="danger-item">
               <div>
                 <h3>{t('settings.deleteAccount')}</h3>
@@ -428,7 +474,7 @@ const Settings = () => {
               </div>
               <button
                 className="btn btn-danger"
-                onClick={handleDeleteAccount}
+                onClick={() => setShowDeleteModal(true)}
               >
                 <FiTrash2 />
                 {t('settings.deleteButton')}
@@ -437,6 +483,49 @@ const Settings = () => {
           </div>
         </div>
       </div>
+
+      {/* Modale confirmation suppression compte */}
+      {showDeleteModal && (
+        <div className="delete-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="delete-modal-close" onClick={() => setShowDeleteModal(false)}>
+              <FiX size={20} />
+            </button>
+            <div className="delete-modal-icon">
+              <FiTrash2 size={32} />
+            </div>
+            <h2>{t('settings.deleteModalTitle')}</h2>
+            <p>{t('settings.deleteModalDesc')}</p>
+
+            <form onSubmit={handleDeleteAccount} className="delete-modal-form">
+              <div className="form-group">
+                <label>{t('settings.deletePasswordLabel')}</label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-danger"
+                disabled={deletingAccount}
+              >
+                {deletingAccount ? t('common.loading') : t('settings.deleteConfirmBtn')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                {t('settings.cancelBtn')}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

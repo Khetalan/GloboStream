@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiHeart, FiCheck } from 'react-icons/fi';
+import axios from 'axios';
 import './ConsentModal.css';
 
 const CONSENT_KEY = 'globostream_consent_v1';
+const CONSENT_VERSION = '1.0';
+const API_URL = process.env.REACT_APP_API_URL || 'https://globostream.onrender.com';
 
 const ConsentModal = () => {
   const [visible, setVisible] = useState(false);
@@ -17,11 +20,23 @@ const ConsentModal = () => {
   }, []);
 
   const handleAccept = () => {
+    // 1. Sauvegarder localement (cache UX)
     localStorage.setItem(CONSENT_KEY, JSON.stringify({
       accepted: true,
       date: new Date().toISOString(),
-      version: '1.0'
+      version: CONSENT_VERSION
     }));
+
+    // 2. Enregistrer en base de données si l'utilisateur est connecté
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.post(
+        `${API_URL}/api/users/consent`,
+        { version: CONSENT_VERSION },
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).catch(() => {}); // Silencieux — le localStorage reste la référence locale
+    }
+
     setVisible(false);
   };
 

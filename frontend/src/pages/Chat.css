@@ -541,6 +541,35 @@
   color: #ef4444;
 }
 
+/* ── Bouton signalement message ────────────────────────────── */
+
+.message-report-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  align-self: center;
+  padding: 0;
+}
+
+.message:hover .message-report-btn {
+  opacity: 1;
+}
+
+.message-report-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
 /* ── Modal Unmatch ─────────────────────────────────────────── */
 
 .unmatch-overlay {

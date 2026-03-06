@@ -1,0 +1,221 @@
+/* ============================================================
+   ReportModal — Modale de signalement réutilisable
+   Mobile-first, max 480px
+   ============================================================ */
+
+.report-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+.report-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 32px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+/* ── En-tête ────────────────────────────────────────────────── */
+.report-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.report-modal-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.report-modal-header h2 {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.report-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.report-modal-close:hover {
+  color: var(--text-primary);
+}
+
+.report-modal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* ── Raisons ────────────────────────────────────────────────── */
+.report-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.report-reason-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.report-reason-btn input[type="radio"] {
+  display: none;
+}
+
+.report-reason-btn svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.report-reason-btn.selected {
+  border-color: var(--error);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.report-reason-btn.selected svg {
+  color: var(--error);
+}
+
+/* ── Description ────────────────────────────────────────────── */
+.report-description {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.report-description label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.report-description textarea {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  resize: none;
+  line-height: 1.4;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.report-description textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.report-char-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* ── Boutons ────────────────────────────────────────────────── */
+.report-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-report-cancel {
+  flex: 1;
+  padding: 12px;
+  min-height: 44px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-report-cancel:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.btn-report-submit {
+  flex: 2;
+  padding: 12px;
+  min-height: 44px;
+  background: var(--error);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-report-submit:hover:not(:disabled) {
+  background: #DC2626;
+  transform: translateY(-1px);
+}
+
+.btn-report-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── 768px+ : centré ────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .report-overlay {
+    align-items: center;
+  }
+
+  .report-modal {
+    border-radius: 20px;
+    max-width: 440px;
+  }
+}

@@ -41,9 +41,11 @@ React Hot Toast (notifications)
 
 ### Services Tiers
 ```
-MongoDB Atlas (base de données)
+MongoDB Atlas (base de données cloud)
+Cloudinary (stockage photos)
 Nominatim/OpenStreetMap (géolocalisation)
 Google OAuth (connexion sociale)
+Stripe (paiements en ligne)
 ```
 
 ---
@@ -54,9 +56,11 @@ Google OAuth (connexion sociale)
 globostream/
 ├── backend/                    # Serveur Node.js
 │   ├── models/                # Modèles MongoDB
-│   │   ├── User.js           # Utilisateurs
+│   │   ├── User.js           # Utilisateurs (wallet intégré)
 │   │   ├── Message.js        # Messages chat
-│   │   └── MessageRequest.js # Demandes de messages
+│   │   ├── MessageRequest.js # Demandes de messages
+│   │   ├── GiftCatalog.js    # Catalogue cadeaux (Phase 6)
+│   │   └── Transaction.js    # Audit log monétaire (Phase 6)
 │   ├── routes/               # Routes API
 │   │   ├── auth.js          # Authentification
 │   │   ├── users.js         # Profils
@@ -69,15 +73,24 @@ globostream/
 │   │   ├── surprise.js      # Live Surprise
 │   │   ├── moderation.js    # Modération
 │   │   ├── publicProfile.js # Profils publics
-│   │   └── changePassword.js
+│   │   ├── changePassword.js
+│   │   ├── giftCatalog.js   # Catalogue cadeaux (Phase 6)
+│   │   ├── wallet.js        # Portefeuille virtuel (Phase 6)
+│   │   └── payments.js      # Stripe Checkout + webhook (Phase 6)
 │   ├── middleware/           # Middlewares
 │   │   ├── auth.js          # Vérification JWT
 │   │   └── privileges.js    # Vérification droits
 │   ├── socketHandlers/       # Gestionnaires Socket.IO
+│   │   ├── liveRoom.js      # Gestion rooms live (cadeaux async)
 │   │   └── surprise.js
 │   ├── config/               # Configuration
 │   │   └── passport.js      # OAuth
+│   ├── utils/               # Utilitaires
+│   │   └── coinPacks.js     # Config packs pièces Stripe (Phase 6)
 │   ├── scripts/              # Utilitaires DB
+│   │   ├── generateFakeProfiles.js
+│   │   ├── cleanFakeProfiles.js
+│   │   └── seedGifts.js     # Seed catalogue cadeaux (Phase 6)
 │   ├── server.js            # Point d'entrée
 │   └── package.json
 │
@@ -91,7 +104,7 @@ globostream/
 │   │   │   ├── FiltersPanel.js
 │   │   │   ├── MessageModal.js
 │   │   │   └── MessageRequestsPanel.js
-│   │   ├── pages/           # 17+ pages principales
+│   │   ├── pages/           # 22 pages principales
 │   │   │   ├── Landing.js
 │   │   │   ├── Login.js
 │   │   │   ├── Register.js
@@ -108,7 +121,12 @@ globostream/
 │   │   │   ├── LiveSurprise.js
 │   │   │   ├── LivePublic.js
 │   │   │   ├── LiveCompetition.js
-│   │   │   └── LiveEvent.js
+│   │   │   ├── LiveEvent.js
+│   │   │   ├── TeamPage.js
+│   │   │   ├── Legal.js
+│   │   │   ├── OAuthCallback.js    # Phase 5 — callback OAuth
+│   │   │   ├── CompleteProfile.js  # Phase 5 — completion profil OAuth
+│   │   │   └── WalletPage.js       # Phase 6 — portefeuille virtuel
 │   │   ├── contexts/        # Contextes React
 │   │   │   └── AuthContext.js
 │   │   ├── locales/         # Traductions i18n (5 langues)
@@ -175,61 +193,90 @@ npm start
 
 ## État Actuel du Projet
 
-**Statut** : En développement - Phase MVP (déployé)
+**Statut** : ✅ MVP + Phase 5 RGPD + Phase 6 Monétisation — 22 pages — Déployé (Render + GitHub Pages)
 
-Backend déployé sur Render.com, frontend sur GitHub Pages. 210 tests Jest passent (100%). Voir `docs/RAPPORT.md` pour le détail.
+Backend déployé sur Render.com, frontend sur GitHub Pages. 210 tests Jest passent (100%). Build 0 warning (348 KB JS / 26 KB CSS). Voir `docs/RAPPORT.md` pour le détail complet.
 
 ### Fonctionnalités
 
 **Authentification & Profils**
-- [x] Inscription/Connexion email/password
-- [x] OAuth Google/Facebook/Apple (structure)
+- [x] Inscription/Connexion email/password (JWT 7j, Bcrypt 12 rounds)
+- [x] OAuth Google/Facebook/Apple (fix bypass âge — Phase 5)
 - [x] Profil complet (20+ champs)
-- [x] Upload 6 photos max
+- [x] Upload 6 photos max (Cloudinary persistant)
 - [x] Géolocalisation GPS automatique
-- [x] Autocomplétion ville (OpenStreetMap)
+- [x] Autocomplétion ville (OpenStreetMap/Nominatim)
+
+**Phase 5 — RGPD & Sécurité OAuth**
+- [x] Flag `profileComplete` sur User (false pour nouveaux OAuth)
+- [x] `OAuthCallback.js` + `CompleteProfile.js` — flux post-OAuth
+- [x] `PrivateRoute` → redirect `/complete-profile` si profil incomplet
+- [x] ConsentModal RGPD + page Legal (CGU/Confidentialité/Mentions)
+- [x] Watermark anti-capture vidéo en live
+
+**Phase 6 — Monétisation (Pièces / Globos / Stripe)**
+- [x] Deux monnaies : Pièces (viewers) + Globos (streamers)
+- [x] Wallet utilisateur (coins, globos, historique transactions)
+- [x] Catalogue cadeaux en DB (GiftCatalog), gérable depuis ModerationPanel
+- [x] 6 cadeaux initiaux (🌹💋❤️⭐👑💎 — seed script)
+- [x] Stripe Checkout — 4 packs de pièces
+- [x] Webhook Stripe `checkout.session.completed` (idempotent)
+- [x] Conversion Globos → Pièces + demande retrait PayPal
+- [x] WalletPage — 4 onglets (Acheter / Convertir / Retirer / Historique)
+- [x] Audit log complet (Transaction model)
 
 **Swipe & Matching**
-- [x] Système de swipe avec animations
-- [x] 10 filtres avancés (âge, distance, genre, taille, etc.)
+- [x] Système de swipe avec animations (Framer Motion drag & drop)
+- [x] 10 filtres avancés (âge, distance, genre, taille, langues, etc.)
 - [x] Calcul distance GPS (Haversine)
 - [x] Détection matchs automatique
+- [x] Modale profil centrée scrollable (480px, border-radius 20px)
 
 **Messagerie**
 - [x] Chat temps réel (Socket.IO)
 - [x] Demandes de messages avec acceptation/refus
+- [x] Emoji picker (emoji-picker-react)
 - [x] Indicateur "en train d'écrire..."
 
 **Live Streaming**
-- [x] Live Surprise (Speed Dating vidéo avec WebRTC)
-- [x] Live Publique avec filtres
-- [x] Live Compétition
-- [x] Live Événementiel
-- [x] Flux caméra réel avec écran preview
-- [ ] WebRTC multi-participants (en cours)
+- [x] Live Surprise (Speed Dating vidéo WebRTC P2P)
+- [x] Live Publique avec filtres et recherche
+- [x] Live Compétition (CompStreamCard, FAB équipe, badge TAG)
+- [x] Live Événementiel — 8 thèmes colorés
+- [x] Contrôles streamer (mic/cam/kick) + watermark anti-capture
+- [x] Système cadeaux avec déduction pièces atomique (MongoDB $inc)
+- [ ] WebRTC multi-participants (Phase 2 — actuellement 1-on-1)
+
+**Équipes & Compétitions**
+- [x] Modèle Team (captain/members/joinRequests/grades/TAG/chat)
+- [x] TeamPage — 4 onglets, candidatures, chat Socket.IO, grades
+- [x] Modèle Competition (CRUD admin)
 
 **Modération**
 - [x] 4 niveaux de privilèges (User/Mod/Admin/SuperAdmin)
-- [x] Panel modération complet
+- [x] Panel modération complet (18 tests passés)
 - [x] Actions : bannir, débannir, promouvoir, révoquer
+- [x] Onglet Cadeaux admin (CRUD catalogue GiftCatalog)
 
 **Interface & UX**
 - [x] Design dark mode
 - [x] Navigation avec menu hamburger (mobile) / dropdown (desktop)
 - [x] CSS mobile-first responsive (22 fichiers)
 - [x] Animations (Framer Motion)
-- [x] Internationalisation i18n (5 langues : FR, EN, IT, DE, ES)
+- [x] Internationalisation i18n (5 langues : FR, EN, IT, DE, ES — ~700 clés)
 
-**Tests**
+**Tests & Qualité**
 - [x] 210 tests Jest backend (100% passent)
-- [x] 15 pages testées visuellement
-- [x] Responsive testé (3 tailles)
+- [x] 19 pages testées visuellement
+- [x] Responsive testé (3 tailles : 375px, 768px, 968px)
+- [x] 0 warning ESLint (37 corrigés)
 
-### À développer
-- [ ] WebRTC complet pour multi-participants
-- [ ] Notifications push
+### À développer (Phase 2+)
+- [ ] WebRTC multi-participants
+- [ ] Notifications push (Firebase/OneSignal)
 - [ ] Emails transactionnels
 - [ ] Système de signalement & blocage
+- [ ] Vérification téléphone/selfie
 
 ---
 
@@ -317,6 +364,6 @@ Projet privé - Tous droits réservés © 2026
 
 ---
 
-**Version** : 4.0
-**Dernière mise à jour** : 18 Février 2026
-**Statut** : En développement - MVP déployé (Render + GitHub Pages)
+**Version** : 5.0
+**Dernière mise à jour** : 2 Mars 2026
+**Statut** : ✅ MVP + Phase 5 RGPD + Phase 6 Monétisation — Déployé (Render + GitHub Pages)

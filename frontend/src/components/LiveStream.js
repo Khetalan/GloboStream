@@ -19,14 +19,6 @@ import './LiveStream.css';
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Catalogue des cadeaux disponibles
-const GIFTS = [
-  { id: 'rose',    emoji: '🌹', name: 'Rose',     value: 1   },
-  { id: 'kiss',    emoji: '💋', name: 'Bisou',    value: 5   },
-  { id: 'heart',   emoji: '❤️', name: 'Cœur',     value: 10  },
-  { id: 'star',    emoji: '⭐', name: 'Étoile',   value: 20  },
-  { id: 'crown',   emoji: '👑', name: 'Couronne', value: 50  },
-  { id: 'diamond', emoji: '💎', name: 'Diamant',  value: 100 },
-];
 
 // Serveurs STUN pour la collecte ICE (nécessaire hors réseau local)
 const PEER_CONFIG = {
@@ -77,6 +69,7 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
   const [gifts, setGifts] = useState([]);
   const [showGiftPanel, setShowGiftPanel] = useState(false);
   const [selectedParticipantForGift, setSelectedParticipantForGift] = useState(null);
+  const [giftCatalog, setGiftCatalog] = useState([]);
   const [joinRequests, setJoinRequests] = useState([]);
   const [showJoinRequestsPanel, setShowJoinRequestsPanel] = useState(false); // New state
   const [isUiVisible, setIsUiVisible] = useState(true);
@@ -145,6 +138,11 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
       localVideoRef.current.srcObject = localStreamRef.current;
     }
   }, [isLive]);
+
+  // Charger le catalogue de cadeaux
+  useEffect(() => {
+    axios.get('/api/gifts/catalog').then(r => setGiftCatalog(r.data.gifts || [])).catch(() => {});
+  }, []);
 
   // Sécurité : stopper les tracks et arrêter le live au démontage
   useEffect(() => {
@@ -744,9 +742,6 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
     socketRef.current.emit('send-gift', {
       roomId: roomIdRef.current,
       giftId: gift.id,
-      giftEmoji: gift.emoji,
-      giftName: gift.name,
-      giftValue: gift.value,
       recipientSocketId: participant.socketId
     });
     setShowGiftPanel(false);
@@ -1545,11 +1540,11 @@ const LiveStream = ({ mode = 'public', onQuit, streamerName = 'Streamer', user, 
                     <>
                       <p className="ls-gift-subtitle">{t('liveGifts.toParticipant', { name: selectedParticipantForGift.name })}</p>
                       <div className="ls-gift-grid">
-                        {GIFTS.map(gift => (
+                        {giftCatalog.map(gift => (
                           <button key={gift.id} className="ls-gift-item" onClick={() => handleSendGift(gift, selectedParticipantForGift)}>
                             <span className="ls-gift-emoji">{gift.emoji}</span>
                             <span className="ls-gift-name">{gift.name}</span>
-                            <span className="ls-gift-value">{gift.value}pts</span>
+                            <span className="ls-gift-value">🪙{gift.coinCost}</span>
                           </button>
                         ))}
                       </div>

@@ -4,9 +4,21 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { FiMail, FiLock, FiUser, FiCalendar, FiHeart } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiCalendar, FiHeart, FiAlertOctagon } from 'react-icons/fi';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import './Auth.css';
+
+// Date max = exactement 18 ans avant aujourd'hui
+const getMaxBirthDate = () => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 18);
+  return d.toISOString().split('T')[0];
+};
+
+const calcAge = (birthDate) => {
+  if (!birthDate) return null;
+  return Math.floor((Date.now() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000));
+};
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +30,7 @@ const Register = () => {
     gender: 'homme'
   });
   const [loading, setLoading] = useState(false);
+  const [underageBlocked, setUnderageBlocked] = useState(false);
   const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -31,17 +44,26 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
+    // Vérification âge client-side avant envoi
+    const age = calcAge(formData.birthDate);
+    if (age === null || age < 18) {
+      setUnderageBlocked(true);
+      return;
+    }
+
+    setLoading(true);
     const result = await register(formData);
-    
+
     if (result.success) {
       toast.success(t('register.success'));
       navigate('/home');
+    } else if (result.error === 'underage') {
+      setUnderageBlocked(true);
     } else {
-      toast.error(result.error);
+      toast.error(result.error || t('register.error'));
     }
-    
+
     setLoading(false);
   };
 
@@ -65,6 +87,25 @@ const Register = () => {
             <p>{t('register.subtitle')}</p>
           </div>
 
+          {underageBlocked && (
+            <motion.div
+              className="underage-block"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <FiAlertOctagon size={40} className="underage-icon" />
+              <h2>{t('register.underageTitle')}</h2>
+              <p>{t('register.underageDesc')}</p>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setUnderageBlocked(false)}
+              >
+                ←
+              </button>
+            </motion.div>
+          )}
+
+          {!underageBlocked && (
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
@@ -136,7 +177,7 @@ const Register = () => {
                 value={formData.birthDate}
                 onChange={handleChange}
                 required
-                max={new Date(Date.now() - 567648000000).toISOString().split('T')[0]}
+                max={getMaxBirthDate()}
               />
             </div>
 
@@ -187,12 +228,16 @@ const Register = () => {
             </button>
           </form>
 
+          )}
+
+          {!underageBlocked && (
           <div className="auth-footer">
             <p>
               {t('register.hasAccount')}{' '}
               <Link to="/login">{t('register.loginLink')}</Link>
             </p>
           </div>
+          )}
         </motion.div>
       </div>
     </div>
